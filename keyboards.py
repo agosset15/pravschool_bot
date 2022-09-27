@@ -1,4 +1,7 @@
 from aiogram import types
+from db import Database
+
+db = Database("rs-bot.db", 'users.db')
 
 
 def get_startkeyboard():
@@ -6,6 +9,39 @@ def get_startkeyboard():
     buttons = ["📕ПОНЕДЕЛЬНИК📕", "📗ВТОРНИК📗", "📘СРЕДА📘", "📙ЧЕТВЕРГ📙", "📔ПЯТНИЦА📔", "📚ОСОБОЕ МЕНЮ📚"]
     keyboard.add(*buttons)
     return keyboard
+
+
+def inline_kb(clas: int or None, uch: int | None = None):
+    if clas is not None:
+        arr = db.week(clas)
+        buttons = [
+            types.InlineQueryResultArticle(id="1", title="📕ПОНЕДЕЛЬНИК📕",
+                                           input_message_content=types.InputTextMessageContent(arr[0])),
+            types.InlineQueryResultArticle(id="2", title="📗ВТОРНИК📗",
+                                           input_message_content=types.InputTextMessageContent(arr[1])),
+            types.InlineQueryResultArticle(id="3", title="📘СРЕДА📘",
+                                           input_message_content=types.InputTextMessageContent(arr[2])),
+            types.InlineQueryResultArticle(id="4", title="📙ЧЕТВЕРГ📙",
+                                           input_message_content=types.InputTextMessageContent(arr[3])),
+            types.InlineQueryResultArticle(id="5", title="📔ПЯТНИЦА📔",
+                                           input_message_content=types.InputTextMessageContent(arr[4]))
+        ]
+        return buttons
+    else:
+        arr = db.teacher_week(uch)
+        buttons = [
+            types.InlineQueryResultArticle(id="1", title="📕ПОНЕДЕЛЬНИК📕",
+                                           input_message_content=types.InputTextMessageContent(arr[0])),
+            types.InlineQueryResultArticle(id="2", title="📗ВТОРНИК📗",
+                                           input_message_content=types.InputTextMessageContent(arr[1])),
+            types.InlineQueryResultArticle(id="3", title="📘СРЕДА📘",
+                                           input_message_content=types.InputTextMessageContent(arr[2])),
+            types.InlineQueryResultArticle(id="4", title="📙ЧЕТВЕРГ📙",
+                                           input_message_content=types.InputTextMessageContent(arr[3])),
+            types.InlineQueryResultArticle(id="5", title="📔ПЯТНИЦА📔",
+                                           input_message_content=types.InputTextMessageContent(arr[4]))
+        ]
+        return buttons
 
 
 def vip_menu():
@@ -21,6 +57,7 @@ def vip_menu():
     keyboard.add(*buttons)
     return keyboard
 
+
 def admin_menu():
     buttons = [
         types.InlineKeyboardButton(text="Изменить расписание",
@@ -31,6 +68,7 @@ def admin_menu():
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
     return keyboard
+
 
 def sp_menu():
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)

@@ -29,6 +29,7 @@ class Admad(StatesGroup):
 class ClassWait(StatesGroup):
     clas = State()
     uch = State()
+    chat_clas = State()
 
 
 class KabWait(StatesGroup):
@@ -56,6 +57,7 @@ class AdminAdd(StatesGroup):
 
 zero = 0
 b_zero = False
+clases_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10б", "10г", "10ф", "11б", "11с", "11ф"]
 
 
 @dp.message_handler(commands="start", state="*")
@@ -84,7 +86,10 @@ async def cmd_start(message: types.Message, state: FSMContext):
                              f"\n[Книга отзывов и предложений](tg://resolve?domain=agosset15bot)",
                              reply_markup=kb.uinb(), parse_mode="MarkdownV2")
     elif teachr == 0:
-        clas = db.what_class(message.from_user.id)
+        if db.is_chat(message.chat.id) is True:
+            clas = db.chat(message.chat.id)
+        else:
+            clas = db.what_class(message.from_user.id)
         list_class = [101, 102, 103, 111, 112, 113]
         if clas in list_class:
             clas = int(clas / 10)
@@ -122,6 +127,10 @@ async def text(message: types.Message):
     dase = ["📕ПОНЕДЕЛЬНИК📕", "📗ВТОРНИК📗", "📘СРЕДА📘", "📙ЧЕТВЕРГ📙", "📔ПЯТНИЦА📔"]
     if class1 != 0:
         try:
+            if db.is_chat(message.chat.id) is True:
+                class1 = db.chat(message.chat.id)
+            else:
+                class1 = db.what_class(message.from_user.id)
             if message.text in dase:
                 usersmessage = 0
                 if message.text == "📕ПОНЕДЕЛЬНИК📕":
@@ -138,50 +147,44 @@ async def text(message: types.Message):
                 await message.answer(f"{message.text}:\n{value}", reply_markup=kb.get_startkeyboard())
             else:
                 if message.text == "📖НА НЕДЕЛЮ📖":
-                    clas1 = db.what_class(message.from_user.id)
-                    clas = clas1 + (1 / 10)
-                    value0 = db.day(clas)
-                    clas = clas1 + (2 / 10)
-                    value1 = db.day(clas)
-                    clas = clas1 + (3 / 10)
-                    value2 = db.day(clas)
-                    clas = clas1 + (4 / 10)
-                    value3 = db.day(clas)
-                    clas = clas1 + (5 / 10)
-                    value4 = db.day(clas)
-                    await message.answer(f"✏️Понедельник:\n{value0}\n\n✏️Вторник:\n {value1}\n\n✏️Среда:\n{value2}"
-                                         f"\n\n✏️Четверг:\n{value3}\n\n✏️Пятница:\n{value4}",
+                    value = db.week(class1)
+                    await message.answer(f"✏️Понедельник:\n{value[0]}\n\n✏️Вторник:\n {value[1]}"
+                                         f"\n\n✏️Среда:\n{value[2]}\n\n✏️Четверг:\n{value[3]}"
+                                         f"\n\n✏️Пятница:\n{value[4]}",
                                          reply_markup=kb.get_startkeyboard())
         except TypeError or ValueError:
             await message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
             print(message.from_user.id)
     else:
         try:
-            clas1 = int(db.teacher(message.from_user.id))
+            if db.is_chat(message.chat.id) is True:
+                class1 = int(db.chat(message.chat.id))
+            else:
+                class1 = int(db.what_class(message.from_user.id))
             if message.text in dase:
                 usersmessage = 0
                 if message.text == "📕ПОНЕДЕЛЬНИК📕":
-                    usersmessage = clas1 + 0.1
+                    usersmessage = class1 + 0.1
                 if message.text == "📗ВТОРНИК📗":
-                    usersmessage = clas1 + 0.2
+                    usersmessage = class1 + 0.2
                 if message.text == "📘СРЕДА📘":
-                    usersmessage = clas1 + 0.3
+                    usersmessage = class1 + 0.3
                 if message.text == "📙ЧЕТВЕРГ📙":
-                    usersmessage = clas1 + 0.4
+                    usersmessage = class1 + 0.4
                 if message.text == "📔ПЯТНИЦА📔":
-                    usersmessage = clas1 + 0.5
+                    usersmessage = class1 + 0.5
                 value = db.teacher_rasp(usersmessage)
                 await message.answer(f"{message.text}:\n{value}", reply_markup=kb.get_startkeyboard())
             if message.text == "📖НА НЕДЕЛЮ📖":
-                clas = clas1 + (1 / 10)
+                clas = class1 + (1 / 10)
                 value0 = db.teacher_rasp(clas)
-                clas = clas1 + (2 / 10)
+                clas = class1 + (2 / 10)
                 value1 = db.teacher_rasp(clas)
-                clas = clas1 + (3 / 10)
+                clas = class1 + (3 / 10)
                 value2 = db.teacher_rasp(clas)
-                clas = clas1 + (4 / 10)
+                clas = class1 + (4 / 10)
                 value3 = db.teacher_rasp(clas)
-                clas = clas1 + (5 / 10)
+                clas = class1 + (5 / 10)
                 value4 = db.teacher_rasp(clas)
                 await message.answer(f"✏️Понедельник:\n{value0}\n\n✏️Вторник:\n {value1}\n\n✏️Среда:\n{value2}"
                                      f"\n\n✏️Четверг:\n{value3}\n\n✏️Пятница:\n{value4}",
@@ -235,11 +238,14 @@ async def call_handl(call: types.CallbackQuery, state: FSMContext):
         try:
             class1 = db.what_class(call.from_user.id)
             if class1 != 0:
+                if db.is_chat(call.message.chat.id) is True:
+                    class1 = db.chat(call.message.chat.id)
+                else:
+                    class1 = db.what_class(call.from_user.id)
                 day = time.localtime()
                 day = day.tm_wday + 1
                 if day < 6:
-                    clas1 = db.what_class(call.from_user.id)
-                    clas = clas1 + (day / 10)
+                    clas = class1 + (day / 10)
                     value = db.day(clas)
                     await call.message.answer(f"{value}")
                 else:
@@ -249,8 +255,11 @@ async def call_handl(call: types.CallbackQuery, state: FSMContext):
                 day = time.localtime()
                 day = day.tm_wday + 1
                 if day < 6:
-                    clas1 = db.teacher(call.from_user.id)
-                    clas = clas1 + (day / 10)
+                    if db.is_chat(call.message.chat.id) is True:
+                        class1 = db.chat(call.message.chat.id)
+                    else:
+                        class1 = db.what_class(call.from_user.id)
+                    clas = class1 + (day / 10)
                     value = db.teacher_rasp(clas)
                     await call.message.answer(f"{value}")
                 else:
@@ -263,16 +272,19 @@ async def call_handl(call: types.CallbackQuery, state: FSMContext):
         try:
             class1 = db.what_class(call.from_user.id)
             if class1 != 0:
+                if db.is_chat(call.message.chat.id) is True:
+                    class1 = db.chat(call.message.chat.id)
+                else:
+                    class1 = db.what_class(call.from_user.id)
                 day = time.localtime()
                 day = day.tm_wday + 2
                 userbase = [6, 7]
-                clas1 = db.what_class(call.from_user.id)
                 if day < 6:
-                    clas = clas1 + (day / 10)
+                    clas = class1 + (day / 10)
                     value = db.day(clas)
                     await call.message.answer(f"{value}")
                 elif day == 8:
-                    clas = clas1 + 0.1
+                    clas = class1 + 0.1
                     value = db.day(clas)
                     await call.message.answer(f"{value}")
                 elif day in userbase:
@@ -521,6 +533,87 @@ async def admin_kab(message: types.Message, state: FSMContext):
     xl = Exel(data['file'], prj_dir)
     xl.kab(int(usersmessage[0]), int(usersmessage[1]), int(usersmessage[2]))
     await message.answer("Готово!\nПодождите минутку,и новое расписание добавится в бота.")
+    await state.finish()
+
+
+@dp.inline_handler()
+async def inline(query: types.InlineQuery):
+    if query.query in clases_list:
+        usersmessage = query.query
+        if usersmessage == "10б":
+            usersmessage = "101"
+        if usersmessage == "10г":
+            usersmessage = "102"
+        if usersmessage == "10ф":
+            usersmessage = "103"
+        if usersmessage == "11б":
+            usersmessage = "111"
+        if usersmessage == "11с":
+            usersmessage = "112"
+        if usersmessage == "11ф":
+            usersmessage = "113"
+        await query.answer(kb.inline_kb(usersmessage), cache_time=1, is_personal=True,
+                           switch_pm_text="Поговорить лично »»", switch_pm_parameter="ls")
+    else:
+        us = db.user_exists(query.from_user.id)
+        if us is True:
+            uh = db.teacher(query.from_user.id)
+            cls = db.what_class(query.from_user.id)
+            if cls != 0:
+                await query.answer(kb.inline_kb(cls), cache_time=1, is_personal=True,
+                                   switch_pm_text="Поговорить лично »»", switch_pm_parameter="ls")
+            else:
+                await query.answer(kb.inline_kb(clas=None, uch=uh), cache_time=1, is_personal=True,
+                                   switch_pm_text="Поговорить лично »»", switch_pm_parameter="ls")
+        else:
+            buttons = [
+                types.InlineQueryResultArticle(id="err", title="Вы не зарегистрированы!",
+                                               description="Зарегистрируйтесь по кнопке выше, или напишите класс",
+                                               input_message_content=types.InputTextMessageContent("Ошибка!"
+                                                                                                   "\nВы не "
+                                                                                                   "зарегистрированы. "
+                                                                                                   "\n"
+                                                                                                   "Зарегистрируйтесь "
+                                                                                                   "в лс бота."))]
+            await query.answer(buttons, cache_time=1, switch_pm_parameter="new", switch_pm_text="Регистрация »»")
+
+
+@dp.message_handler(content_types=['new_chat_members'])
+async def send_welcome(message: types.Message):
+    bot_obj = await bot.get_me()
+    bot_id = bot_obj.id
+
+    for chat_member in message.new_chat_members:
+        if chat_member.id == bot_id:
+            await message.answer("Выберете класс в этом чате.", reply_markup=kb.clases())
+            await ClassWait.chat_clas.set()
+
+
+@dp.message_handler(state=ClassWait.chat_clas)
+async def chat_class(message: types.Message, state: FSMContext):
+    id1 = message.chat.id
+    usersmessage = message.text
+    class_list = ["10б", "10г", "10ф", "11б", "11с", "11ф"]
+    if usersmessage in class_list:
+        if usersmessage == "10б":
+            usersmessage = "101"
+        if usersmessage == "10г":
+            usersmessage = "102"
+        if usersmessage == "10ф":
+            usersmessage = "103"
+        if usersmessage == "11б":
+            usersmessage = "111"
+        if usersmessage == "11с":
+            usersmessage = "112"
+        if usersmessage == "11ф":
+            usersmessage = "113"
+        db.add_chat(id1, usersmessage)
+    await message.answer("""Вы всегда сможете изменить класс в меню "⚙️Настройки⚙️" в особом меню.""",
+                         reply_markup=kb.get_startkeyboard())
+    await message.answer("Выберете день, на который вы хотите увидеть расписание\."
+                         "\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
+                         "\n[Книга отзывов и предложений](tg://resolve?domain=agosset15bot)",
+                         reply_markup=kb.inboard(), parse_mode="MarkdownV2")
     await state.finish()
 
 
