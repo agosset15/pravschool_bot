@@ -95,6 +95,10 @@ class Database:
         with self.conn:
             return self.cur.execute("SELECT class FROM `users` WHERE `id` = ?", (user_id,)).fetchone()[0]
 
+    def what_name(self, user_id):
+        with self.conn:
+            return self.cur.execute("SELECT name FROM `users` WHERE `id` = ?", (user_id,)).fetchone()[0]
+
     def day(self, clas):
         with self.connection:
             return self.cursor.execute("SELECT rasp FROM `rasp` WHERE id_day = ?", (clas,)).fetchone()[0]

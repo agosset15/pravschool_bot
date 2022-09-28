@@ -55,6 +55,7 @@ class AdminAdd(StatesGroup):
     paswd = State()
 
 
+error_list = []
 zero = 0
 b_zero = False
 clases_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10б", "10г", "10ф", "11б", "11с", "11ф"]
@@ -78,6 +79,8 @@ async def cmd_start(message: types.Message, state: FSMContext):
                                  reply_markup=kb.uchitel())
             await ClassWait.clas.set()
             print("Новый пользователь!")
+            global error_list
+            error_list.append("Новый пользователь!")
     teachr = db.teacher(message.from_user.id)
     if teachr in range(1, 40):
         await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
@@ -155,6 +158,7 @@ async def text(message: types.Message):
         except TypeError or ValueError:
             await message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
             print(message.from_user.id)
+            error_list.append(f"{message.from_user.id} - ошибка текст\учеников")
     else:
         try:
             if db.is_chat(message.chat.id) is True:
@@ -192,6 +196,7 @@ async def text(message: types.Message):
         except TypeError or ValueError:
             await message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
             print(message.from_user.id)
+            error_list.append(f"{message.from_user.id} - ошибка текст\учителей")
     if message.text == "📚ОСОБОЕ МЕНЮ📚":
         await message.answer("Вы перешли в особое меню.", reply_markup=kb.sp_menu())
     if message.text == "📚НА ГОД📚":
@@ -268,6 +273,7 @@ async def call_handl(call: types.CallbackQuery, state: FSMContext):
         except TypeError or ValueError:
             await call.message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
             print(call.from_user.id)
+            error_list.append(f"{call.from_user.id} - ошибка колл\сегодня")
     if call.data == "tom":
         try:
             class1 = db.what_class(call.from_user.id)
@@ -309,10 +315,32 @@ async def call_handl(call: types.CallbackQuery, state: FSMContext):
         except TypeError or ValueError:
             await call.message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
             print(call.from_user.id)
+            error_list.append(f"{call.from_user.id} - ошибка колл\завтра")
     if call.data == "kab":
         await bot.send_photo(photo=open(f"photos/kabs.jpg", "rb"), caption="Введите номер кабинета из списка выше",
                              chat_id=call.from_user.id)
         await KabWait.kab.set()
+    if call.data == "log":
+        message = "Вот лог:"
+        for i in error_list:
+            message = message + f"\n\n{i}"
+        if len(message) > 4096:
+            for x in range(0, len(message), 4096):
+                await call.message.answer(message[x:x + 4096])
+        else:
+            await call.message.answer(message)
+    if call.data == "users_check":
+        userbase = db.ad()
+        message = "Пользователи:\nID    Класс    Имя\n\n"
+        for z in userbase:
+            message = message + f"{z[0]}  {db.what_class(z[0])}  {db.what_name(z[0])}\n\n"
+        if len(message) > 4096:
+            for x in range(0, len(message), 4096):
+                await call.message.answer(message[x:x + 4096])
+        else:
+            await call.message.answer(message)
+
+
 
 
 @dp.message_handler(state=ClassWait.clas)

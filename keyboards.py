@@ -50,6 +50,10 @@ def vip_menu():
                                    callback_data="new_rasp"),
         types.InlineKeyboardButton(text="Назначить админа",
                                    callback_data="admin_add"),
+        types.InlineKeyboardButton(text="Сводка пользователей",
+                                   callback_data="users_check"),
+        types.InlineKeyboardButton(text="Error_log",
+                                   callback_data="log"),
         types.InlineKeyboardButton(text="Сделать объявление",
                                    callback_data="ad")
     ]
