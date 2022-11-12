@@ -9,7 +9,7 @@ class Database:
         self.cursor = self.connection.cursor()
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS `users`
-        (id INTEGER, name VARCHAR, uname VARCHAR, class INTEGER, teacher INTEGER)
+        (id INTEGER, name VARCHAR, uname VARCHAR, class INTEGER, teacher INTEGER, ref VARCHAR)
         """)
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS `admins`
@@ -32,14 +32,23 @@ class Database:
             result = self.cur.execute("SELECT * FROM `users` WHERE `id` = ?", (user_id,)).fetchall()
             return bool(len(result))
 
-    def add_user(self, user_id, name, username, clas, tchr):
+    def add_user(self, user_id, name, username, clas, tchr, code):
         with self.conn:
-            return self.cur.execute("INSERT INTO users values (:id, :name, :uname, :class, :teacher);",
+            return self.cur.execute("INSERT INTO users values (:id, :name, :uname, :class, :teacher, :ref);",
                                     {'id': user_id,
                                      'name': name,
                                      'uname': username,
                                      'class': clas,
-                                     'teacher': tchr})
+                                     'teacher': tchr,
+                                     'ref': code})
+
+    def delete(self, user_id):
+        with self.conn:
+            self.cur.execute("DELETE FROM `users` WHERE `id` = ?", (user_id,))
+
+    def code(self, user_id: int):
+        with self.conn:
+            return self.cur.execute("SELECT ref FROM `users` WHERE `id` = ?", (user_id,)).fetchone()[0]
 
     def add_chat(self, chat_id: int, clas: int):
         with self.conn:
@@ -122,12 +131,13 @@ class Database:
                 data.append(self.cursor.execute("SELECT rasp FROM `rasp` WHERE id_day = ?", (cls,)).fetchone()[0])
             return data
 
-    def teacher_week(self, id: int):
+    def teacher_week(self, user_id: int):
         with self.connection:
             data = []
             for i in range(1, 6):
-                cls = float(int(id) + i/10)
-                data.append(self.cursor.execute("SELECT rasp FROM `uchitel_rasp` WHERE `id_day` = ?", (cls,)).fetchone()[0])
+                cls = float(int(user_id) + i/10)
+                data.append(self.cursor.execute("SELECT rasp FROM `uchitel_rasp` WHERE `id_day` = ?",
+                                                (cls,)).fetchone()[0])
             return data
 
     def ad(self):
