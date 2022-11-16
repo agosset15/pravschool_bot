@@ -16,7 +16,7 @@
 
 * [aiogram](https://github.com/aiogram/aiogram) — работа с Telegram Bot API;
 * [sqlite3](https://docs.python.org/3/library/sqlite3.html) — перманентное хранение данных;
-`* [Docker](https://www.docker.com) и [Docker-Compose](https://docs.docker.com/compose) — быстрое разворачивание бота в изолированном контейнере.` - В разработке
+* `[Docker](https://www.docker.com) и [Docker-Compose](https://docs.docker.com/compose) — быстрое разворачивание бота в изолированном контейнере.` - В разработке
 * Systemd
 
 ## Установка
