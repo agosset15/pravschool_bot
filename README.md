@@ -1,6 +1,6 @@
 # Бот-расписание уроков
 
-[<img src="https://img.shields.io/badge/автор-связаться-blue?style=flat-square">](https://t.me/agosset15)
+[<img src="https://img.shields.io/badge/автор-связаться-blue">](https://t.me/agosset15)
 [<img src="https://img.shields.io/badge/Telegram-%40pravschool__bot-blue">](https://t.me/pravschool_bot)
 
 Телеграмм-бот, в которым можно посмотреть расписание Свято-Димитриевской школы.
