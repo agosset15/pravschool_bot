@@ -16,13 +16,13 @@
 
 * [aiogram](https://github.com/aiogram/aiogram) — работа с Telegram Bot API;
 * [sqlite3](https://docs.python.org/3/library/sqlite3.html) — перманентное хранение данных;
-* `[Docker](https://www.docker.com) и [Docker-Compose](https://docs.docker.com/compose) — быстрое разворачивание бота в изолированном контейнере.` - В разработке
 * Systemd
 
 ## Установка
 
 Скопируйте файл `env_example` как `.env` (с точкой в начале), откройте и отредактируйте содержимое.
-Используйте Systemd, пример службы тоже есть в репозитории.
+Используйте Systemd, пример службы есть в репозитории.
+Вот [статья](https://telegra.ph/Sozdanie-servisa-09-21) для ознакомления.
 
 ## Благодарности
 
