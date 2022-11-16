@@ -22,7 +22,7 @@
 
 1. Скопируйте файл `env_example` как `.env` (с точкой в начале), откройте и отредактируйте содержимое.
 2. Выполните `python -m pip install -r requirements.txt`
-3. Используйте Systemd, пример службы есть в репозитории. Вот [<a href="https://telegra.ph/Sozdanie-servisa-09-21" target="_blank">статья</a>] для ознакомления.
+3. Используйте Systemd, пример службы есть в репозитории. Вот <a href="https://telegra.ph/Sozdanie-servisa-09-21" target="_blank">статья</a> для ознакомления.
 
 ## Благодарности
 
