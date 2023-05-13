@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="MobileOptimized" content="176"/>
+    <meta name="HandheldFriendly" content="True"/>
+    <meta name="robots" content="noindex,nofollow"/>
+    <script src="https://telegram.org/js/telegram-web-app.js?1"></script>
+    <script>
+        function setThemeClass() {
+            document.documentElement.className = Telegram.WebApp.colorScheme;
+        }
+
+        Telegram.WebApp.onEvent('themeChanged', setThemeClass);
+        setThemeClass();
+
+    </script>
+    <title>Расписание</title>
+    <style>
+        /* General styles */
+        body {
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-text-color);
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        }
+
+        /* Header styles */
+        header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        }
+
+        /* Form styles */
+        form {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 20vh;
+        }
+
+        .schedule {
+        display: none;
+        padding: 7px;
+        font-size: 12px;
+        border-radius: 5px;
+        border: 2px solid var(--tg-theme-hint-color);
+        margin-right: 10px;
+        }
+
+        .kabschedule {
+        display: none;
+        padding: 7px;
+        font-size: 12px;
+        border-radius: 5px;
+        border: 2px solid var(--tg-theme-hint-color);
+        margin-right: 10px;
+        }
+
+        .homework {
+        display: none;
+        padding: 7px;
+        font-size: 12px;
+        border-radius: 5px;
+        border: 2px solid var(--tg-theme-hint-color);
+        margin-right: 10px;
+        }
+
+        aside {
+        display: none;
+        padding: 7px;
+        font-size: 12px;
+        border-radius: 5px;
+        border: 1px solid var(--tg-theme-hint-color);
+        margin-right: 10px;
+        }
+
+
+        /* Input styles */
+        select {
+        padding: 7px;
+        font-size: 12px;
+        border-radius: 5px;
+        border: 1px solid var(--tg-theme-hint-color);
+        margin-right: 10px;
+        }
+
+        input[type="text"] {
+        padding: 7px;
+        font-size: 12px;
+        border-radius: 5px;
+        border: 1px solid var(--tg-theme-hint-color);
+        margin-right: 10px;
+        }
+
+        /* Button styles */
+        button {
+        padding: 7px 12px;
+        background-color: var(--tg-theme-button-color);
+        color: var(--tg-theme-button-text-color);
+        border-radius: 5px;
+        border: none;
+        font-size: 12px;
+        cursor: pointer;
+        }
+
+        /* Settings button styles */
+        .dropbtn {
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-text-color);
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+        }
+
+        .dropbtn:hover, .dropbtn:focus {
+        background-color: var(--tg-theme-button-text-color);
+        }
+
+        .dropdown {
+        position: relative;
+        display: inline-block;
+        }
+
+        .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: var(--tg-theme-button-color);
+        min-width: 160px;
+        overflow: auto;
+        box-shadow: 0px 4px 8px 0px var(--tg-theme-hint-color);
+        z-index: 1;
+        }
+
+        .dropdown-content a {
+        color: var(--tg-theme-button-text-color);
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        }
+
+        .dropdown a:hover {background-color: var(--tg-theme-bg-color)}
+
+    </style>
+</head>
+<body>
+    <div id="Day">
+        <header>
+            <div class="dropdown">
+                <button onclick="showRaspList()" class="dropbtn">Расписание по дням</button>
+                <div id="myDropdown" class="dropdown-content">
+                  <a href="#" onclick="showPage('Kab', 'Day')">Расписание по кабинетам</a>
+                  <a href="#" onclick="showPage('HW', 'Day')">Домашнее задание</a>
+                  <a href="#" onclick="window.open('http://d.pravschool.ru');">Электронный журнал</a>
+                </div>
+            </div>
+            <a href="?nextpage=2"><img src='https://i.postimg.cc/pXyFWfTR/pngwing-com.png' border='0' width="50" height="50" alt="Профиль"/></a>
+        </header>
+        <form>
+            <select id="day-number">
+                <option value='1'>Понедельник</option>
+                <option value='2'>Вторник</option>
+                <option value='3'>Среда</option>
+                <option value='4'>Четверг</option>
+                <option value='5'>Пятница</option>
+            </select>
+            <button id="show-schedule-button" onclick="showSchedule(event)">Показать расписание</button>
+        </form>
+        <div id="schedule">
+            <p id="l1"></p>
+            <p id="l2"></p>
+            <p id="l3"></p>
+            <p id="l4"></p>
+            <p id="l5"></p>
+            <p id="l6"></p>
+            <p id="l7"></p>
+            <p id="l8"></p>
+        </div>
+    </div>
+
+    <div id="Kab" style="display:none">
+        <header>
+            <div class="dropdown">
+                <button onclick="showRaspList()" class="dropbtn">Расписание по кабинетам</button>
+                <div id="myDropdown" class="dropdown-content">
+                  <a href="#" onclick="showPage('Day', 'Kab')">Расписание по дням</a>
+                  <a href="#" onclick="showPage('HW', 'Kab')">Домашнее задание</a>
+                  <a href="http://d.pravschool.ru/">Электронный журнал</a>
+                </div>
+            </div>
+            <a href="?nextpage=2"><img src='https://i.postimg.cc/pXyFWfTR/pngwing-com.png' border='0' width="50" height="50" alt="Профиль"/></a>
+        </header>
+        <img src='https://i.postimg.cc/BbZwy2mm/photo-2023-01-27-19-33-53.jpg' border='0' alt='ID кабинетов'/>
+        <form>
+            <input type="text" placeholder="Введите номер кабинета" id="kab-number">
+            <button id="show-kab-button" onclick="showKab(event)">Показать расписание</button>
+        </form>
+        <div id="kabschedule">
+            <p id="r1"></p>
+            <p id="r2"></p>
+            <p id="r3"></p>
+            <p id="r4"></p>
+            <p id="r5"></p>
+            <p id="r6"></p>
+            <p id="r7"></p>
+            <p id="r8"></p>
+            <p id="r9"></p>
+            <p id="r10"></p>
+            <p id="r11"></p>
+            <p id="r12"></p>
+            <p id="r13"></p>
+            <p id="r14"></p>
+            <p id="r15"></p>
+            <p id="r16"></p>
+            <p id="r17"></p>
+            <p id="r18"></p>
+            <p id="r19"></p>
+            <p id="r20"></p>
+            <p id="r21"></p>
+            <p id="r22"></p>
+            <p id="r23"></p>
+            <p id="r24"></p>
+            <p id="r25"></p>
+            <p id="r26"></p>
+            <p id="r27"></p>
+            <p id="r28"></p>
+            <p id="r29"></p>
+            <p id="r30"></p>
+            <p id="r31"></p>
+            <p id="r32"></p>
+            <p id="r33"></p>
+            <p id="r34"></p>
+            <p id="r35"></p>
+            <p id="r36"></p>
+            <p id="r37"></p>
+            <p id="r38"></p>
+            <p id="r39"></p>
+            <p id="r40"></p>
+            <p id="r41"></p>
+            <p id="r42"></p>
+            <p id="r43"></p>
+            <p id="r44"></p>
+            <p id="r45"></p>
+            <p id="r46"></p>
+            <p id="r47"></p>
+            <p id="r48"></p>
+            <p id="r49"></p>
+            <p id="r50"></p>
+        </div>
+    </div>
+
+    <div id="HW" style="display:none">
+        <header>
+            <div class="dropdown">
+                <button onclick="showRaspList()" class="dropbtn">Домашнее задание</button>
+                <div id="myDropdown" class="dropdown-content">
+                  <a href="#" onclick="showPage('Day', 'HW')">Расписание по дням</a>
+                  <a href="#" onclick="showPage('Kab', 'HW')">Расписание по кабинетам</a>
+                  <a href="http://d.pravschool.ru/">Электронный журнал</a>
+                </div>
+            </div>
+            <a href="?nextpage=2"><img src='https://i.postimg.cc/pXyFWfTR/pngwing-com.png' border='0' width="50" height="50" alt="Профиль"/></a>
+        </header>
+        <form>
+            <select id="day-number-hw">
+                <option value='1'>Понедельник</option>
+                <option value='2'>Вторник</option>
+                <option value='3'>Среда</option>
+                <option value='4'>Четверг</option>
+                <option value='5'>Пятница</option>
+            </select>
+            <button id="show-hw-button" onclick="showHw(event)">Показать ДЗ</button>
+        </form>
+        <div id="homework">
+            <p id="hw1"></p>
+            <p id="hw2"></p>
+            <p id="hw3"></p>
+            <p id="hw4"></p>
+            <p id="hw5"></p>
+            <p id="hw6"></p>
+            <p id="hw7"></p>
+            <p id="hw8"></p>
+        </div>
+    </div>
+<script src="https://webappcontent.telegram.org/js/jquery.min.js"></script>
+<script>
+    Telegram.WebApp.ready();
+
+    var initData = Telegram.WebApp.initData || '';
+    var initDataUnsafe = Telegram.WebApp.initDataUnsafe || {};
+
+
+    function showPage(page, prv) {
+        let pg = document.querySelector(`#${page}`);
+        pg.style.display = "block";
+        let pv = document.querySelector(`#${prv}`);
+        pv.style.display = "none";
+    }
+
+
+    function showRaspList() {
+        document.getElementsByClassName("dropdown-content");
+        let dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+            let openDropdown = dropdowns[i];
+            openDropdown.classList.toggle("show");
+        }
+    }
+
+    window.onclick = function(event) {
+    if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+        }
+        }
+    }
+    }
+
+
+    const dayNumberInput = document.querySelector("#day-number");
+    const scheduleContainer = document.querySelector("#schedule");
+
+    function showSchedule(e) {
+        const dayNumber = dayNumberInput.value;
+        scheduleContainer.style.display = "block";
+        fetch(`https://tg.ag15.ru/demo/getDb/rasp?day=${dayNumber}&_auth=${initData}`)
+        .then(response => response.json())
+        .then(data => {
+            let rs = data.rasp
+            let paragraphs = rs.split(/\d+\./);
+            let less = ['l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8']
+            let le = document.getElementById('l1')
+            for (let i = 1; i < paragraphs.length; i++) {
+                le.innerHTML = `${i}. ${paragraphs[i]}`;
+                le = document.getElementById(less[i-1])
+            }
+        });
+        e.preventDefault()
+        return false;
+    };
+
+
+    const kabNumberInput = document.querySelector("#kab-number");
+    const kabContainer = document.querySelector("#kabschedule");
+
+    function showKab(e) {
+        const kabNumber = kabNumberInput.value;
+        kabContainer.style.display = "block";
+        fetch(`https://tg.ag15.ru/demo/getDb/rasp/kab?kab=${kabNumber}&_auth=${initData}`)
+        .then(response => response.json())
+        .then(data => {
+            let rs = data.rasp
+            let paragraphs = rs.split('#');
+            let less = document.getElementById("r1")
+            for (let i = 1; i < paragraphs.length; i++) {
+                less.innerHTML = paragraphs[i];
+                less = document.getElementById(`r${i+1}`)
+            }
+        });
+        e.preventDefault()
+        return false;
+    };
+
+
+    const showHwButton = document.querySelector("#show-hw-button");
+    const hwNumberInput = document.querySelector("#day-number-hw");
+    const hwContainer = document.querySelector("#homework");
+
+    function showHw(e) {
+        const dayNumber = hwNumberInput.value;
+        hwContainer.style.display = "block";
+        fetch(`https://tg.ag15.ru/demo/getDb/homework?day=${dayNumber}&_auth=${initData}`).then(response => response.json()).then(data => {
+            let rs = data.hw
+            let paragraphs = rs.split('#');
+            let less = [hw1, hw2, hw3, hw4, hw5, hw6, hw7, hw8]
+            for (let i = 1; i < paragraphs.length; i++) {
+                less[i-1].innerHTML = paragraphs[i];
+            }
+        });
+        e.preventDefault()
+        return false;
+    };
+
+
+    function sendMessage(msg_id, with_webview) {
+        if (!initDataUnsafe.query_id) {
+            alert('WebViewQueryId not defined');
+            return;
+        }
+        $.ajax('/demo/sendMessage', {
+            type: 'POST',
+            data: {
+                '_auth': initData,
+                msg_id: msg_id || '',
+                with_webview: !initDataUnsafe.receiver && with_webview ? 1 : 0
+            },
+            dataType: 'json',
+            success: function (result) {
+                $('button').prop('disabled', false);
+                if (result.response) {
+                    if (result.response.ok) {
+                        $('#btn_status').html('Message sent successfully!').addClass('ok').show();
+                    } else {
+                        $('#btn_status').text(result.response.description).addClass('err').show();
+                        alert(result.response.description);
+                    }
+                } else {
+                    $('#btn_status').text('Unknown error').addClass('err').show();
+                    alert('Unknown error');
+                }
+            },
+            error: function (xhr) {
+                $('button').prop('disabled', false);
+                $('#btn_status').text('Server error').addClass('err').show();
+                alert('Server error');
+            }
+        });
+    }
+
+    function webviewExpand() {
+        Telegram.WebApp.expand();
+    }
+
+    function webviewClose() {
+        Telegram.WebApp.close();
+    }
+
+    Telegram.WebApp.onEvent('themeChanged', function () {
+        $('#theme_data').html(JSON.stringify(Telegram.WebApp.themeParams, null, 2));
+    });
+
+    Telegram.WebApp.MainButton
+        .setText('Закрыть')
+        .show()
+        .onClick(function () {
+            webviewClose();
+        });
+
+</script>
+</body>
+</html>

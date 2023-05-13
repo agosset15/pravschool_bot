@@ -1,3 +1,4 @@
+from json import JSONEncoder
 from aiogram.fsm.state import State, StatesGroup
 from aiogram import Bot
 from pydantic import BaseSettings, SecretStr
@@ -12,6 +13,13 @@ class Settings(BaseSettings):
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
+
+class MyEncoder(JSONEncoder):
+    def default(self, o):
+        thedict = o.__dict__
+        thekey = '_sa_instance_state'
+        if thekey in thedict: del thedict[thekey]
+        return thedict
 
 
 config = Settings()

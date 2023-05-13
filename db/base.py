@@ -4,7 +4,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from misc import SingletonMeta
+
+class SingletonMeta(type):
+    _instance = None
+
+    def __call__(cls, *args, **kwargs):
+        if cls._instance:
+            return cls._instance
+        cls._instance = super(SingletonMeta, cls).__call__(*args, **kwargs)
+        return cls._instance
 
 
 class Database(metaclass=SingletonMeta):

@@ -20,7 +20,7 @@ def get_student_by_telegram_id(telegram_id: int) -> Student:
 
 def get_all_students() -> list[Student]:
     try:
-        return Database().session.query(Student).all()
+        return Database().session.query(Student).filter(Student.blocked == 'False').all()
     except exc.NoResultFound:
         return None
 
@@ -49,12 +49,12 @@ def get_all_classes() -> list:
 
 def get_students_with_duty_notification() -> list[Student]:
     try:
-        return Database().session.query(Student).filter(Student.duty_notification == 1).all()
+        return Database().session.query(Student).filter(Student.duty_notification == 1, Student.blocked == 'False').all()
     except exc.NoResultFound:
         return None
 
 
-def get_schedule(clas: int, day: int) -> Schedule:
+def get_schedule(clas: int, day: int) -> Schedule.rasp:
     try:
         return Database().session.query(Schedule.rasp).filter(Schedule.clas == clas, Schedule.day == day,
                                                               Schedule.isTeacher == 0, Schedule.isKab == 0).one()[0]
@@ -62,7 +62,7 @@ def get_schedule(clas: int, day: int) -> Schedule:
         return None
 
 
-def get_teacher_schedule(clas: int, day: int) -> Schedule:
+def get_teacher_schedule(clas: int, day: int) -> Schedule.rasp:
     try:
         return Database().session.query(Schedule.rasp).filter(Schedule.clas == clas, Schedule.day == day,
                                                               Schedule.isTeacher == 1, Schedule.isKab == 0).one()[0]
@@ -70,7 +70,7 @@ def get_teacher_schedule(clas: int, day: int) -> Schedule:
         return None
 
 
-def get_kab_schedule(clas: int, day: int) -> Schedule:
+def get_kab_schedule(clas: int, day: int) -> Schedule.rasp:
     try:
         return Database().session.query(Schedule.rasp).filter(Schedule.clas == clas, Schedule.day == day,
                                                               Schedule.isTeacher == 1, Schedule.isKab == 1).one()[0]

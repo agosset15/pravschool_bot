@@ -1,5 +1,6 @@
 import time
 import ast
+from datetime import datetime, timedelta
 from aiogram import Router, html
 from aiogram.filters import Text
 from aiogram.types import CallbackQuery
@@ -41,6 +42,7 @@ async def special(call: CallbackQuery, state: FSMContext):
                                   reply_markup=kb.settings())
         await call.answer()
     if call.data == "back":
+        await state.clear()
         await call.message.delete()
         await call.message.answer("Вы вернулись в главное меню.", reply_markup=kb.uinb())
         await call.answer()
@@ -55,8 +57,15 @@ async def special(call: CallbackQuery, state: FSMContext):
         await state.set_state(DelUser.id)
     if call.data == "ns":
         if get_student_by_telegram_id(call.from_user.id).isNs == 1:
-            await call.message.answer("Выберете день на который вы хотите посмотреть", reply_markup=kb.make_ns())
+            dt = datetime.now()
+            start = dt - timedelta(days=dt.weekday())
+            end = start + timedelta(days=6)
+            start = start.strftime('%d.%m.%Y')
+            end = end.strftime('%d.%m.%Y')
+            await call.message.answer(f"Выберете день на который вы хотите посмотреть\nТекущая неделя: {start} - {end}",
+                                      reply_markup=kb.make_ns())
             await state.set_state(GetNS.day)
+            await state.update_data(start=start)
         else:
             await call.message.answer("Вы не ввели свои данные. Введите их в меню настроек.")
             await call.message.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для {html.bold('личных')}"
@@ -105,6 +114,7 @@ async def call_now(call: CallbackQuery):
             day = day.tm_wday + 1
             if day < 6:
                 value = get_schedule(clas, day)
+                value = '\n'.join(ast.literal_eval(value))
                 await call.message.answer(f"{value}")
             else:
                 await call.message.answer("Сегодня выходной!")
@@ -114,6 +124,7 @@ async def call_now(call: CallbackQuery):
             day = day.tm_wday + 1
             if day < 6:
                 value = get_teacher_schedule(clas, day)
+                value = '\n'.join(ast.literal_eval(value))
                 await call.message.answer(f"{value}")
             else:
                 await call.message.answer("Сегодня выходной!")
@@ -136,12 +147,13 @@ async def call_tom(call: CallbackQuery):
             userbase = [6, 7]
             if day < 6:
                 value = get_schedule(clas, day)
+                value = '\n'.join(ast.literal_eval(value))
                 await call.message.answer(f"{value}")
             elif day == 8:
                 value = get_schedule(clas, day)
                 await call.message.answer(f"{value}")
             elif day in userbase:
-                await call.message.answer("Завтра выходной!\nУра!")
+                await call.message.answer("Завтра выходной!")
             await call.answer()
         else:
             day = time.localtime()
@@ -149,9 +161,10 @@ async def call_tom(call: CallbackQuery):
             userbase = [6, 7]
             if day < 6 or day == 8:
                 value = get_teacher_schedule(clas, day)
+                value = '\n'.join(ast.literal_eval(value))
                 await call.message.answer(f"{value}")
             elif day in userbase:
-                await call.message.answer("Завтра выходной!\nУра!")
+                await call.message.answer("Завтра выходной!")
             await call.answer()
     except TypeError or ValueError:
         await call.message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
@@ -275,5 +288,5 @@ async def other_call(call: CallbackQuery, state: FSMContext):
     if call.data == "wanttobeadmin":
         await call.message.answer("Вы можете добавлять домашнее задание для своего класса прямо в боте."
                                   "\nДля того, чтобы получить  такую возможность, нужно написать администратору "
-                                  "@agosset15", reply_markup=kb.settings())
+                                  "@ag15bots", reply_markup=kb.settings())
         await call.answer()

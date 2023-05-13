@@ -55,8 +55,20 @@ def edit_student_clas(telegram_id: int, new_clas: int = None) -> None:
 def switch_student_duty_notification(telegram_id: int) -> None:
     student = get_student_by_telegram_id(telegram_id)
     if student:
-        student.mark_notification = not student.mark_notification
+        student.duty_notification = not student.duty_notification
         Database().session.commit()
+
+
+def update_student_blocked(user_id: int):
+    Database().session.query(Student).filter(Student.id == user_id).update(
+        values={Student.blocked: 'True'})
+    Database().session.commit()
+
+
+def update_student_nonblocked(user_id: int):
+    Database().session.query(Student).filter(Student.id == user_id).update(
+        values={Student.blocked: 'False'})
+    Database().session.commit()
 
 
 # `````````````````````````````````````````````````````SCHEDULE```````````````````````````````````````````````````
@@ -71,12 +83,12 @@ def edit_schedule_rasp(clas: str, day: str, new_rasp: str) -> None:
 # `````````````````````````````````````````````````````HOMEWORKS``````````````````````````````````````````````````
 
 def edit_homework(day: int, lesson: int, clas: int, new_homework: str) -> None:
-    Database().session.query(Homework).filter(Homework.day == day,Homework.lesson == lesson,
+    Database().session.query(Homework).filter(Homework.day == day, Homework.lesson == lesson,
                                               Homework.clas == clas).update(values={Homework.homework: new_homework})
     Database().session.commit()
 
 
-def edit_homework_upd_date(day: int, lesson: str, clas: str, new_upd_date: str) -> None:
+def edit_homework_upd_date(day: int, lesson: int, clas: str, new_upd_date: str) -> None:
     Database().session.query(Homework).filter(Homework.day == day, Homework.lesson == lesson,
                                               Homework.clas == clas).update(values={Homework.upd_date: new_upd_date})
     Database().session.commit()

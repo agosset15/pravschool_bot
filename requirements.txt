@@ -1,8 +1,10 @@
 --pre
 aiogram==3.0.0b5
 python-dotenv
-openpyxl
-pydantic
+openpyxl~=3.0.10
+pydantic~=1.10.4
 netschoolapi==11.0.2
 apscheduler==3.9.1.post1
-sqlalchemy
+sqlalchemy~=1.4.46
+aiohttp~=3.8.3
+pymysql~=1.0.2

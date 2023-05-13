@@ -1,9 +1,11 @@
-from aiogram import Router, F, html
+from aiogram import Router, html
 from aiogram.filters import Command, Text
+from aiogram.filters.chat_member_updated import ChatMemberUpdatedFilter, KICKED, MEMBER, ChatMemberUpdated
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from db.methods.create import create_student
 from db.methods.get import get_student_by_telegram_id, get_all_students
+from db.methods.update import update_student_nonblocked, update_student_blocked
 from ..keyboards import keyboards as kb
 from ..config import *
 
@@ -11,6 +13,20 @@ router = Router()
 
 zero = 0
 clases_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10б", "10г", "10ф", "11б", "11с", "11ф"]
+
+
+@router.my_chat_member(
+    ChatMemberUpdatedFilter(member_status_changed=KICKED)
+)
+async def user_blocked_bot(event: ChatMemberUpdated):
+    update_student_blocked(event.from_user.id)
+
+
+@router.my_chat_member(
+    ChatMemberUpdatedFilter(member_status_changed=MEMBER)
+)
+async def user_unblocked_bot(event: ChatMemberUpdated):
+    update_student_nonblocked(event.from_user.id)
 
 
 @router.message(Command("start"))
@@ -53,7 +69,7 @@ async def cmd_start(message: Message, state: FSMContext):
                 print("Новый пользователь!")
                 await bot.send_message(-1001845347264, f"{message.from_user.id} Новый пользователь!")
     else:
-        if usr.isTeacher == 1:
+        if usr.isTeacher is True:
             await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
             await message.answer(f"Вы учитель\.\nВыберете день, на который вы хотите увидеть расписание\."
                                  f"\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
@@ -84,7 +100,7 @@ async def stop(message: Message, state: FSMContext):
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
     adm = get_student_by_telegram_id(message.from_user.id).isAdmin
-    if adm == 1:
+    if adm is True:
         await message.answer("Вы уже админ. Вы можете добавлять домашнее задание.")
     else:
         await message.answer("Вы не админ, но можете им стать, для этого напишите @agosset15")

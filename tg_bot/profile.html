@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="MobileOptimized" content="176"/>
+    <meta name="HandheldFriendly" content="True"/>
+    <meta name="robots" content="noindex,nofollow"/>
+    <script src="https://telegram.org/js/telegram-web-app.js?1"></script>
+    <script src="https://webappcontent.telegram.org/js/jquery.min.js"></script>
+    <script>
+        function setThemeClass() {
+            document.documentElement.className = Telegram.WebApp.colorScheme;
+        }
+
+        Telegram.WebApp.onEvent('themeChanged', setThemeClass);
+        setThemeClass();
+
+    </script>
+    <title>Расписание</title>
+    <style>
+        body {
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+
+        main {
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        footer {
+            color: var(--tg-theme-hint-color);
+            display: flex;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 20px;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px;
+        }
+
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--tg-theme-text-color);
+        }
+
+        a {
+            color: var(--tg-theme-text-color);
+            font-size: 20px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            background-color: var(--tg-theme-hint-color);
+            color: var(--tg-theme-text-color);
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--tg-theme-button-text-color);
+            color: var(--tg-theme-button-color);
+        }
+
+        .dropbtn {
+        background-color: var(--tg-theme-secondary-bg-color);
+        color: var(--tg-theme-text-color);
+        padding: 0px;
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+        }
+
+        .dropbtn:hover, .dropbtn:focus {
+        background-color: var(--tg-theme-button-text-color);
+        }
+</style>
+</head>
+<body>
+    <header>
+        <a href="?nextpage=1" class="dropbtn">Расписание</a>
+        <a href="?nextpage=2"><img src='https://i.postimg.cc/pXyFWfTR/pngwing-com.png' border='0' width="50" height="50" alt="Профиль"/></a>
+    </header>
+    <main>
+        <div id="profile">
+            <h2 id="name">Имя: </h2>
+            <h2 id="class">Класс: </h2>
+            <h2 id="ns-un">Логин в журнале: </h2>
+            <h2 id="ns-pass">Пароль в журнале: </h2>
+            <h2 id="is-tchr">Учитель: </h2>
+            <h2 id="is-noti">Уведомления: </h2>
+            <h2 id="is-admin">Админ: </h2>
+        </div>
+        <div id="settings">
+            <button id="editClassBtn" onclick="editClassBtn(event)">Изменить класс</button>
+            <button id="editNsBtn" onclick="editNsBtn(event)">Изменить данные ЭЖ</button>
+            <div id="editClass" style="display: none;">
+                <select id="inputClass">
+                    <option value='1'>1</option>
+                    <option value='2'>2</option>
+                    <option value='3'>3</option>
+                    <option value='4'>4</option>
+                    <option value='5'>5</option>
+                    <option value='6'>6</option>
+                    <option value='7'>7</option>
+                    <option value='8'>8</option>
+                    <option value='9'>9</option>
+                    <option value='101'>10б</option>
+                    <option value='102'>10г</option>
+                    <option value='103'>10ф</option>
+                    <option value='111'>11б</option>
+                    <option value='112'>11с</option>
+                    <option value='113'>11ф</option>
+                </select>
+                <button id="confirmEditClass" onclick="confirmEditClass(event)">Изменить</button>
+            </div>
+            <div id="editNs" style="display: none;">
+                <input type="email" id="inputNsUsername" placeholder="Логин"/>
+                <input type="password" id="inputNsPassword" placeholder="Пароль"/>
+                <button id="confirmEditNs" onclick="confirmEditNs(event)">Изменить</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>©agosset15 2023</p>
+        <p id="count">Всего пользователей: </p>
+    </footer>
+
+<script>
+    $(document).ready(function () {   
+            Telegram.WebApp.ready();
+            OnStartUp();
+        })
+
+    var initData = Telegram.WebApp.initData || '';
+    var initDataUnsafe = Telegram.WebApp.initDataUnsafe || {};
+
+
+    const usr_name = document.getElementById("name");
+    const usr_class = document.getElementById("class");
+    const ns_un = document.getElementById("ns-un");
+    const ns_pass = document.getElementById("ns-pass");
+    const is_tchr = document.getElementById("is-tchr");
+    const is_noti = document.getElementById("is-noti");
+    const is_admin = document.getElementById("is-admin");
+    
+    const count = document.getElementById('count')
+
+    function OnStartUp() {
+        let dt = Telegram.WebApp.initData || '';
+        fetch(`https://tg.ag15.ru/demo/getDb?_auth=${dt}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok === 'false') {
+                alert('Server error')
+            }
+            else {
+                usr_name.innerHTML = `Имя: ${data.name}`;
+                usr_class.innerHTML = `Класс: ${data.clas}`;
+                ns_un.innerHTML = `Логин: ${data.login}`;
+                ns_pass.innerHTML = `Пароль: ${data.pass}`;
+                is_tchr.innerHTML = `Учитель: ${data.isTeacher}`;
+                is_noti.innerHTML = `Уведомления: ${data.ntf}`;
+                is_admin.innerHTML = `Админ: ${data.isAdmin}`;
+                window.isTeacher = (data.isTeacher === 'true')
+                window.isAdmin = (data.isAdmin === 'true')
+                window.isNs = (data.isNs === 'true')
+            }
+        });
+        fetch(`https://tg.ag15.ru/demo/getDb/count?_auth=${dt}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok === 'false') {
+                alert('Server error')
+            }
+            else {
+                count.innerHTML = `Всего пользователей: ${data.count}`
+            }
+        });
+    }
+    
+    const editNs = document.getElementById("editNs");
+    const inputNsUsername = document.getElementById("inputNsUsername");
+    const inputNsPassword = document.getElementById("inputNsPassword");
+
+
+    const editClass = document.getElementById("editClass");
+    const inputClass = document.getElementById("inputClass");
+
+
+    function editNsBtn(e) {
+        editNs.style.display = "block";
+        editClass.style.display = "none";
+        e.preventDefault()
+    };
+
+    function confirmEditNs(e) {
+        const username = inputNsUsername.value
+        const pass = inputNsPassword.value
+        fetch(`https://tg.ag15.ru/demo/editDb/ns?login=${username}&password=${pass}&_auth=${initData}`, {
+        method: "POST"
+        }).then(response => response.json()).then(data => {
+        if (data.ok === 'false') {
+                alert('Server error')
+            }
+            else {
+                ns_un.innerHTML = `Логин: ${username}`;
+                ns_pass.innerHTML = `Пароль: ${pass}`;
+            }
+        });
+        editNs.style.display = "none";
+        e.preventDefault()
+    };
+
+    function editClassBtn(e) {
+        editNs.style.display = "none";
+        editClass.style.display = "block";
+        e.preventDefault()
+    };
+
+    function confirmEditClass(e) {
+        fetch(`https://tg.ag15.ru/demo/editDb/class?class=${inputClass.value}&_auth=${initData}`, {
+        method: "POST"
+        }).then(response => response.json()).then(data => {
+        console.log("Request complete! response:", data);
+        if (data.ok === 'false') {
+                alert('Server error');
+            }
+            else {
+                let classs = inputClass.value;
+                let class_list = ["101", "102", "103", "111", "112", "113"];
+                let list1 = {'101': '10б', "102": "10г", '103': '10ф', '111': '11б', '112': '11с', '113': '11ф'};
+                console.log(typeof(classs));
+                if (classs in class_list) {
+                    classs = list1[classs];
+                }
+                usr_class.innerHTML = `Класс: ${classs}`;
+            }
+        });
+        editClass.style.display = "none";
+        e.preventDefault()
+    };
+
+
+    function webviewExpand() {
+        Telegram.WebApp.expand();
+    }
+
+    function webviewClose() {
+        Telegram.WebApp.close();
+    }
+
+    Telegram.WebApp.onEvent('themeChanged', function () {
+        $('#theme_data').html(JSON.stringify(Telegram.WebApp.themeParams, null, 2));
+    });
+
+    Telegram.WebApp.MainButton
+        .setText('Закрыть')
+        .show()
+        .onClick(function () {
+            webviewClose();
+        });
+
+</script>
+</body>
+</html>

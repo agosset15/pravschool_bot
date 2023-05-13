@@ -1,4 +1,0 @@
-# Этот файл необходимо переименовать в .env
-
-# Токен бота, узнать можно у https://t.me/botfather
-BOT_TOKEN=123456789:abcdefghijklmnopqrstuvwxyz

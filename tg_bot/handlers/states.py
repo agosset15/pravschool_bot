@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import ast
 from aiogram import Router, F, html
@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from netschoolapi.errors import SchoolNotFoundError, AuthError
 
-from ..web_edit.add_rasp import Exel
+from ..backend.add_rasp import Exel
 from db.methods.update import edit_student_clas, switch_student_admin, edit_student_login, edit_student_password,\
     edit_homework, edit_homework_upd_date, switch_student_ns, switch_student_teasher_false, switch_student_teasher_true
 from db.methods.create import create_homework
@@ -207,16 +207,42 @@ async def add_ns_login(message: Message, state: FSMContext):
 @router.callback_query(GetNS.day)
 async def get_ns_day(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-    usersmessage = int(call.data)
-    await state.update_data(day=usersmessage)
-    l_p = get_student_by_telegram_id(call.from_user.id)
-    try:
-        await ns.login(l_p.login, l_p.password, 'Свято-Димитриевская школа')
-        diary = await ns.diary()
-        await ns.logout()
-        await ns.logout()
-        await ns.logout()
-        day = diary.schedule[usersmessage]
+    start = await state.get_data()
+    start = start['start']
+    start = datetime.strptime(start, '%d.%m.%Y')
+    if call.data in ["back_week", "next_week", "back"]:
+        if call.data == "back":
+            await state.clear()
+            await call.message.answer("Вы вернулись в главное меню.", reply_markup=kb.uinb())
+            await call.answer()
+        else:
+            if call.data == "back_week":
+                start = start - timedelta(days=7)
+            else:
+                start = start + timedelta(days=7)
+            end = start + timedelta(days=6)
+            start = start.strftime('%d.%m.%Y')
+            end = end.strftime('%d.%m.%Y')
+            await call.message.answer(f"Выберете день на который вы хотите посмотреть\nТекущая неделя: {start} - {end}",
+                                      reply_markup=kb.make_ns())
+            await state.update_data(start=start)
+            await call.answer()
+    else:
+        usersmessage = int(call.data)
+        await state.update_data(day=usersmessage)
+        l_p = get_student_by_telegram_id(call.from_user.id)
+        try:
+            await ns.login(l_p.login, l_p.password, 'Свято-Димитриевская школа')
+            diary = await ns.diary(start=start)
+            await ns.logout()
+            await ns.logout()
+            await ns.logout()
+            day = diary.schedule[usersmessage]
+        except SchoolNotFoundError or AuthError:
+            await ns.logout()
+            await state.clear()
+            await call.message.answer("Неверный логин/пароль.")
+            return
         lesson = day.lessons
         message_text = []
         for less in lesson:
@@ -240,12 +266,9 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
                 await call.message.answer(msg[x:x + 4096], parse_mode='HTML', reply_markup=kb.get_startkeyboard())
         else:
             await call.message.answer(msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard())
-        await call.message.answer("В настройках вы можете подписаться на ежедневные напоминания о просроченных заданиях",
-                                  reply_markup=kb.uinb())
-    except SchoolNotFoundError or AuthError:
-        await ns.logout()
-        return "Неверный логин/пароль"
-    await state.clear()
+        await call.message.answer("В настройках вы можете подписаться на ежедневные напоминания о "
+                                  "просроченных заданиях", reply_markup=kb.uinb())
+        await state.clear()
 
 
 @router.callback_query(EditHomework.lesson)
