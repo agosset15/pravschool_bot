@@ -157,6 +157,7 @@ def settings():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text="Изменить класс", callback_data="change_class")
     keyboard.button(text="Подключить ЭЖ", callback_data="add_ns")
+    keyboard.button(text="Подключить уведомления", callback_data="add_ns_upd")
     keyboard.button(text="Информация о боте", callback_data="info")
     keyboard.button(text="Удалить меня", callback_data="delete")
     keyboard.button(text="Стать админом", callback_data='wanttobeadmin')
@@ -168,7 +169,6 @@ def settings():
 def ns_settings():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text="Изменить логин/пароль", callback_data="change_ns")
-    keyboard.button(text="Подключить уведомления", callback_data="add_ns_upd")
     keyboard.button(text="Вернуться назад", callback_data="back")
     keyboard.adjust(1)
     return keyboard.as_markup(resize_keyboard=True)

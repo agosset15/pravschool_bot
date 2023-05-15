@@ -278,13 +278,15 @@ async def other_call(call: CallbackQuery, state: FSMContext):
         await call.answer()
     if call.data == "add_ns_upd":
         usr = get_student_by_telegram_id(call.from_user.id)
-        if usr.duty_notification == 0:
-            switch_student_duty_notification(call.from_user.id)
-            await call.message.answer("Подключили вам уведомления. Они будут приходить каждый день в 12:00.")
-            await call.answer()
-        elif usr.duty_notification == 1:
-            await call.message.answer("У вас уже подключены уведомления.")
-            await call.answer()
+        if usr.duty_notification is False:
+            if usr.isNs is True:
+                switch_student_duty_notification(call.from_user.id)
+                await call.message.answer("Подключили вам уведомления. Они будут приходить каждый день в 12:00.")
+                await call.answer()
+            else:
+                await call.answer("У вас не введены данные для ЭЖ", show_alert=True)
+        elif usr.duty_notification is True:
+            await call.answer("У вас уже подключены уведомления.")
     if call.data == "wanttobeadmin":
         await call.message.answer("Вы можете добавлять домашнее задание для своего класса прямо в боте."
                                   "\nДля того, чтобы получить  такую возможность, нужно написать администратору "
