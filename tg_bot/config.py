@@ -4,7 +4,7 @@ from aiogram import Bot
 from pydantic import BaseSettings, SecretStr
 from netschoolapi import NetSchoolAPI
 
-from ..db import Student
+from db import Student
 
 ns = NetSchoolAPI('http://d.pravschool.ru/')
 
