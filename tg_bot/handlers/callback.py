@@ -280,7 +280,7 @@ async def other_call(call: CallbackQuery, state: FSMContext):
         usr = get_student_by_telegram_id(call.from_user.id)
         if usr.duty_notification == 0:
             switch_student_duty_notification(call.from_user.id)
-            await call.message.answer("Подключили вам уведомления. Они будут приходить раз в день в 12:00.")
+            await call.message.answer("Подключили вам уведомления. Они будут приходить каждый день в 12:00.")
             await call.answer()
         elif usr.duty_notification == 1:
             await call.message.answer("У вас уже подключены уведомления.")

@@ -34,7 +34,7 @@ async def classadd(message: Message, state: FSMContext):
     msg = int(usersmessage)
     edit_student_clas(message.from_user.id, msg)
     switch_student_teasher_false(message.from_user.id)
-    await message.answer("""Вы всегда сможете изменить свой класс в меню "⚙️Настройки⚙️" в особом меню.""",
+    await message.answer("""Вы всегда сможете изменить свой класс в меню настроек в особом меню.""",
                          reply_markup=kb.get_startkeyboard())
     await message.answer("Выберете день, на который вы хотите увидеть расписание\."
                          "\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
@@ -50,7 +50,7 @@ async def uch(message: Message, state: FSMContext):
     switch_student_teasher_true(message.from_user.id)
     await state.update_data(uch=usersmessage)
     await state.clear()
-    await message.answer("""Вы всегда сможете изменить свои данные в меню "⚙️Настройки⚙️" в особом меню.""",
+    await message.answer("""Вы всегда сможете изменить свои данные в меню настроек в особом меню.""",
                          reply_markup=kb.get_startkeyboard())
     await message.answer("Выберете день, на который вы хотите увидеть расписание\."
                          "\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
