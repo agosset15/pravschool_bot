@@ -15,9 +15,9 @@ from aiogram.types import (
 )
 from aiogram.utils.web_app import check_webapp_signature, safe_parse_webapp_init_data
 
-from db.methods.get import get_student_by_telegram_id, get_homework
-from db.methods.update import edit_homework, edit_homework_upd_date, edit_student_login, edit_student_password, edit_student_clas
-from db.methods.create import create_homework
+from ...db.methods.get import get_student_by_telegram_id, get_homework
+from ...db.methods.update import edit_homework, edit_homework_upd_date, edit_student_login, edit_student_password, edit_student_clas
+from ...db.methods.create import create_homework
 
 
 async def check_data_handler(request: Request):

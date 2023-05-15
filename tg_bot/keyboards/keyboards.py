@@ -1,9 +1,9 @@
 import ast
 from aiogram import types, html
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder, InlineKeyboardButton, \
-    InlineKeyboardMarkup
-from db.methods.get import get_schedule, get_teacher_schedule
-from db import Student
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton, \
+    InlineKeyboardMarkup, ReplyKeyboardBuilder
+from ...db.methods.get import get_schedule, get_teacher_schedule
+from ...db import Student
 from ..config import ns
 from netschoolapi.errors import SchoolNotFoundError, AuthError
 

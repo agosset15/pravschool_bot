@@ -3,7 +3,7 @@ from aiogram import Router
 from aiogram.filters import Text
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
-from db.methods.get import get_student_by_telegram_id, get_schedule, get_teacher_schedule
+from ...db.methods.get import get_student_by_telegram_id, get_schedule, get_teacher_schedule
 from ..keyboards import keyboards as kb
 from ..config import bot
 
