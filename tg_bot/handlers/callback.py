@@ -5,9 +5,9 @@ from aiogram import Router, html
 from aiogram.filters import Text
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
-from ...db.methods.get import get_count, get_student_by_telegram_id, get_schedule, get_teacher_schedule, get_homework
-from ...db.methods.delete import delete_student
-from ...db.methods.update import switch_student_duty_notification
+from db.methods.get import get_count, get_student_by_telegram_id, get_schedule, get_teacher_schedule, get_homework
+from db.methods.delete import delete_student
+from db.methods.update import switch_student_duty_notification
 from ..keyboards import keyboards as kb
 from ..config import *
 

@@ -6,7 +6,7 @@ from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_request import Request
 from aiohttp.web_response import json_response
 
-from ...db.methods.get import (get_student_by_telegram_id,
+from db.methods.get import (get_student_by_telegram_id,
                             get_schedule, get_homework,
                             get_teacher_schedule,
                             get_kab_schedule, get_count)

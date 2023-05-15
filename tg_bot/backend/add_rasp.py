@@ -1,4 +1,4 @@
-from ...db.methods.create import create_schedule
+from db.methods.create import create_schedule
 import openpyxl
 
 

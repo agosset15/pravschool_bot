@@ -1,5 +1,5 @@
 from ..config import send_duty
-from ...db.methods.get import get_students_with_duty_notification
+from db.methods.get import get_students_with_duty_notification
 
 
 async def send_user_ns_duty():
