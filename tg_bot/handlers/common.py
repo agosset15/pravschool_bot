@@ -3,7 +3,7 @@ from aiogram.filters import Command, Text
 from aiogram.filters.chat_member_updated import ChatMemberUpdatedFilter, KICKED, MEMBER, ChatMemberUpdated
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from db.methods.create import create_student
+from db import create_student
 from db.methods.get import get_student_by_telegram_id, get_all_students
 from db.methods.update import update_student_nonblocked, update_student_blocked
 from ..keyboards import keyboards as kb
