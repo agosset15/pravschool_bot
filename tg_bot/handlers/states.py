@@ -4,11 +4,13 @@ import ast
 from aiogram import Router, F, html
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError, TelegramNotFound
 from netschoolapi.errors import SchoolNotFoundError, AuthError
 
 from ..backend.add_rasp import Exel
-from db.methods.update import edit_student_clas, switch_student_admin, edit_student_login, edit_student_password,\
-    edit_homework, edit_homework_upd_date, switch_student_ns, switch_student_teasher_false, switch_student_teasher_true
+from db.methods.update import (edit_student_clas, switch_student_admin, edit_student_login, edit_student_password,
+                               edit_homework, edit_homework_upd_date, switch_student_ns, switch_student_teasher_false,
+                               switch_student_teasher_true, update_student_blocked, update_student_nonblocked)
 from db.methods.create import create_homework
 from db.methods.get import get_kab_schedule, get_all_students, get_student_by_telegram_id, get_homework
 from db.methods.delete import delete_schedules, delete_student
@@ -85,7 +87,11 @@ async def getcount(message: Message, state: FSMContext):
     userbase = get_all_students()
     if len(userbase) > 1:
         for z in userbase:
-            await bot.send_message(z.id, f"Внимание!\n{ad}")
+            try:
+                await bot.send_message(z.id, f"Внимание!\n{ad}")
+            except TelegramBadRequest or TelegramForbiddenError or TelegramNotFound:
+                update_student_blocked(z.id)
+                pass
     else:
         await bot.send_message(userbase[0].id, f"Внимание!\n{ad}")
     await bot.send_message(message.chat.id, 'Done!')
