@@ -106,6 +106,12 @@ async def cmd_admin(message: Message):
         await message.answer("Вы не админ, но можете им стать, для этого напишите @agosset15")
 
 
+@router.message(Command("duty"))
+async def cmd_duty(message: Message):
+    user = get_student_by_telegram_id(message.from_user.id)
+    await send_duty(user)
+
+
 @router.callback_query(Text("users_check"))
 async def clb_usr(callback: CallbackQuery):
     userbase = get_all_students()
