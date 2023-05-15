@@ -109,7 +109,10 @@ async def cmd_admin(message: Message):
 @router.message(Command("duty"))
 async def cmd_duty(message: Message):
     user = get_student_by_telegram_id(message.from_user.id)
-    await send_duty(user)
+    if user.isNs is True:
+        await send_duty(user)
+    else:
+        await message.answer("У вас не введены данные ЭЖ.")
 
 
 @router.callback_query(Text("users_check"))
