@@ -17,7 +17,7 @@ def delete_schedules():
     session.query(Schedule).delete()
 
 
-def delete_schedule_day(clas: str, day: str):
+def delete_schedule_day(clas: int, day: int):
     session = Database().session
     schedule = get_schedule(clas, day)
 

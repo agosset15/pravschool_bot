@@ -12,7 +12,6 @@ def create_student(telegram_id: int, name: str, uname: str, clas: int, ref: str)
         session.add(Student(id=telegram_id, name=name, username=uname, clas=clas, ref=ref))
         session.commit()
 
-
 def create_schedule(clas: int, day: int, rasp: str, teacher: int, kab: int) -> None:
     session = Database().session
     try:
