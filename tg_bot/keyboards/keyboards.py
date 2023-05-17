@@ -118,6 +118,7 @@ def vip_menu():
     kb.button(text="Сводка пользователей", callback_data="users_check")
     kb.button(text="Удалить пользователя", callback_data="del_user")
     kb.button(text="Сделать объявление", callback_data="ad")
+    kb.button(text="Веб-Админка", web_app=types.WebAppInfo(url='https://tg.ag15.ru/index.php?nextpage=admin'))
     kb.adjust(1)
     return kb.as_markup()
 
@@ -141,7 +142,7 @@ def uinb():
             InlineKeyboardButton(text="Настройки", callback_data="settings")],
         [InlineKeyboardButton(text="Домашнее задание", callback_data="homework")],
         [InlineKeyboardButton(text="Веб интерфейс",
-                              web_app=types.WebAppInfo(url='https://tg.ag15.ru/demo?nextpage=1'))]
+                              web_app=types.WebAppInfo(url='https://tg.ag15.ru/index.php?nextpage=1'))]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
