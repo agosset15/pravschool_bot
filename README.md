@@ -22,12 +22,25 @@
 * [aiogram](https://github.com/aiogram/aiogram) — работа с Telegram Bot API;
 * [sqlite3](https://docs.python.org/3/library/sqlite3.html) — перманентное хранение данных;
 * [aiohttp](https://aiohttp.org/) — веб-сервер для веб-приложения;
+* [sqlalchemy](https://sqlalche.me/)
 
 ## Установка
+
+
+<details>
+<summary>Вариант с systemd</summary>
 
 1. Скопируйте файл `env_example` как `.env` (с точкой в начале), откройте и отредактируйте содержимое.
 2. Выполните `python3 -m pip install -r requirements.txt`
 3. Используйте Systemd, пример службы есть в репозитории. Вот <a href="https://telegra.ph/Sozdanie-servisa-09-21" target="_blank">статья</a> для ознакомления.
+</details>
+
+<details>
+<summary>Вариант с docker (легкий)</summary>
+
+1. На вашем устройстве должен быть установлен docker
+2. Выполните `docker pull agosset15/pravschool_bot` а затем `docker run agosset15/pravschool_bot:v1`
+</details>
 
 ## Благодарности
 

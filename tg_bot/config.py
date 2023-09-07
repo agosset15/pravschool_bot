@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from json import JSONEncoder
 from aiogram.fsm.state import State, StatesGroup
 from aiogram import Bot
@@ -17,6 +18,9 @@ class MyEncoder(JSONEncoder):
         return thedict
 
 
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 bot = Bot(token=os.getenv('BOT_TOKEN'))
 
 
