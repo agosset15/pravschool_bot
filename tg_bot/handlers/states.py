@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import os
 import ast
 from aiogram import Router, F, html
 from aiogram.types import Message, CallbackQuery
@@ -10,7 +9,7 @@ from netschoolapi.errors import SchoolNotFoundError, AuthError
 from ..backend.add_rasp import Exel
 from db.methods.update import (edit_student_clas, switch_student_admin, edit_student_login, edit_student_password,
                                edit_homework, edit_homework_upd_date, switch_student_ns, switch_student_teasher_false,
-                               switch_student_teasher_true, update_student_blocked, update_student_nonblocked)
+                               switch_student_teasher_true, update_student_blocked)
 from db.methods.create import create_homework
 from db.methods.get import get_kab_schedule, get_all_students, get_student_by_telegram_id, get_homework
 from db.methods.delete import delete_schedules, delete_student
@@ -280,19 +279,35 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
 @router.callback_query(EditHomework.lesson)
 async def edit_homework_lesson(call: CallbackQuery, state: FSMContext):
     await state.update_data(lesson=call.data)
-    await call.message.answer("Напишите ДЗ")
+    await call.message.answer("Отправьте текст задания",
+                              reply_markup=kb.reply_rext_kb("Не добавлять", "Отправьте домашнее задание"))
     await state.set_state(EditHomework.homework)
 
 
 @router.message(EditHomework.homework)
 async def edit_homework_text(message: Message, state: FSMContext):
+    text = message.text
+    if message.text == "Не добавлять":
+        text = "   "
+    await state.update_data(homework=text)
+    await message.answer("Отправьте изображение",
+                         reply_markup=kb.reply_rext_kb("Не добавлять", "Отправьте изображение"))
+    await state.set_state(EditHomework.image)
+
+
+@router.message(EditHomework.image)
+async def edit_homework_image(message: Message, state: FSMContext):
+    if message.text != "Не добавлять":
+        image = message.photo[-1].file_id
+    else:
+        image = None
     data = await state.get_data()
     await state.clear()
     usr = get_student_by_telegram_id(message.from_user.id)
     if get_homework(data['lesson'], usr.clas, data['day']) is not None:
-        edit_homework(data['day'], data['lesson'], usr.clas, message.text)
+        edit_homework(data['day'], data['lesson'], usr.clas, data['homework'], image)
         edit_homework_upd_date(data['day'], data['lesson'], usr.clas, str(datetime.now().strftime('%H:%M %d.%m.%Y')))
     else:
-        create_homework(data['day'], data['lesson'], usr.clas, message.text,
-                        str(datetime.now().strftime('%H:%M %d.%m.%Y')))
+        create_homework(data['day'], data['lesson'], usr.clas, data['homework'],
+                        str(datetime.now().strftime('%H:%M %d.%m.%Y')), image)
     await message.answer("Домашнее задание успешно добавлено.", reply_markup=kb.get_startkeyboard())

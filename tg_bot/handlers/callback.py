@@ -1,8 +1,7 @@
 import time
 import ast
 from datetime import datetime, timedelta
-from aiogram import Router, html
-from aiogram.filters import Text
+from aiogram import Router, html, F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 from db.methods.get import get_count, get_student_by_telegram_id, get_schedule, get_teacher_schedule, get_homework
@@ -17,7 +16,7 @@ sp = ["year", "settings", "change_class", "info", "back", "delete", "del_user", 
 admin_id = 900645059
 
 
-@router.callback_query(Text(sp))
+@router.callback_query(F.data in sp)
 async def special(call: CallbackQuery, state: FSMContext):
     if call.data == "year":
         await call.message.delete()
@@ -104,7 +103,7 @@ async def special(call: CallbackQuery, state: FSMContext):
             await bot.send_message(-1001845347264, f"{call.from_user.id} ошибка колл\учителей(учеников)")
 
 
-@router.callback_query(Text("now"))
+@router.callback_query(F.data == "now")
 async def call_now(call: CallbackQuery):
     try:
         usr = get_student_by_telegram_id(call.from_user.id)
@@ -136,7 +135,7 @@ async def call_now(call: CallbackQuery):
         await bot.send_message(-1001845347264, f"{call.from_user.id}ошибка колл\сегодня")
 
 
-@router.callback_query(Text("tom"))
+@router.callback_query(F.data == "tom")
 async def call_tom(call: CallbackQuery):
     try:
         usr = get_student_by_telegram_id(call.from_user.id)
@@ -173,39 +172,47 @@ async def call_tom(call: CallbackQuery):
         await bot.send_message(-1001845347264, f"{call.from_user.id} ошибка колл\завтра")
 
 
-@router.callback_query(Text('homework'))
+@router.callback_query(F.data == 'homework')
 async def call_homework(call: CallbackQuery):
     await call.message.delete()
     await call.message.answer("Выберете день", reply_markup=kb.days_inline())
     await call.answer()
 
 
-@router.callback_query(Text(['mon', 'tue', 'wed', 'thu', 'fri']))
+@router.callback_query(F.data in ['mon', 'tue', 'wed', 'thu', 'fri'])
 async def call_homework_day(call: CallbackQuery):
     await call.message.delete()
     usr = get_student_by_telegram_id(call.from_user.id)
     data = {'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5}
     wday = data[call.data]
-    day = ast.literal_eval(get_schedule(usr.clas, wday))
-    homework = []
-    for i in range(1, len(day) + 1):
-        hm = get_homework(i, usr.clas, wday)
-        if hm is None:
-            homework.append(f"{day[i - 1]} - Нет")
-        else:
-            homework.append(f"{day[i - 1]} - {hm.homework}(Добавлено {hm.upd_date})")
-    text = '\n'.join(homework)
     if usr.isAdmin == 1:
         await call.message.answer(f"Важно! Это ДЗ может быть устаревшим. Проверяйте дату добавления."
-                                  f"\n\n{text}\n\nВы можете добавлять домашнее задание, нажав кнопку ниже",
-                                  reply_markup=kb.admin_kb(wday))
+                                  f"\n\nВы можете добавлять домашнее задание, нажав кнопку ниже",
+                                  reply_markup=kb.hw_lessons(usr, wday, True))
     else:
-        await call.message.answer(f"Важно! Это ДЗ может быть устаревшим. Проверяйте дату добавления."
-                                  f"\n\n{text}", reply_markup=kb.back())
+        await call.message.answer(f"Важно! Это ДЗ может быть устаревшим. Проверяйте дату добавления.",
+                                  reply_markup=kb.hw_lessons(usr, wday, True))
     await call.answer()
 
 
-@router.callback_query(Text(endswith='edit_homework'))
+@router.callback_query(F.data.startswith == "hw")
+async def call_get_hw_lesson(call: CallbackQuery):
+    await call.message.delete()
+    usr = get_student_by_telegram_id(call.from_user.id)
+    less = int(call.data.split('_')[1])
+    wday = int(call.data.split('_')[2])
+    day = ast.literal_eval(get_schedule(usr.clas, wday))
+    hm = get_homework(less, usr.clas, wday)
+    text = f"{day[less]} - Нет"
+    if hm:
+        text = f'{html.bold(day[less])}\n\n{hm.homework} (Добавлено <i>{hm.upd_date}</i>)'
+    if hm.image:
+        await call.message.answer_photo(hm.image, caption=text, reply_markup=kb.back())
+    else:
+        await call.message.answer(text, reply_markup=kb.back())
+
+
+@router.callback_query(F.data.endswith == 'edit_homework')
 async def call_edit_homework(call: CallbackQuery, state: FSMContext):
     day = call.data.split('_')[0]
     usr = get_student_by_telegram_id(call.from_user.id)
@@ -217,8 +224,8 @@ async def call_edit_homework(call: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(
-    Text(["new_rasp", "admin_add", "edit", "ad", "uch", "kab", "photo_add", "add_ns", "change_ns", "add_ns_upd",
-          "wanttobeadmin"]))
+    F.data in ["new_rasp", "admin_add", "edit", "ad", "uch", "kab", "photo_add", "add_ns", "change_ns", "add_ns_upd",
+               "wanttobeadmin"])
 async def other_call(call: CallbackQuery, state: FSMContext):
     if call.data == "new_rasp":
         await call.message.answer("Пришлите пожалуйста файл с расширением .xlsx")

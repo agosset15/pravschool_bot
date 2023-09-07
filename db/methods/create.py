@@ -23,10 +23,10 @@ def create_schedule(clas: int, day: int, rasp: str, teacher: int, kab: int) -> N
         session.commit()
 
 
-def create_homework(day: int, lesson: int, clas: int, homework: str, upd_date: str) -> None:
+def create_homework(day: int, lesson: int, clas: int, homework: str, upd_date: str, image: str = None) -> None:
     session = Database().session
     try:
         session.query(Homework).filter(Homework.day == day, Homework.lesson == lesson, Homework.clas == clas).one()
     except sqlalchemy.exc.NoResultFound:
-        session.add(Homework(day=day, lesson=lesson, clas=clas, homework=homework, upd_date=upd_date))
+        session.add(Homework(day=day, lesson=lesson, clas=clas, homework=homework, upd_date=upd_date, image=image))
         session.commit()

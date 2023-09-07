@@ -1,6 +1,5 @@
 import ast
-from aiogram import Router
-from aiogram.filters import Text
+from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from db.methods.get import get_student_by_telegram_id, get_schedule, get_teacher_schedule
@@ -13,8 +12,8 @@ days = ["ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕР�
 admin_id = 900645059
 
 
-@router.message(Text("ОСОБОЕ МЕНЮ"))
-@router.message(Text(days))
+@router.message(F.text == "ОСОБОЕ МЕНЮ")
+@router.message(F.text in days)
 async def text(message: Message, state: FSMContext):
     await state.clear()
     usr = get_student_by_telegram_id(message.from_user.id)

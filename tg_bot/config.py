@@ -1,20 +1,12 @@
+import os
 from json import JSONEncoder
 from aiogram.fsm.state import State, StatesGroup
 from aiogram import Bot
-from pydantic import BaseSettings, SecretStr
 from netschoolapi import NetSchoolAPI
 
 from db import Student
 
 ns = NetSchoolAPI('http://d.pravschool.ru/')
-
-
-class Settings(BaseSettings):
-    bot_token: SecretStr
-
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
 
 
 class MyEncoder(JSONEncoder):
@@ -25,8 +17,7 @@ class MyEncoder(JSONEncoder):
         return thedict
 
 
-config = Settings()
-bot = Bot(token=config.bot_token.get_secret_value())
+bot = Bot(token=os.getenv('BOT_TOKEN'))
 
 
 async def id_ad(a):
@@ -126,3 +117,4 @@ class GetNS(StatesGroup):
 class EditHomework(StatesGroup):
     lesson = State()
     homework = State()
+    image = State()

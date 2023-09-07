@@ -30,6 +30,18 @@ def days_inline() -> types.InlineKeyboardMarkup:
     return kb.as_markup()
 
 
+def hw_lessons(user, wday, adm: bool) -> types.InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    day = ast.literal_eval(get_schedule(user.clas, wday))
+    for i, l in day, range(0, len(day) - 1):
+        kb.button(text=i, callback_data=f'hw_{l}_{wday}')
+    if adm:
+        kb.button(text="Добавить ДЗ", callback_data=f'{wday}_edit_homework')
+    kb.button(text='Назад', callback_data="back")
+    kb.adjust(1)
+    return kb.as_markup()
+
+
 def inline_kb(clas: int | None, uch: int = None):
     if clas is not None:
         arr = []
@@ -42,15 +54,20 @@ def inline_kb(clas: int | None, uch: int = None):
             arr.append('\n'.join(ast.literal_eval(get_teacher_schedule(uch, i))))
     buttons = [
         types.InlineQueryResultArticle(id="1", title="ПОНЕДЕЛЬНИК",
-                                       input_message_content=types.InputTextMessageContent(message_text=arr[0])),
+                                       input_message_content=types.InputTextMessageContent(message_text=arr[0]),
+                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
         types.InlineQueryResultArticle(id="2", title="ВТОРНИК",
-                                       input_message_content=types.InputTextMessageContent(message_text=arr[1])),
+                                       input_message_content=types.InputTextMessageContent(message_text=arr[1]),
+                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
         types.InlineQueryResultArticle(id="3", title="СРЕДА",
-                                       input_message_content=types.InputTextMessageContent(message_text=arr[2])),
+                                       input_message_content=types.InputTextMessageContent(message_text=arr[2]),
+                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
         types.InlineQueryResultArticle(id="4", title="ЧЕТВЕРГ",
-                                       input_message_content=types.InputTextMessageContent(message_text=arr[3])),
+                                       input_message_content=types.InputTextMessageContent(message_text=arr[3]),
+                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
         types.InlineQueryResultArticle(id="5", title="ПЯТНИЦА",
-                                       input_message_content=types.InputTextMessageContent(message_text=arr[4]))
+                                       input_message_content=types.InputTextMessageContent(message_text=arr[4]),
+                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"))
     ]
     return buttons
 
@@ -141,7 +158,12 @@ def uinb():
             InlineKeyboardButton(text="Настройки", callback_data="settings")],
         [InlineKeyboardButton(text="Домашнее задание", callback_data="homework")],
         [InlineKeyboardButton(text="Веб интерфейс",
-                              web_app=types.WebAppInfo(url='https://tg.ag15.ru/demo?nextpage=1'))]
+                              web_app=types.WebAppInfo(url='https://tg.ag15.ru/demo?nextpage=1'))],
+        [InlineKeyboardButton(text="Попробовать в любом чате",
+                              switch_inline_query_chosen_chat=types.SwitchInlineQueryChosenChat(allow_bot_chats=False,
+                                                                                                allow_user_chats=True,
+                                                                                                allow_channel_chats=True,
+                                                                                                allow_group_chats=True))]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
@@ -203,6 +225,20 @@ def back():
     kb.button(text="Назад", callback_data='back')
     kb.adjust(1)
     return kb.as_markup()
+
+
+def url_kb(url: str):
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Все расписание", url=url)
+    kb.adjust(1)
+    return kb.as_markup()
+
+
+def reply_rext_kb(text: str, placeholder: str = None):
+    kb = ReplyKeyboardBuilder()
+    kb.button(text=text)
+    kb.adjust(1)
+    return kb.as_markup(resize_keyboard=True, input_field_placeholder=placeholder)
 
 
 def make_ns():

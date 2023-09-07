@@ -82,9 +82,10 @@ def edit_schedule_rasp(clas: str, day: str, new_rasp: str) -> None:
 
 # `````````````````````````````````````````````````````HOMEWORKS``````````````````````````````````````````````````
 
-def edit_homework(day: int, lesson: int, clas: int, new_homework: str) -> None:
+def edit_homework(day: int, lesson: int, clas: int, new_homework: str, image: str) -> None:
     Database().session.query(Homework).filter(Homework.day == day, Homework.lesson == lesson,
-                                              Homework.clas == clas).update(values={Homework.homework: new_homework})
+                                              Homework.clas == clas).update(values={Homework.homework: new_homework,
+                                                                                    Homework.image: image})
     Database().session.commit()
 
 

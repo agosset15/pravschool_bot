@@ -39,6 +39,7 @@ class Homework(Database.BASE):
     lesson = Column(Integer)
     clas = Column(Integer)
     homework = Column(String)
+    image = Column(String)
     upd_date = Column(String)
 
 
