@@ -11,7 +11,7 @@ from aiogram.webhook.aiohttp_server import setup_application, SimpleRequestHandl
 from db import register_models
 from .config import bot
 from .handlers import common, states, callback, text, inline
-from .backend.send_duty import send_user_ns_duty
+from .backend.notifications import send_user_ns_duty
 from .web_routes import (add_db_homework, demo_handler, check_data_handler, send_message_handler, getdb_user,
                          getdb_rasp,
                          getdb_kab_rasp,

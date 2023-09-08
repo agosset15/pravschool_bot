@@ -1,6 +1,7 @@
 --pre
 aiogram==3.0.0
 python-dotenv
+requests
 openpyxl~=3.0.10
 pydantic~=2.3.0
 apscheduler==3.9.1.post1

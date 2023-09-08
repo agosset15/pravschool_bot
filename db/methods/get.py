@@ -54,6 +54,13 @@ def get_students_with_duty_notification() -> list[Student]:
         return None
 
 
+def get_students_with_greet_notification() -> list[Student]:
+    try:
+        return Database().session.query(Student).filter(Student.duty_notification == 1, Student.blocked == 'False').all()
+    except exc.NoResultFound:
+        return None
+
+
 def get_schedule(clas: int, day: int) -> Schedule.rasp:
     try:
         return Database().session.query(Schedule.rasp).filter(Schedule.clas == clas, Schedule.day == day,

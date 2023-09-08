@@ -16,6 +16,8 @@ class Student(Database.BASE):
     password = Column(String)
     clas = Column(Integer)
     duty_notification = Column(Boolean, default=False)
+    greet_notification = Column(Boolean, default=False)
+    time_to_greet = Column(Integer, default=2000)
     blocked = Column(String, default='False')
     ref = Column(String)
 

@@ -59,6 +59,19 @@ def switch_student_duty_notification(telegram_id: int) -> None:
         Database().session.commit()
 
 
+def switch_student_greet_notification(telegram_id: int) -> None:
+    student = get_student_by_telegram_id(telegram_id)
+    if student:
+        student.duty_notification = not student.duty_notification
+        Database().session.commit()
+
+
+def switch_student_greet_notification_time(telegram_id: int, time: int) -> None:
+    Database().session.query(Student).filter(Student.id == telegram_id).update(
+        values={Student.time_to_greet: time})
+    Database().session.commit()
+
+
 def update_student_blocked(user_id: int):
     Database().session.query(Student).filter(Student.id == user_id).update(
         values={Student.blocked: 'True'})
