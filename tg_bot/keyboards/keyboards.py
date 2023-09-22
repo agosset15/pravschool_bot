@@ -198,7 +198,7 @@ def ns_settings():
 
 def clases():
     kb = ReplyKeyboardBuilder()
-    buttons = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10б", "10г", "10ф", "11б", "11с", "11ф"]
+    buttons = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10г", "10е", "10ф", "11г", "11е", "11ф"]
     for i in buttons:
         kb.button(text=i)
     return kb.as_markup(resize_keyboard=True, input_field_placeholder="Выберете свой класс")

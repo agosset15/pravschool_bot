@@ -6,15 +6,16 @@ from ..keyboards import keyboards as kb
 
 router = Router()
 
-clases_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10б", "10г", "10ф", "11б", "11с", "11ф"]
+clases_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10б", "10г", "10ф", "11б", "11с", "11ф", "101", "102",
+               "103", "111", "112", "113"]
 
 
 @router.inline_query()
 async def inline(query: InlineQuery):
     if query.query in clases_list:
         usersmessage = query.query
-        list1 = {'10б': '101', "10г": "102", '10ф': '103', '11б': '111', '11с': '112', '11ф': '113'}
-        class_list = ["10б", "10г", "10ф", "11б", "11с", "11ф"]
+        list1 = {'10г': '101', "10е": "102", '10ф': '103', '11г': '111', '11е': '112', '11ф': '113'}
+        class_list = ["10г", "10е", "10ф", "11г", "11е", "11ф"]
         if usersmessage in class_list:
             usersmessage = list1[usersmessage]
         await query.answer(kb.inline_kb(int(usersmessage)), cache_time=1, is_personal=True,

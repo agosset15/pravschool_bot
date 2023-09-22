@@ -38,8 +38,8 @@ async def cmd_start(message: Message, state: FSMContext):
     if usr is None:
         if code and code.split('_')[0] in clases_list:
             cod = code.split('_')[0]
-            list1 = {'10б': '101', "10г": "102", '10ф': '103', '11б': '111', '11с': '112', '11ф': '113'}
-            class_list = ["10б", "10г", "10ф", "11б", "11с", "11ф"]
+            list1 = {'10г': '101', "10е": "102", '10ф': '103', '11г': '111', '11е': '112', '11ф': '113'}
+            class_list = ["10г", "10е", "10ф", "11г", "11е", "11ф"]
             usersmessage = cod
             if usersmessage in class_list:
                 usersmessage = list1[usersmessage]
