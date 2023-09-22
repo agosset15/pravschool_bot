@@ -10,7 +10,7 @@ class Exel:
     def rasp(self, min_row: int, max_row: int):
         sheet = self.file_to_read['классы']
         data = []
-        for i in range(4, 33, 4):
+        for i in range(4, 33, 2):
             les1 = []
             clas1 = []
             les2 = []
