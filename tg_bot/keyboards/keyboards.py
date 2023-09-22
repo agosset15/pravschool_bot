@@ -58,7 +58,7 @@ def inline_kb(clas: int | None, uch: int = None):
         types.InlineQueryResultArticle(id="1", title="ПОНЕДЕЛЬНИК",
                                        input_message_content=types.InputTextMessageContent(message_text=arr[0]),
                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
-                                       thumbnail_url="https://i.postimg.cc/Rh06vDF8/mon.png", thumbnail_height=512,
+                                       thumbnail_url="https://i.postimg.cc/yN3Yy3pD/mon.png", thumbnail_height=512,
                                        thumbnail_width=512),
         types.InlineQueryResultArticle(id="2", title="ВТОРНИК",
                                        input_message_content=types.InputTextMessageContent(message_text=arr[1]),

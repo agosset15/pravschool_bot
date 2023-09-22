@@ -26,7 +26,7 @@ async def inline(query: InlineQuery):
             try:
                 clas = usr.clas
                 if clas > 0:
-                    await query.answer(await kb.inline_ns_kb(usr), cache_time=1, is_personal=True,
+                    await query.answer(await kb.inline_ns_kb(usr), cache_time=86400, is_personal=True,
                                        switch_pm_text="Поговорить лично »»", switch_pm_parameter="inline")
                 else:
                     buttons = [
