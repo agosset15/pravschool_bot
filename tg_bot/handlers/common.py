@@ -115,7 +115,7 @@ async def cmd_duty(message: Message):
         await message.answer("У вас не введены данные ЭЖ.")
 
 
-@router.callback_query(F.dats == "users_check")
+@router.callback_query(F.data == "users_check")
 async def clb_usr(callback: CallbackQuery):
     userbase = get_all_students()
     message = "Пользователи:\nID    Класс    Имя    Реф\n\n"
