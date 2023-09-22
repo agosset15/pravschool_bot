@@ -11,7 +11,6 @@ from netschoolapi.errors import SchoolNotFoundError, AuthError
 from db import Student
 from db.methods.get import get_schedule
 
-import keyboards.keyboards as kb
 
 ns = NetSchoolAPI('http://d.pravschool.ru/')
 
@@ -118,9 +117,9 @@ async def send_greeting(student: Student, text: str, morning: bool = False):
         msg = f"По версии ЭЖ {mor}:\n\n" + text
         if len(msg) > 4096:
             for x in range(0, len(msg), 4096):
-                await bot.send_message(student.id, msg[x:x + 4096], parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+                await bot.send_message(student.id, msg[x:x + 4096], parse_mode='HTML')
         else:
-            await bot.send_message(student.id, msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+            await bot.send_message(student.id, msg, parse_mode='HTML')
     else:
         await bot.send_message(student.id,"⚠️Вы не ввели свои данные. Введите их в меню настроек.")
     await bot.send_message(student.id, f"{get_duty(student)}")

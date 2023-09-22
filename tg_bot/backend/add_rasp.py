@@ -10,37 +10,34 @@ class Exel:
     def rasp(self, min_row: int, max_row: int):
         sheet = self.file_to_read['классы']
         data = []
-        for i in range(4, 61, 4):
-            data1 = []
-            data2 = []
-            data3 = []
-            data4 = []
+        for i in range(4, 31, 4):
+            les1 = []
+            clas1 = []
+            les2 = []
+            clas2 = []
             for col1 in range(min_row, max_row + 1, 2):
                 value = sheet.cell(col1, i).value
-                data1.append(value)
+                les1.append(value)
+                value = sheet.cell(col1, i + 1).value
+                clas1.append(value)
             for col2 in range(min_row + 1, max_row + 1, 2):
+                value = sheet.cell(col2, i).value
+                les2.append(value)
                 value = sheet.cell(col2, i + 1).value
-                data2.append(value)
-            for col3 in range(min_row, max_row + 1, 2):
-                value = sheet.cell(col3, i + 2).value
-                data3.append(value)
-            for col4 in range(min_row + 1, max_row + 1, 2):
-                value = sheet.cell(col4, i + 3).value
-                data4.append(value)
-            for q in range(len(data1)):
-                if data1[q] is None:
+                clas2.append(value)
+            for q in range(len(les1)):
+                if les1[q] is None:
                     text = " "
                     data.append(text)
                 else:
-                    if data3[q] == '/':
-                        text = f"{data1[q]}({data2[q]}/{data4[q]})"
+                    if les2[q] is None and clas2[q]:
+                        text = f"{les1[q]}({clas1[q]}/{clas2[q]})"
                         data.append(text)
-                    elif data3[q] is None:
-                        text = f"{data1[q]}({data2[q]})"
+                    elif les2[q] is None and clas2[q] is None:
+                        text = f"{les1[q]}({clas1[q]})"
                         data.append(text)
-                    elif data3[q].startswith('/'):
-                        m = data3[q].replace('/', '')
-                        text = f"{data1[q]}({data2[q]})//{m}({data4[q]})"
+                    else:
+                        text = f"{les1[q]}({clas1[q]})//{les2[q]}({clas2[q]})"
                         data.append(text)
         main_data = []
         for w in range(0, len(data), 8):

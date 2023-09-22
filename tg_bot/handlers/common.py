@@ -1,4 +1,4 @@
-from aiogram import Router, html, F
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.filters.chat_member_updated import ChatMemberUpdatedFilter, KICKED, MEMBER, ChatMemberUpdated
 from aiogram.types import Message, CallbackQuery
@@ -115,7 +115,7 @@ async def cmd_duty(message: Message):
         await message.answer("У вас не введены данные ЭЖ.")
 
 
-@router.callback_query(F.dats =="users_check")
+@router.callback_query(F.dats == "users_check")
 async def clb_usr(callback: CallbackQuery):
     userbase = get_all_students()
     message = "Пользователи:\nID    Класс    Имя    Реф\n\n"

@@ -16,7 +16,7 @@ sp = ["year", "settings", "change_class", "info", "back", "delete", "del_user", 
 admin_id = 900645059
 
 
-@router.callback_query(F.data in sp)
+@router.callback_query(F.data == sp)
 async def special(call: CallbackQuery, state: FSMContext):
     if call.data == "year":
         await call.message.delete()
@@ -224,7 +224,7 @@ async def call_edit_homework(call: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(
-    F.data in ["new_rasp", "admin_add", "edit", "ad", "uch", "kab", "photo_add", "add_ns", "change_ns", "add_ns_upd",
+    F.data == ["new_rasp", "admin_add", "edit", "ad", "uch", "kab", "photo_add", "add_ns", "change_ns", "add_ns_upd",
                "wanttobeadmin"])
 async def other_call(call: CallbackQuery, state: FSMContext):
     if call.data == "new_rasp":
