@@ -30,11 +30,11 @@ class Exel:
                     text = " "
                     data.append(text)
                 else:
-                    if les2[q] is None and clas2[q]:
+                    if les2[q] is None and clas1[q]:
                         text = f"{les1[q]}({clas1[q]}/{clas2[q]})"
                         data.append(text)
-                    elif les2[q] is None and clas2[q] is None:
-                        text = f"{les1[q]}({clas1[q]})"
+                    elif les2[q] is None and clas1[q] is None:
+                        text = f"{les1[q]}({clas2[q]})"
                         data.append(text)
                     else:
                         text = f"{les1[q]}({clas1[q]})//{les2[q]}({clas2[q]})"
