@@ -1,5 +1,5 @@
 from aiogram import Router
-from aiogram.types import InlineQuery, InlineQueryResultArticle
+from aiogram.types import InlineQuery, InlineQueryResultArticle, InlineQueryResult
 from aiogram.types import InputTextMessageContent
 from db.methods.get import get_student_by_telegram_id
 from ..keyboards import keyboards as kb

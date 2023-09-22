@@ -43,19 +43,23 @@ def hw_lessons(user, wday, adm: bool) -> types.InlineKeyboardMarkup:
 
 
 def inline_kb(clas: int | None, uch: int = None):
+    week = ""
     if clas is not None:
         arr = []
         for i in range(1, 6):
             arr.append('\n'.join(ast.literal_eval(get_schedule(clas, i))))
-
     else:
         arr = []
         for i in range(1, 6):
             arr.append('\n'.join(ast.literal_eval(get_teacher_schedule(uch, i))))
+    week = (f"<b>Понедельник:</b>\n{arr[0]}\n\n<b>Вторник:</b>\n{arr[1]}\n\n<b>Среда:</b>\n{arr[2]}"
+            f"\n\n<b>Четверг:</b>\n{arr[3]}\n\n<b>Пятница:</b>\n{arr[4]}")
     buttons = [
         types.InlineQueryResultArticle(id="1", title="ПОНЕДЕЛЬНИК",
                                        input_message_content=types.InputTextMessageContent(message_text=arr[0]),
-                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
+                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
+                                       thumbnail_url="https://i.postimg.cc/Rh06vDF8/mon.png", thumbnail_height=512,
+                                       thumbnail_width=512),
         types.InlineQueryResultArticle(id="2", title="ВТОРНИК",
                                        input_message_content=types.InputTextMessageContent(message_text=arr[1]),
                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
@@ -67,6 +71,10 @@ def inline_kb(clas: int | None, uch: int = None):
                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
         types.InlineQueryResultArticle(id="5", title="ПЯТНИЦА",
                                        input_message_content=types.InputTextMessageContent(message_text=arr[4]),
+                                       reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
+        types.InlineQueryResultArticle(id="5", title="На неделю",
+                                       input_message_content=types.InputTextMessageContent(message_text=week,
+                                                                                           parse_mode='HTML'),
                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"))
     ]
     return buttons
