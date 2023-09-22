@@ -13,7 +13,7 @@ admin_id = 900645059
 
 
 @router.message(F.text == "ОСОБОЕ МЕНЮ")
-@router.message(F.text == days)
+@router.message(F.text.in_(days))
 async def text(message: Message, state: FSMContext):
     await state.clear()
     usr = get_student_by_telegram_id(message.from_user.id)

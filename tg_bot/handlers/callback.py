@@ -16,7 +16,7 @@ sp = ["year", "settings", "change_class", "info", "back", "delete", "del_user", 
 admin_id = 900645059
 
 
-@router.callback_query(F.data == sp)
+@router.callback_query(F.data.in_(sp))
 async def special(call: CallbackQuery, state: FSMContext):
     if call.data == "year":
         await call.message.delete()
@@ -179,7 +179,7 @@ async def call_homework(call: CallbackQuery):
     await call.answer()
 
 
-@router.callback_query(F.data in ['mon', 'tue', 'wed', 'thu', 'fri'])
+@router.callback_query(F.data.in_(['mon', 'tue', 'wed', 'thu', 'fri']))
 async def call_homework_day(call: CallbackQuery):
     await call.message.delete()
     usr = get_student_by_telegram_id(call.from_user.id)
@@ -224,8 +224,8 @@ async def call_edit_homework(call: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(
-    F.data == ["new_rasp", "admin_add", "edit", "ad", "uch", "kab", "photo_add", "add_ns", "change_ns", "add_ns_upd",
-               "wanttobeadmin"])
+    F.data.in_(["new_rasp", "admin_add", "edit", "ad", "uch", "kab", "photo_add", "add_ns", "change_ns", "add_ns_upd",
+               "wanttobeadmin"]))
 async def other_call(call: CallbackQuery, state: FSMContext):
     if call.data == "new_rasp":
         await call.message.answer("Пришлите пожалуйста файл с расширением .xlsx")
