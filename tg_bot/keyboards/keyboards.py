@@ -72,7 +72,7 @@ def inline_kb(clas: int | None, uch: int = None):
         types.InlineQueryResultArticle(id="5", title="ПЯТНИЦА",
                                        input_message_content=types.InputTextMessageContent(message_text=arr[4]),
                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button")),
-        types.InlineQueryResultArticle(id="5", title="На неделю",
+        types.InlineQueryResultArticle(id="6", title="На неделю",
                                        input_message_content=types.InputTextMessageContent(message_text=week,
                                                                                            parse_mode='HTML'),
                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"))
