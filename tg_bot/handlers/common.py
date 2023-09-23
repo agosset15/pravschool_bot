@@ -103,7 +103,7 @@ async def cmd_admin(message: Message):
     if adm is True:
         await message.answer("Вы уже админ. Вы можете добавлять домашнее задание.")
     else:
-        await message.answer("Вы не админ, но можете им стать, для этого напишите @agosset15")
+        await message.answer("Вы не админ, но можете им стать, для этого напишите @ag15bots")
 
 
 @router.message(Command("duty"))
