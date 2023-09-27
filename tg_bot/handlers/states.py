@@ -331,6 +331,8 @@ async def today_kab_free(call: CallbackQuery):
         day = day.tm_wday + 1
     else:
         day = int(call.data.split('_')[1])
+    dase = ['ПОНЕДЕЛЬНИК', 'ВТОРНИК', 'СРЕДА', 'ЧЕТВЕРГ', 'ПЯТНИЦА']
+    t_day = dase[day - 1]
     if day < 6:
         result = []
         kabs = {1: '103', 2: '104', 3: '105', 4: '107', 5: '110а', 6: '110б', 7: '122', 8: '123', 9: '127', 10: '130',
@@ -338,15 +340,10 @@ async def today_kab_free(call: CallbackQuery):
                 20: '115', 21: '201', 22: '204'}
         for kab in range(1, 23):
             value: list[str] = ast.literal_eval(get_kab_schedule(kab, day))
-            print(value[lesson - 1][2:])
-            if value[lesson - 1][2:] != ' ':
-                print(kabs[kab])
-                print(value[lesson - 1][2:])
-            else:
-                print(kabs[kab])
+            if value[lesson - 1][2:] == ' ':
                 result.append(kabs[kab])
         res = '\n'.join(result)
-        await call.message.answer(f"Сегодня на {day} уроке свободны:\n\n{res}")
+        await call.message.answer(f"{t_day}, на {day} уроке свободны:\n\n{res}")
         await call.answer()
     else:
         await call.answer("Сегодня выходной!", show_alert=True)
