@@ -343,7 +343,7 @@ async def today_kab_free(call: CallbackQuery):
             if value[lesson - 1][2:] == ' ':
                 result.append(kabs[kab])
         res = '\n'.join(result)
-        await call.message.answer(f"{t_day}, на {day} уроке свободны:\n\n{res}")
+        await call.message.answer(f"{t_day}, на {day} уроке свободны:\n\n{res}", reply_markup=kb.get_startkeyboard())
         await call.answer()
     else:
-        await call.answer("Сегодня выходной!", show_alert=True)
+        await call.message.answer("Сегодня выходной!", reply_markup=kb.get_startkeyboard())
