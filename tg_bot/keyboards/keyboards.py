@@ -8,10 +8,10 @@ from ..config import ns
 from netschoolapi.errors import SchoolNotFoundError, AuthError
 
 
-def get_startkeyboard(q: bool = None) -> types.ReplyKeyboardMarkup:
+def get_startkeyboard(extra_text: str = None) -> types.ReplyKeyboardMarkup:
     buttons = ["ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "ОСОБОЕ МЕНЮ"]
-    if q:
-        buttons = buttons[:-1]
+    if extra_text:
+        buttons[5] = extra_text
     kb = ReplyKeyboardBuilder()
     for i in buttons:
         kb.button(text=i)

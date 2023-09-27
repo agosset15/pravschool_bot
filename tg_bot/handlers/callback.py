@@ -228,18 +228,8 @@ async def call_edit_homework(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "kabs_free")
 async def get_kabs_free(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-    m = await call.message.answer("Updating....", reply_markup=kb.get_startkeyboard(q=True))
-    await m.delete()
-    await call.message.answer("Выберите день:", reply_markup=kb.inline_text_kb("Сегодня", 'today_kabs_free'))
+    await call.message.answer("Выберите день:", reply_markup=kb.get_startkeyboard(extra_text="СЕГОДНЯ"))
     await state.set_state(GetFreeKabs.day)
-    await call.answer()
-
-
-@router.callback_query(F.data == "today_kabs_free", GetFreeKabs.day)
-async def today_kabs_free(call: CallbackQuery, state: FSMContext):
-    await state.set_state(GetFreeKabs.lesson)
-    await call.message.delete()
-    await call.message.answer("Выберите урок:", reply_markup=kb.kab_free_lessons())
     await call.answer()
 
 

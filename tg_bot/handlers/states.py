@@ -315,9 +315,9 @@ async def edit_homework_image(message: Message, state: FSMContext):
 async def day_kabs_free(message: Message, state: FSMContext):
     dase = {'ПОНЕДЕЛЬНИК': 1, 'ВТОРНИК': 2, 'СРЕДА': 3,
             'ЧЕТВЕРГ': 4, 'ПЯТНИЦА': 5}
-    day = dase[message.text]
-    await state.clear()
+    day = dase[message.text] if message.text != "СЕГОДНЯ" else None
     await message.answer("Выберите урок:", reply_markup=kb.kab_free_lessons(day))
+    await state.set_state(GetFreeKabs.lesson)
 
 
 @router.callback_query(GetFreeKabs.lesson)
