@@ -322,7 +322,7 @@ async def day_kabs_free(message: Message, state: FSMContext):
 
 @router.callback_query(GetFreeKabs.lesson)
 async def today_kab_free(call: CallbackQuery):
-    await call.messagte.delete()
+    await call.message.delete()
     lesson = int(call.data.split('_')[0])
     if call.data.split('_')[1] == "today":
         day = time.localtime()
