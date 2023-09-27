@@ -341,7 +341,7 @@ async def today_kab_free(call: CallbackQuery):
             if value[lesson - 1][1:] == '.':
                 result.append(kabs[kab])
         res = '\n'.join(result)
-        await call.message.answer(f"Сегодня на {day} уроке свободны:\n\n{res}")
+        await call.message.answer(f"Сегодня на {day} уроке свободны:\n\n{result}")
         await call.answer()
     else:
         await call.answer("Сегодня выходной!", show_alert=True)
