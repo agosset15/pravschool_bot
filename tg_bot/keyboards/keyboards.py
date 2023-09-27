@@ -227,7 +227,6 @@ def uinb():
             InlineKeyboardButton(text="На год", callback_data="year"),
             InlineKeyboardButton(text="ДЗ", callback_data="ns"),
             InlineKeyboardButton(text="Настройки", callback_data="settings")],
-        [InlineKeyboardButton(text="Домашнее задание", callback_data="homework")],
         [InlineKeyboardButton(text="Попробовать в любом чате",
                               switch_inline_query_chosen_chat=types.SwitchInlineQueryChosenChat(allow_bot_chats=False,
                                                                                                 allow_user_chats=True,
