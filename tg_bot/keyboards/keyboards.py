@@ -8,8 +8,10 @@ from ..config import ns
 from netschoolapi.errors import SchoolNotFoundError, AuthError
 
 
-def get_startkeyboard() -> types.ReplyKeyboardMarkup:
+def get_startkeyboard(q: bool = None) -> types.ReplyKeyboardMarkup:
     buttons = ["ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "ОСОБОЕ МЕНЮ"]
+    if q:
+        buttons = buttons[:-1]
     kb = ReplyKeyboardBuilder()
     for i in buttons:
         kb.button(text=i)
@@ -250,6 +252,22 @@ def back():
     return kb.as_markup()
 
 
+def kab_free_kb():
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Найти свободные", callback_data='kabs_free')
+    kb.adjust(1)
+    return kb.as_markup()
+
+
+def kab_free_lessons(day: int = None):
+    kb = InlineKeyboardBuilder()
+    t = day if day else "_today"
+    for i in range(1, 9):
+        kb.button(text=f"{i}", callback_data=f"{i}{t}_kab_free")
+    kb.adjust(4)
+    return kb.as_markup()
+
+
 def url_kb(url: str):
     kb = InlineKeyboardBuilder()
     kb.button(text="Все расписание", url=url)
@@ -257,11 +275,18 @@ def url_kb(url: str):
     return kb.as_markup()
 
 
-def reply_rext_kb(text: str, placeholder: str = None):
+def reply_text_kb(text: str, placeholder: str = None):
     kb = ReplyKeyboardBuilder()
     kb.button(text=text)
     kb.adjust(1)
     return kb.as_markup(resize_keyboard=True, input_field_placeholder=placeholder)
+
+
+def inline_text_kb(text: str, call: str = None):
+    kb = InlineKeyboardBuilder()
+    kb.button(text=text, callback_data=call)
+    kb.adjust(1)
+    return kb.as_markup()
 
 
 def make_ns():

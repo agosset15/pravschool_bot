@@ -1,10 +1,11 @@
 import time
 import ast
 from datetime import datetime, timedelta
-from aiogram import Router, html, F
+from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
-from db.methods.get import get_count, get_student_by_telegram_id, get_schedule, get_teacher_schedule, get_homework
+from db.methods.get import (get_count, get_student_by_telegram_id, get_teacher_schedule, get_homework,
+                            get_kab_schedule)
 from db.methods.delete import delete_student
 from db.methods.update import switch_student_duty_notification
 from ..keyboards import keyboards as kb
@@ -148,12 +149,13 @@ async def call_tom(call: CallbackQuery):
                 value = get_schedule(clas, day)
                 value = '\n'.join(ast.literal_eval(value))
                 await call.message.answer(f"{value}")
+                await call.answer()
             elif day == 8:
                 value = get_schedule(clas, day)
                 await call.message.answer(f"{value}")
+                await call.answer()
             elif day in userbase:
-                await call.message.answer("Завтра выходной!")
-            await call.answer()
+                await call.answer("Завтра выходной!", show_alert=True)
         else:
             day = time.localtime()
             day = day.tm_wday + 2
@@ -162,9 +164,9 @@ async def call_tom(call: CallbackQuery):
                 value = get_teacher_schedule(clas, day)
                 value = '\n'.join(ast.literal_eval(value))
                 await call.message.answer(f"{value}")
+                await call.answer()
             elif day in userbase:
-                await call.message.answer("Завтра выходной!")
-            await call.answer()
+                await call.answer("Завтра выходной!", show_alert=True)
     except TypeError or ValueError:
         await call.message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
         await bot.send_message(admin_id, f"{call.from_user.id} - ошибка колл\завтра")
@@ -223,9 +225,52 @@ async def call_edit_homework(call: CallbackQuery, state: FSMContext):
     await call.answer()
 
 
+@router.callback_query(F.data == "kabs_free")
+async def get_kabs_free(call: CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    m = await call.message.answer("Updating....", reply_markup=kb.get_startkeyboard(q=True))
+    await m.delete()
+    await call.message.answer("Выберите день:", reply_markup=kb.inline_text_kb("Сегодня", 'today_kabs_free'))
+    await state.set_state(GetFreeKabs.day)
+    await call.answer()
+
+
+@router.callback_query(F.data == "today_kabs_free", GetFreeKabs.day)
+async def today_kabs_free(call: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await call.message.delete()
+    await call.message.answer("Выберите урок:", reply_markup=kb.kab_free_lessons())
+    await call.answer()
+
+
+@router.callback_query(F.data.endswith == "_kab_free")
+async def today_kab_free(call: CallbackQuery):
+    await call.messagte.delete()
+    lesson = int(call.data.split('_')[0])
+    if call.data.split('_')[1] == "today":
+        day = time.localtime()
+        day = day.tm_wday + 1
+    else:
+        day = int(call.data.split('_')[1])
+    if day < 6:
+        result = []
+        kabs = {1: '103', 2: '104', 3: '105', 4: '107', 5: '110а', 6: '110б', 7: '122', 8: '123', 9: '127', 10: '130',
+                11: '132', 12: '133', 13: '135', 14: '239', 15: '240', 16: '242', 17: '306', 18: 'Ул', 19: '105б',
+                20: '115', 21: '201', 22: '204'}
+        for kab in range(22):
+            value = get_kab_schedule(kab, day)
+            if value[lesson - 1][1:] == '':
+                result.append(kabs[kab])
+        res = '\n'.join(result)
+        await call.message.answer(f"Сегодня на {day} уроке свободны:\n\n{res}")
+        await call.answer()
+    else:
+        await call.answer("Сегодня выходной!", show_alert=True)
+
+
 @router.callback_query(
     F.data.in_(["new_rasp", "admin_add", "edit", "ad", "uch", "kab", "photo_add", "add_ns", "change_ns", "add_ns_upd",
-               "wanttobeadmin"]))
+                "wanttobeadmin"]))
 async def other_call(call: CallbackQuery, state: FSMContext):
     if call.data == "new_rasp":
         await call.message.answer("Пришлите пожалуйста файл с расширением .xlsx")
@@ -254,11 +299,13 @@ async def other_call(call: CallbackQuery, state: FSMContext):
         await state.set_state(ClassWait.uch)
         await call.answer()
     if call.data == "kab":
+        mes = await call.message.answer("Updating....", reply_markup=kb.rem())
+        await mes.delete()
         with open("ids.txt", "r", encoding='utf-8') as text_id:
             photo_id = text_id.read()
         photo_id = photo_id.strip("[]").split(',')[0].strip(" ''")
         await call.message.answer_photo(photo_id, caption="Введите номер кабинета из списка выше",
-                                        reply_markup=kb.rem())
+                                        reply_markup=kb.kab_free_kb())
         await state.set_state(KabWait.kab)
         await call.answer()
     if call.data == "photo_add":

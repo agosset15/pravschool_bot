@@ -187,3 +187,7 @@ class EditHomework(StatesGroup):
     lesson = State()
     homework = State()
     image = State()
+
+
+class GetFreeKabs(StatesGroup):
+    day = State()

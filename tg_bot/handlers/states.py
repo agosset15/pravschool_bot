@@ -278,7 +278,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
 async def edit_homework_lesson(call: CallbackQuery, state: FSMContext):
     await state.update_data(lesson=call.data)
     await call.message.answer("Отправьте текст задания",
-                              reply_markup=kb.reply_rext_kb("Не добавлять", "Отправьте домашнее задание"))
+                              reply_markup=kb.reply_text_kb("Не добавлять", "Отправьте домашнее задание"))
     await state.set_state(EditHomework.homework)
 
 
@@ -289,7 +289,7 @@ async def edit_homework_text(message: Message, state: FSMContext):
         text = "   "
     await state.update_data(homework=text)
     await message.answer("Отправьте изображение",
-                         reply_markup=kb.reply_rext_kb("Не добавлять", "Отправьте изображение"))
+                         reply_markup=kb.reply_text_kb("Не добавлять", "Отправьте изображение"))
     await state.set_state(EditHomework.image)
 
 
@@ -309,3 +309,12 @@ async def edit_homework_image(message: Message, state: FSMContext):
         create_homework(data['day'], data['lesson'], usr.clas, data['homework'],
                         str(datetime.now().strftime('%H:%M %d.%m.%Y')), image)
     await message.answer("Домашнее задание успешно добавлено.", reply_markup=kb.get_startkeyboard())
+
+
+@router.message(GetFreeKabs.day)
+async def day_kabs_free(message: Message, state: FSMContext):
+    dase = {'ПОНЕДЕЛЬНИК': 1, 'ВТОРНИК': 2, 'СРЕДА': 3,
+            'ЧЕТВЕРГ': 4, 'ПЯТНИЦА': 5}
+    day = dase[message.text]
+    await state.clear()
+    await message.answer("Выберите урок:", reply_markup=kb.kab_free_lessons(day))
