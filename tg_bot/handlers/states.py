@@ -318,3 +318,28 @@ async def day_kabs_free(message: Message, state: FSMContext):
     day = dase[message.text]
     await state.clear()
     await message.answer("Выберите урок:", reply_markup=kb.kab_free_lessons(day))
+
+
+@router.callback_query(GetFreeKabs.lesson)
+async def today_kab_free(call: CallbackQuery):
+    await call.messagte.delete()
+    lesson = int(call.data.split('_')[0])
+    if call.data.split('_')[1] == "today":
+        day = time.localtime()
+        day = day.tm_wday + 1
+    else:
+        day = int(call.data.split('_')[1])
+    if day < 6:
+        result = []
+        kabs = {1: '103', 2: '104', 3: '105', 4: '107', 5: '110а', 6: '110б', 7: '122', 8: '123', 9: '127', 10: '130',
+                11: '132', 12: '133', 13: '135', 14: '239', 15: '240', 16: '242', 17: '306', 18: 'Ул', 19: '105б',
+                20: '115', 21: '201', 22: '204'}
+        for kab in range(22):
+            value = get_kab_schedule(kab, day)
+            if value[lesson - 1][1:] == '':
+                result.append(kabs[kab])
+        res = '\n'.join(result)
+        await call.message.answer(f"Сегодня на {day} уроке свободны:\n\n{res}")
+        await call.answer()
+    else:
+        await call.answer("Сегодня выходной!", show_alert=True)

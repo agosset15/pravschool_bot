@@ -191,3 +191,4 @@ class EditHomework(StatesGroup):
 
 class GetFreeKabs(StatesGroup):
     day = State()
+    lesson = State()
