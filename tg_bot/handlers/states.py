@@ -338,7 +338,7 @@ async def today_kab_free(call: CallbackQuery):
                 20: '115', 21: '201', 22: '204'}
         for kab in range(1, 23):
             value = ast.literal_eval(get_kab_schedule(kab, day))
-            if value[lesson - 1][2:] == '':
+            if value[lesson - 1][1:] == '.':
                 result.append(kabs[kab])
         res = '\n'.join(result)
         await call.message.answer(f"Сегодня на {day} уроке свободны:\n\n{res}")
