@@ -261,9 +261,9 @@ def kab_free_kb():
 
 def kab_free_lessons(day: int = None):
     kb = InlineKeyboardBuilder()
-    t = day if day else "_today"
+    t = day if day else "today"
     for i in range(1, 9):
-        kb.button(text=f"{i}", callback_data=f"{i}{t}_kab_free")
+        kb.button(text=f"{i}", callback_data=f"{i}_{t}_kab_free")
     kb.adjust(4)
     return kb.as_markup()
 
