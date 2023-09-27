@@ -2,7 +2,7 @@ import ast
 from aiogram import types, html
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder, InlineKeyboardButton, \
     InlineKeyboardMarkup
-from db.methods.get import get_schedule, get_teacher_schedule
+from db.methods.get import get_schedule, get_teacher_schedule, get_homework
 from db import Student
 from ..config import ns
 from netschoolapi.errors import SchoolNotFoundError, AuthError
@@ -45,7 +45,6 @@ def hw_lessons(user, wday, adm: bool) -> types.InlineKeyboardMarkup:
 
 
 def inline_kb(clas: int | None, uch: int = None):
-    week = ""
     if clas is not None:
         arr = []
         for i in range(1, 6):
@@ -152,6 +151,53 @@ async def inline_ns_kb(usr: Student):
     return buttons
 
 
+# def inline_hw_kb(clas: int):
+#     arr = []
+#     for i in range(1, 6):
+#         arr.append('\n'.join(ast.literal_eval(get(clas, i))))
+#     week = (f"<b>Понедельник:</b>\n{arr[0]}\n\n<b>Вторник:</b>\n{arr[1]}\n\n<b>Среда:</b>\n{arr[2]}"
+#             f"\n\n<b>Четверг:</b>\n{arr[3]}\n\n<b>Пятница:</b>\n{arr[4]}")
+#     buttons = [
+#         types.InlineQueryResultArticle(id="1", title="ПОНЕДЕЛЬНИК",
+#                                        input_message_content=types.InputTextMessageContent(message_text=f"<b>Понедельник:</b>\n{arr[0]}",
+#                                                                                            parse_mode='HTML'),
+#                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
+#                                        thumbnail_url="https://i.postimg.cc/yN3Yy3pD/mon.png", thumbnail_height=512,
+#                                        thumbnail_width=512),
+#         types.InlineQueryResultArticle(id="2", title="ВТОРНИК",
+#                                        input_message_content=types.InputTextMessageContent(message_text=f"<b>Вторник:</b>\n{arr[1]}",
+#                                                                                            parse_mode='HTML'),
+#                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
+#                                        thumbnail_url="https://i.postimg.cc/cLQ8dYhQ/tue.png", thumbnail_height=512,
+#                                        thumbnail_width=512),
+#         types.InlineQueryResultArticle(id="3", title="СРЕДА",
+#                                        input_message_content=types.InputTextMessageContent(message_text=f"<b>Среда:</b>\n{arr[2]}",
+#                                                                                            parse_mode='HTML'),
+#                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
+#                                        thumbnail_url="https://i.postimg.cc/zvbV6R3H/wed.png", thumbnail_height=512,
+#                                        thumbnail_width=512),
+#         types.InlineQueryResultArticle(id="4", title="ЧЕТВЕРГ",
+#                                        input_message_content=types.InputTextMessageContent(message_text=f"<b>Четверг:</b>\n{arr[3]}",
+#                                                                                            parse_mode='HTML'),
+#                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
+#                                        thumbnail_url="https://i.postimg.cc/DwK8p0hm/thu.png", thumbnail_height=512,
+#                                        thumbnail_width=512),
+#         types.InlineQueryResultArticle(id="5", title="ПЯТНИЦА",
+#                                        input_message_content=types.InputTextMessageContent(message_text=f"<b>Пятница:</b>\n{arr[4]}",
+#                                                                                            parse_mode='HTML'),
+#                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
+#                                        thumbnail_url="https://i.postimg.cc/VkcR8Xn8/fri.png", thumbnail_height=512,
+#                                        thumbnail_width=512),
+#         types.InlineQueryResultArticle(id="6", title="На неделю",
+#                                        input_message_content=types.InputTextMessageContent(message_text=week,
+#                                                                                            parse_mode='HTML'),
+#                                        reply_markup=url_kb("https://t.me/pravschool_bot?start=inline_button"),
+#                                        thumbnail_url="https://i.postimg.cc/C1tG68S9/week.png", thumbnail_height=512,
+#                                        thumbnail_width=512)
+#     ]
+#     return buttons
+
+
 def vip_menu():
     kb = InlineKeyboardBuilder()
     kb.button(text="Изменить расписание", callback_data="new_rasp")
@@ -179,11 +225,9 @@ def uinb():
         [
             InlineKeyboardButton(text="На неделю", callback_data="week"),
             InlineKeyboardButton(text="На год", callback_data="year"),
-            InlineKeyboardButton(text="ЭЖ", callback_data="ns"),
+            InlineKeyboardButton(text="ДЗ", callback_data="ns"),
             InlineKeyboardButton(text="Настройки", callback_data="settings")],
         [InlineKeyboardButton(text="Домашнее задание", callback_data="homework")],
-        [InlineKeyboardButton(text="Веб интерфейс",
-                              web_app=types.WebAppInfo(url='https://tg.ag15.ru/demo?nextpage=1'))],
         [InlineKeyboardButton(text="Попробовать в любом чате",
                               switch_inline_query_chosen_chat=types.SwitchInlineQueryChosenChat(allow_bot_chats=False,
                                                                                                 allow_user_chats=True,

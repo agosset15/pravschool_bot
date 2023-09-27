@@ -62,7 +62,8 @@ async def special(call: CallbackQuery, state: FSMContext):
             end = start + timedelta(days=6)
             start = start.strftime('%d.%m.%Y')
             end = end.strftime('%d.%m.%Y')
-            await call.message.answer(f"Выберете день на который вы хотите посмотреть\nТекущая неделя: {start} - {end}",
+            await call.message.answer(f"Выберете день на который вы хотите посмотреть домашнее задание из ЭЖ"
+                                      f"\nТекущая неделя: {start} - {end}",
                                       reply_markup=kb.make_ns())
             await state.set_state(GetNS.day)
             await state.update_data(start=start)
@@ -71,6 +72,8 @@ async def special(call: CallbackQuery, state: FSMContext):
             await call.message.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для {html.bold('личных')}"
                                       f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
                                       f"(не заочное отделение и не началка на Якиманке)", parse_mode='HTML')
+        await call.message.answer("Переключиться на альтернативный дневник",
+                                  reply_markup=kb.inline_text_kb('Домашние задания в боте', 'homework'))
         await call.answer()
     if call.data == 'week':
         usr = get_student_by_telegram_id(call.from_user.id)
