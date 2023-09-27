@@ -44,7 +44,7 @@ async def getdb_user(request: Request):
     classs = usr.clas
     print(classs)
     class_list = [101, 102, 103, 111, 112, 113]
-    list1 = {101: '10б', 102: "10г", 103: '10ф', 111: '11б', 112: '11с', 113: '11ф'}
+    list1 = {101: '10г', 102: "10е", 103: '10ф', 111: '11г', 112: '11е', 113: '11ф'}
     if classs in class_list:
         classs = list1[classs]
     return json_response(
