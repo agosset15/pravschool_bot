@@ -336,7 +336,7 @@ async def today_kab_free(call: CallbackQuery):
         kabs = {1: '103', 2: '104', 3: '105', 4: '107', 5: '110а', 6: '110б', 7: '122', 8: '123', 9: '127', 10: '130',
                 11: '132', 12: '133', 13: '135', 14: '239', 15: '240', 16: '242', 17: '306', 18: 'Ул', 19: '105б',
                 20: '115', 21: '201', 22: '204'}
-        for kab in range(22):
+        for kab in range(1, 23):
             value = ast.literal_eval(get_kab_schedule(kab, day))
             if value[lesson - 1][1:] == '':
                 result.append(kabs[kab])
