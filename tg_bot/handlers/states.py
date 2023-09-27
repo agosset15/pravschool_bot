@@ -340,7 +340,7 @@ async def today_kab_free(call: CallbackQuery):
             value = ast.literal_eval(get_kab_schedule(kab, day))
             print(value[lesson - 1][2:])
             if value[lesson - 1][2:] != "":
-                pass
+                print(kabs[kab])
             else:
                 print(kabs[kab])
                 result.append(kabs[kab])
