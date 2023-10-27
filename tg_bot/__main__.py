@@ -1,4 +1,5 @@
 import logging
+import os
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -77,4 +78,5 @@ def main():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    os.environ["TZ"] = "Europe/Moscow"
     main()
