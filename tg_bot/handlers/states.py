@@ -1,3 +1,4 @@
+import datetime
 import time
 import ast
 from aiogram import Router, F, html
@@ -236,13 +237,14 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
         usersmessage = int(call.data)
         await state.update_data(day=usersmessage)
         l_p = get_student_by_telegram_id(call.from_user.id)
+        d = datetime.date(start + timedelta(days=usersmessage))
         try:
             await ns.login(l_p.login, l_p.password, 'Свято-Димитриевская школа')
             diary = await ns.diary(start=start)
             await ns.logout()
             await ns.logout()
             await ns.logout()
-            day = next((item for item in diary.schedule if item.date == start + timedelta(days=usersmessage)), None)
+            day = next((item for item in diary.schedule if item.day == d), None)
         except SchoolNotFoundError or AuthError:
             await ns.logout()
             await state.clear()
