@@ -1,6 +1,9 @@
-from typing import Any, Dict
+from dataclasses import field, dataclass
+import datetime
+from typing import Any, Dict, List
 
-from marshmallow import EXCLUDE, Schema, fields, pre_load
+from marshmallow import EXCLUDE, Schema, pre_load
+from marshmallow_dataclass import class_schema
 
 __all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School']
 
@@ -11,43 +14,40 @@ class NetSchoolAPISchema(Schema):
         unknown = EXCLUDE
 
 
+@dataclass
 class Attachment(NetSchoolAPISchema):
-    id = fields.Integer()
-    name = fields.String(data_key='originalFileName')
-    description = fields.String(allow_none=True, missing='')
+    id: int
+    name: str = field(metadata=dict(data_key='originalFileName'))
+    description: str = field(metadata=dict(
+        allow_none=True, missing='', required=False
+    ))
 
 
+@dataclass
 class Author(NetSchoolAPISchema):
-    id = fields.Integer()
-    full_name = fields.String(data_key="fio")
-    nickname = fields.String(data_key="nickName")
+    id: int
+    full_name: str = field(metadata=dict(data_key="fio"))
+    nickname: str = field(metadata=dict(data_key="nickName"))
 
 
+@dataclass
 class Announcement(NetSchoolAPISchema):
-    name = fields.String()
-    content = fields.String(data_key='description')
-    post_date = fields.DateTime(data_key='postDate')
-    attachments = fields.List(fields.Nested(Attachment), missing=[])
-    author = fields.Nested(Author)
+    name: str
+    author: Author
+    content: str = field(metadata=dict(data_key='description'))
+    post_date: datetime.datetime = field(metadata=dict(data_key='postDate'))
+    attachments: List[Attachment] = field(default_factory=list)
 
 
+@dataclass
 class Assignment(NetSchoolAPISchema):
-    id = fields.Integer()
-    type = fields.Function(
-        deserialize=(
-            lambda type_id, context: context['assignment_types'][type_id]
-        ),
-        data_key='typeId',
-    )
-    content = fields.String(data_key='assignmentName')
-    mark = fields.Integer(allow_none=True, data_key='mark')
-    is_duty = fields.Boolean(data_key='dutyMark')
-    comment = fields.Function(
-        deserialize=lambda mark_comment: mark_comment['name'],
-        missing='',
-        data_key='markComment',
-    )
-    deadline = fields.Date(data_key='dueDate')
+    id: int
+    comment: str
+    type: str
+    content: str = field(metadata=dict(data_key='assignmentName'))
+    mark: int = field(metadata=dict(allow_none=True, data_key='mark'))
+    is_duty: bool = field(metadata=dict(data_key='dutyMark'))
+    deadline: datetime.date = field(metadata=dict(data_key='dueDate'))
 
     @pre_load
     def unwrap_marks(self, assignment: Dict[str, Any], **_) -> Dict[str, str]:
@@ -56,49 +56,59 @@ class Assignment(NetSchoolAPISchema):
             assignment.update(mark)
         else:
             assignment.update({'mark': None, 'dutyMark': False})
+        mark_comment = assignment.pop("markComment", None)
+        assignment["comment"] = mark_comment["name"] if mark_comment else ""
+        assignment["type"] = self.context["assignment_types"][assignment.pop("typeId")]
         return assignment
 
 
+@dataclass
 class Lesson(NetSchoolAPISchema):
-    day = fields.Date()
-    start = fields.Time(data_key='startTime')
-    end = fields.Time(data_key='endTime')
-    room = fields.String(missing='', allow_none=True)
-    number = fields.Integer()
-    subject = fields.String(data_key='subjectName')
-    assignments = fields.List(fields.Nested(Assignment), missing=[])
+    day: datetime.date
+    start: datetime.time = field(metadata=dict(data_key='startTime'))
+    end: datetime.time = field(metadata=dict(data_key='endTime'))
+    room: str = field(metadata=dict(
+        missing='', allow_none=True, required=False
+    ))
+    number: int
+    subject: str = field(metadata=dict(data_key='subjectName'))
+    assignments: List[Assignment] = field(default_factory=list)
 
 
+@dataclass
 class Day(NetSchoolAPISchema):
-    day = fields.Date(data_key='date')
-    lessons = fields.List(fields.Nested(Lesson))
+    lessons: List[Lesson]
+    day: datetime.date = field(metadata=dict(data_key='date'))
 
 
+@dataclass
 class Diary(NetSchoolAPISchema):
-    start = fields.Date(data_key='weekStart')
-    end = fields.Date(data_key='weekEnd')
-    schedule = fields.List(fields.Nested(Day), data_key='weekDays')
+    start: datetime.date = field(metadata=dict(data_key='weekStart'))
+    end: datetime.date = field(metadata=dict(data_key='weekEnd'))
+    schedule: List[Day] = field(metadata=dict(data_key='weekDays'))
 
 
+@dataclass
 class ShortSchool(NetSchoolAPISchema):
-    name = fields.String()
-    id = fields.Integer()
-    address = fields.String(data_key="addressString")
+    name: str
+    id: int
+    address: str = field(metadata=dict(data_key="addressString"))
 
 
+@dataclass
 class School(NetSchoolAPISchema):
-    name = fields.String(data_key='fullSchoolName')
-    about = fields.String()
+    name: str = field(metadata=dict(data_key='fullSchoolName'))
+    about: str
 
-    address = fields.String()
-    email = fields.String()
-    site = fields.String(data_key='web')
-    phone = fields.String(data_key='phones')
+    address: str
+    email: str
+    site: str = field(metadata=dict(data_key='web'))
+    phone: str = field(metadata=dict(data_key='phones'))
 
-    director = fields.String()
-    AHC = fields.String(data_key='principalAHC')
-    IT = fields.String(data_key='principalIT')
-    UVR = fields.String(data_key='principalUVR')
+    director: str
+    AHC: str = field(metadata=dict(data_key='principalAHC'))
+    IT: str = field(metadata=dict(data_key='principalIT'))
+    UVR: str = field(metadata=dict(data_key='principalUVR'))
 
     @pre_load
     def unwrap_nested_dicts(
@@ -108,3 +118,11 @@ class School(NetSchoolAPISchema):
         school.update(school.pop('managementInfo'))
         school['address'] = school['juridicalAddress'] or school['postAddress']
         return school
+
+
+AttachmentSchema = class_schema(Attachment)
+DiarySchema = class_schema(Diary)
+AssignmentSchema = class_schema(Assignment)
+ShortSchoolSchema = class_schema(ShortSchool)
+SchoolSchema = class_schema(School)
+AnnouncementSchema = class_schema(Announcement)

@@ -74,7 +74,13 @@ class NetSchoolAPI:
                     url='login',
                     data={
                         'loginType': 1,
-                        **(await self._address(school_name_or_id, requester)),
+                        'scid': (
+                            (await self._get_school_id(
+                                school_name_or_id, requester,
+                            ))
+                            if isinstance(school_name_or_id, str) else
+                            school_name_or_id
+                        ),
                         'un': user_name,
                         'pw': pw,
                         'pw2': pw2,
@@ -191,7 +197,7 @@ class NetSchoolAPI:
                 },
             )
         )
-        diary_schema = schemas.Diary()
+        diary_schema = schemas.DiarySchema()
         diary_schema.context['assignment_types'] = self._assignment_types
         diary = diary_schema.load(response.json())
         return diary  # type: ignore
@@ -221,7 +227,7 @@ class NetSchoolAPI:
                 },
             )
         )
-        assignments_schema = schemas.Assignment()
+        assignments_schema = schemas.AssignmentSchema()
         assignments_schema.context['assignment_types'] = self._assignment_types
         assignments = assignments_schema.load(response.json(), many=True)
         return assignments  # type: ignore
@@ -237,7 +243,7 @@ class NetSchoolAPI:
                 params={"take": take},
             )
         )
-        announcements = schemas.Announcement().load(response.json(), many=True)
+        announcements = schemas.AnnouncementSchema().load(response.json(), many=True)
         return announcements  # type: ignore
 
     async def attachments(
@@ -256,7 +262,7 @@ class NetSchoolAPI:
         if not response:
             return []
         attachments_json = response[0]['attachments']
-        attachments = schemas.Attachment().load(attachments_json, many=True)
+        attachments = schemas.AttachmentSchema().load(attachments_json, many=True)
         return attachments  # type: ignore
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
@@ -267,7 +273,7 @@ class NetSchoolAPI:
                 url='schools/{0}/card'.format(self._school_id),
             )
         )
-        school = schemas.School().load(response.json())
+        school = schemas.SchoolSchema().load(response.json())
         return school  # type: ignore
 
     async def logout(self, requests_timeout: int = None):
@@ -300,34 +306,27 @@ class NetSchoolAPI:
         resp = await self._wrapped_client.request(
             requests_timeout,
             self._wrapped_client.client.build_request(
-                method="GET", url="addresses/schools",
+                method="GET", url="schools/search",
             )
         )
-        schools = schemas.ShortSchool().load(resp.json(), many=True)
+        schools = schemas.ShortSchoolSchema().load(resp.json(), many=True)
         return schools  # type: ignore
 
-    async def _address(
-            self, school_name_or_id: Union[int, str],
+    async def _get_school_id(
+            self, school_name: str,
             requester: Requester) -> Dict[str, int]:
         schools = (await requester(
             self._wrapped_client.client.build_request(
                 method="GET",
-                url="addresses/schools",
+                url="schools/search",
             )
         )).json()
 
         for school in schools:
-            if school["name"] == school_name_or_id or school["id"] == school_name_or_id:
+            if school["shortName"] == school_name:
                 self._school_id = school['id']
-                return {
-                    'cid': school['countryId'],
-                    'sid': school['stateId'],
-                    'pid': school['municipalityDistrictId'],
-                    'cn': school['cityId'],
-                    'sft': 2,
-                    'scid': school['id'],
-                }
-        raise errors.SchoolNotFoundError(school_name_or_id)
+                return school["id"]
+        raise errors.SchoolNotFoundError(school_name)
 
     async def download_profile_picture(
             self, user_id: int, buffer: BytesIO,
