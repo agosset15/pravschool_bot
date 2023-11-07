@@ -242,7 +242,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             await ns.logout()
             await ns.logout()
             await ns.logout()
-            day = next(item for item in diary.schedule if item.day == start + timedelta(days=usersmessage))
+            day = next((item for item in diary.schedule if item.date == start + timedelta(days=usersmessage)), None)
         except SchoolNotFoundError or AuthError:
             await ns.logout()
             await state.clear()
