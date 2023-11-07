@@ -343,7 +343,8 @@ def make_ns():
         [
             InlineKeyboardButton(text="<< Неделя", callback_data="back_week"),
             InlineKeyboardButton(text="Назад", callback_data="back"),
-            InlineKeyboardButton(text="Неделя >>", callback_data="next_week")]
+            InlineKeyboardButton(text="Неделя >>", callback_data="next_week")],
+        [InlineKeyboardButton(text="Домашние задания в боте", callback_data='homework')]
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard

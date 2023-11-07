@@ -73,8 +73,6 @@ async def special(call: CallbackQuery, state: FSMContext):
             await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для личных"
                                       f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
                                       f"(не заочное отделение и не начальная школа на Якиманке)", show_alert=True)
-        await call.message.answer("Переключиться на альтернативный дневник",
-                                  reply_markup=kb.inline_text_kb('Домашние задания в боте', 'homework'))
     if call.data == 'week':
         usr = get_student_by_telegram_id(call.from_user.id)
         clas = usr.clas
