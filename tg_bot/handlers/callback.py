@@ -198,7 +198,7 @@ async def call_homework_day(call: CallbackQuery):
     await call.answer()
 
 
-@router.callback_query(F.data.startswith == "hw")
+@router.callback_query(F.data.startswith == "hw_")
 async def call_get_hw_lesson(call: CallbackQuery):
     await call.message.delete()
     usr = get_student_by_telegram_id(call.from_user.id)
