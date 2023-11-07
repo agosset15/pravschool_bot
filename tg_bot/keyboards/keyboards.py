@@ -35,8 +35,8 @@ def days_inline() -> types.InlineKeyboardMarkup:
 def hw_lessons(user, wday, adm: bool) -> types.InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     day = ast.literal_eval(get_schedule(user.clas, wday))
-    for i, l in day, range(0, len(day) - 1):
-        kb.button(text=i, callback_data=f'hw_{l}_{wday}')
+    for i in range(len(day)):
+        kb.button(text=day[i], callback_data=f'hw_{l}_{wday}')
     if adm:
         kb.button(text="Добавить ДЗ", callback_data=f'{wday}_edit_homework')
     kb.button(text='Назад', callback_data="back")
