@@ -198,7 +198,7 @@ async def call_homework_day(call: CallbackQuery):
     await call.answer()
 
 
-@router.callback_query(F.data.startswith == "hw_")
+@router.callback_query(F.data.startswith("hw_"))
 async def call_get_hw_lesson(call: CallbackQuery):
     await call.message.delete()
     usr = get_student_by_telegram_id(call.from_user.id)
@@ -215,7 +215,7 @@ async def call_get_hw_lesson(call: CallbackQuery):
         await call.message.answer(text, reply_markup=kb.back())
 
 
-@router.callback_query(F.data.endswith == 'edit_homework')
+@router.callback_query(F.data.endswith('edit_homework'))
 async def call_edit_homework(call: CallbackQuery, state: FSMContext):
     day = call.data.split('_')[0]
     usr = get_student_by_telegram_id(call.from_user.id)
