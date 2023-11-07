@@ -209,8 +209,8 @@ async def call_get_hw_lesson(call: CallbackQuery):
     text = f"{day[less]} - Нет"
     if hm:
         text = f'{html.bold(day[less])}\n\n{hm.homework} (Добавлено <i>{hm.upd_date}</i>)'
-    if hm.image:
-        await call.message.answer_photo(hm.image, caption=text, reply_markup=kb.back())
+        if hm.image:
+            await call.message.answer_photo(hm.image, caption=text, reply_markup=kb.back())
     else:
         await call.message.answer(text, reply_markup=kb.back())
 
