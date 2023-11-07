@@ -69,9 +69,9 @@ async def special(call: CallbackQuery, state: FSMContext):
             await state.update_data(start=start)
         else:
             await call.message.answer("Вы не ввели свои данные. Введите их в меню настроек.")
-            await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для {html.bold('личных')}"
+            await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для личных"
                                       f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
-                                      f"(не заочное отделение и не началка на Якиманке)", parse_mode='HTML', show_alert=True)
+                                      f"(не заочное отделение и не начальная школа на Якиманке)", show_alert=True)
         await call.message.answer("Переключиться на альтернативный дневник",
                                   reply_markup=kb.inline_text_kb('Домашние задания в боте', 'homework'))
     if call.data == 'week':
@@ -281,9 +281,9 @@ async def other_call(call: CallbackQuery, state: FSMContext):
         await call.answer()
     if call.data == "add_ns":
         if get_student_by_telegram_id(call.from_user.id).isNs == 0:
-            await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для {html.bold('личных')}"
+            await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для личных"
                                       f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
-                                      f"(не заочное отделение и не началка на Якиманке)", parse_mode='HTML', show_alert=True)
+                                      f"(не заочное отделение и не начальная школа на Якиманке)", show_alert=True)
             await call.message.answer("Пришлите свой логин(с учетом регистра)")
             await state.set_state(AddNS.login)
         else:
