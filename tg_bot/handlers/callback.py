@@ -67,6 +67,7 @@ async def special(call: CallbackQuery, state: FSMContext):
                                       reply_markup=kb.make_ns())
             await state.set_state(GetNS.day)
             await state.update_data(start=start)
+            await call.answer()
         else:
             await call.message.answer("Вы не ввели свои данные. Введите их в меню настроек.")
             await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для личных"
