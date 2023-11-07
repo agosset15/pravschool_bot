@@ -1,3 +1,4 @@
+import os
 from typing import Final
 
 from sqlalchemy import create_engine
@@ -19,7 +20,7 @@ class Database(metaclass=SingletonMeta):
     BASE: Final = declarative_base()
 
     def __init__(self):
-        self.__engine = create_engine('sqlite:///database.db')
+        self.__engine = create_engine(os.getenv('DB_ENGINE'))
         session = sessionmaker(bind=self.__engine)
         self.__session = session()
 
