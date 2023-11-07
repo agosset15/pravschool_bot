@@ -217,6 +217,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
     start = start['start']
     start = datetime.strptime(start, '%d.%m.%Y')
     if call.data == 'homework':
+        await state.clear()
         await call.message.answer("Выберете день", reply_markup=kb.days_inline())
     if call.data in ["back_week", "next_week", "back"]:
         if call.data == "back":
