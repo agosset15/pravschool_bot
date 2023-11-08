@@ -9,7 +9,7 @@ def create_student(telegram_id: int, name: str, uname: str, clas: int, ref: str)
     try:
         session.query(Student.id).filter(Student.id == telegram_id).one()
     except sqlalchemy.exc.NoResultFound:
-        session.add(Student(id=telegram_id, name=name, username=uname, clas=clas, ref=ref))
+        session.add(Student(tgid=telegram_id, name=name, username=uname, clas=clas, ref=ref))
         session.commit()
 
 

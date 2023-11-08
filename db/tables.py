@@ -5,8 +5,8 @@ from .base import Database
 
 class Student(Database.BASE):
     __tablename__ = 'STUDENTS'
-
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tgid = Column(Integer, primary_key=True)
     name = Column(String(255))
     username = Column(String(255))
     isAdmin = Column(Boolean, default=False)
@@ -25,7 +25,7 @@ class Student(Database.BASE):
 class Schedule(Database.BASE):
     __tablename__ = 'SCHEDULE'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     isTeacher = Column(Boolean)
     isKab = Column(Boolean)
     clas = Column(Integer)
@@ -36,7 +36,7 @@ class Schedule(Database.BASE):
 class Homework(Database.BASE):
     __tablename__ = 'HOMEWORKS'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     day = Column(Integer)
     lesson = Column(Integer)
     clas = Column(Integer)

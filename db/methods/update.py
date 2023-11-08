@@ -35,19 +35,19 @@ def switch_student_teasher_false(telegram_id: int) -> None:
 
 
 def edit_student_login(telegram_id: int, new_login: str = None) -> None:
-    Database().session.query(Student).filter(Student.id == telegram_id).update(
+    Database().session.query(Student).filter(Student.tgid == telegram_id).update(
         values={Student.login: new_login})
     Database().session.commit()
 
 
 def edit_student_password(telegram_id: int, new_password: str = None) -> None:
-    Database().session.query(Student).filter(Student.id == telegram_id).update(
+    Database().session.query(Student).filter(Student.tgid == telegram_id).update(
         values={Student.password: new_password})
     Database().session.commit()
 
 
 def edit_student_clas(telegram_id: int, new_clas: int = None) -> None:
-    Database().session.query(Student).filter(Student.id == telegram_id).update(
+    Database().session.query(Student).filter(Student.tgid == telegram_id).update(
         values={Student.clas: new_clas})
     Database().session.commit()
 
@@ -67,19 +67,19 @@ def switch_student_greet_notification(telegram_id: int) -> None:
 
 
 def switch_student_greet_notification_time(telegram_id: int, time: int) -> None:
-    Database().session.query(Student).filter(Student.id == telegram_id).update(
+    Database().session.query(Student).filter(Student.tgid == telegram_id).update(
         values={Student.time_to_greet: time})
     Database().session.commit()
 
 
 def update_student_blocked(user_id: int):
-    Database().session.query(Student).filter(Student.id == user_id).update(
+    Database().session.query(Student).filter(Student.tgid == user_id).update(
         values={Student.blocked: 'True'})
     Database().session.commit()
 
 
 def update_student_nonblocked(user_id: int):
-    Database().session.query(Student).filter(Student.id == user_id).update(
+    Database().session.query(Student).filter(Student.tgid == user_id).update(
         values={Student.blocked: 'False'})
     Database().session.commit()
 

@@ -6,14 +6,14 @@ from ..tables import Student, Schedule, Homework
 
 def get_student_by_id(_id: int) -> Student:
     try:
-        return Database().session.query(Student).filter(Student.id == _id).one()
+        return Database().session.query(Student).filter(Student.tgid == _id).one()
     except exc.NoResultFound:
         return None
 
 
 def get_student_by_telegram_id(telegram_id: int) -> Student:
     try:
-        return Database().session.query(Student).filter(Student.id == telegram_id).one()
+        return Database().session.query(Student).filter(Student.tgid == telegram_id).one()
     except exc.NoResultFound:
         return None
 
