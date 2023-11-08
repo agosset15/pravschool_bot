@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, BigInteger
 
 from .base import Database
 
@@ -6,7 +6,7 @@ from .base import Database
 class Student(Database.BASE):
     __tablename__ = 'STUDENTS'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    tgid = Column(Integer, primary_key=True)
+    tgid = Column(BigInteger, primary_key=True)
     name = Column(String(255))
     username = Column(String(255))
     isAdmin = Column(Boolean, default=False)
