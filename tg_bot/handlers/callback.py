@@ -214,7 +214,7 @@ async def call_get_hw_lesson(call: CallbackQuery):
         if hm.image:
             await call.message.answer_photo(hm.image, caption=text, reply_markup=kb.back())
             return
-    await call.message.answer(text, reply_markup=kb.back())
+    await call.message.answer(text, reply_markup=kb.back(), parse_mode='HTML')
 
 
 @router.callback_query(F.data.endswith('edit_homework'))
