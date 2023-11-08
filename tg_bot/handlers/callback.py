@@ -206,7 +206,7 @@ async def call_get_hw_lesson(call: CallbackQuery):
     less = int(call.data.split('_')[1])
     wday = int(call.data.split('_')[2])
     day = ast.literal_eval(get_schedule(usr.clas, wday))
-    logging.log(2, f"less{less}: wday{wday}: day{day}")
+    logging.log(logging.INFO, f"less{less}: wday{wday}: day{day}")
     hm = get_homework(less, usr.clas, wday)
     text = f"{day[less]} - Нет"
     if hm:
