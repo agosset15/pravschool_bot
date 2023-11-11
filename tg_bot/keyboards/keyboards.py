@@ -99,7 +99,7 @@ def inline_kb(clas: int | None, uch: int = None):
 async def inline_ns_kb(usr: Student):
     arr = []
     try:
-        await ns.login(usr.login, usr.password, 'Свято-Димитриевская школа')
+        await ns.login(usr.login, usr.password, 1)
         diary = await ns.diary()
         await ns.logout()
         await ns.logout()
