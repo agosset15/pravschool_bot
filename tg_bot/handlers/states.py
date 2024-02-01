@@ -255,10 +255,10 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             return
         lesson = day.lessons
         message_text = []
-        for less,le in lesson, range(10):
+        for less,le in zip(lesson, range(10)):
             assig = less.assignments
             if assig:
-                for i, asss in assig, range(5):
+                for i, asss in zip(assig, range(5)):
                     di = {"date": d, "lesson": le, "ass": asss}
                     link = f"https://tg.ag15.ru/demo/journal?startapp={di}"
                     if i.mark is None:
