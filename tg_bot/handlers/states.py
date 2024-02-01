@@ -260,7 +260,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             if assig:
                 for i, asss in zip(assig, range(5)):
                     di = {"date": d, "lesson": le, "ass": asss}
-                    link = f"tg://resolve?domain=pravschool_bot&journal&startapp={di}"
+                    link = f"t.me/pravschool_bot/journal?startapp={di}"
                     if i.mark is None:
                         if i.is_duty is True:
                             message_text.append(
