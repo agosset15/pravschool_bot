@@ -49,6 +49,9 @@ class Assignment(NetSchoolAPISchema):
     is_duty: bool = field(metadata=dict(data_key='dutyMark'))
     deadline: datetime.date = field(metadata=dict(data_key='dueDate'))
 
+    def to_json(self):
+        return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark, 'is_duty': self.is_duty, 'deadline': self.deadline}
+
     @pre_load
     def unwrap_marks(self, assignment: Dict[str, Any], **_) -> Dict[str, str]:
         mark = assignment.pop('mark', None)

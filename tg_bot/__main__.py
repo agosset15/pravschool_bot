@@ -19,7 +19,7 @@ from .web_routes import (add_db_homework, demo_handler, check_data_handler, send
                          getdb_homework,
                          getdb_count,
                          edit_db_class,
-                         edit_db_ns)
+                         edit_db_ns, getdb_comments)
 
 WEBHOOK_HOST = 'https://tg.ag15.ru'
 WEBHOOK_PATH = '/webhook/pravschool'
@@ -52,6 +52,7 @@ def main():
     app.router.add_post('/demo/editDb/ns', edit_db_ns)
     app.router.add_post('/demo/editDb/class', edit_db_class)
     app.router.add_get("/demo/getDb/count", getdb_count)
+    app.router.add_get("/demo/getDb/nsComments", getdb_comments)
 
     scheduler = AsyncIOScheduler()
 

@@ -255,19 +255,21 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             return
         lesson = day.lessons
         message_text = []
-        for less in lesson:
+        for less,le in lesson, range(10):
             assig = less.assignments
             if assig:
-                for i in assig:
+                for i, asss in assig, range(5):
+                    di = {"date": d, "lesson": le, "ass": asss}
+                    link = f"https://tg.ag15.ru/demo/journal?startapp={di}"
                     if i.mark is None:
                         if i.is_duty is True:
                             message_text.append(
-                                f"⚠️ДОЛГ!\n{html.bold(i.type)}({less.subject})\n{i.content}")
+                                f"⚠️ДОЛГ!\n{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
                         else:
-                            message_text.append(f"{html.bold(i.type)}({less.subject})\n{i.content}")
+                            message_text.append(f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
                     else:
                         message_text.append(
-                            f"{html.bold(i.type)}({less.subject})\n{i.content} -- {html.bold(i.mark)}")
+                            f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content} -- {html.bold(i.mark)}")
             else:
                 message_text.append(f"{html.bold(less.subject)}\nЗаданий нет.")
         msg = "\n\n".join(message_text)

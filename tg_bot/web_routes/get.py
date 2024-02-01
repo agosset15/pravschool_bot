@@ -10,7 +10,7 @@ from db.methods.get import (get_student_by_telegram_id,
                             get_schedule, get_homework,
                             get_teacher_schedule,
                             get_kab_schedule, get_count)
-from ..config import MyEncoder
+from ..config import MyEncoder, ns
 
 
 async def demo_handler(request: Request):
@@ -143,3 +143,41 @@ async def getdb_count(request: Request):
 
     col = get_count()
     return json_response({'ok': True, 'count': col})
+
+
+async def getdb_comments(request: Request):
+    full = request.query
+    try:
+        uusr = full['user']
+    except KeyError:
+        uusr = full['_auth'].split('&')[1].split('=')[1]
+    d = uusr.replace("'", "\"")
+    uusr = json.loads(d)
+    try:
+        usr = get_student_by_telegram_id(int(uusr['id']))
+        if usr is None:
+            return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+
+    cid = full['_id']
+    d1 = cid.replace("'", "\"")
+    cid = json.loads(d1)
+    d = datetime.date(cid['date'])
+    try:
+        await ns.login(usr.login, usr.password, 1)
+        diary = await ns.diary(start=d)
+        await ns.logout()
+        await ns.logout()
+        await ns.logout()
+        day = next((item for item in diary.schedule if item.day == d), None)
+    except SchoolNotFoundError or AuthError:
+        await ns.logout()
+        await state.clear()
+        await call.message.answer("Неверный логин/пароль.")
+        return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
+    lesson = day[int(cid['lesson'])]
+    assignment = lesson.assignments[int(cid['ass'])]
+    asss = assignment.to_json()
+    return json_response({'ok': True, 'assignment': asss})
+
