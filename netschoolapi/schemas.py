@@ -50,7 +50,7 @@ class Assignment(NetSchoolAPISchema):
     deadline: datetime.date = field(metadata=dict(data_key='dueDate'))
 
     def to_json(self):
-        return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark, 'is_duty': self.is_duty, 'deadline': self.deadline}
+        return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark, 'is_duty': self.is_duty, 'deadline': self.deadline.strftime('%d/%m')}
 
     @pre_load
     def unwrap_marks(self, assignment: Dict[str, Any], **_) -> Dict[str, str]:
