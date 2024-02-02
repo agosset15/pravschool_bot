@@ -178,7 +178,7 @@ class NetSchoolAPI:
         self,
         start: Optional[date] = None,
         end: Optional[date] = None,
-        student_id: Optional[int] = self._student_id,
+        student_id: Optional[int] = None,
         requests_timeout: int = None,
     ) -> schemas.Diary:
         if not start:
@@ -186,6 +186,8 @@ class NetSchoolAPI:
             start = monday
         if not end:
             end = start + timedelta(days=5)
+        if not student_id:
+            student_id = self._student_id
 
         response = await self._request_with_optional_relogin(
             requests_timeout,
