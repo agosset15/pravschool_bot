@@ -165,7 +165,7 @@ async def getdb_comments(request: Request):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     cid = data['hash_id']
     cid = cid.split('a')
-    d = datetime.date(cid[0], cid[1], cid[2])
+    d = datetime.date(int(cid[0]), int(cid[1]), int(cid[2]))
     try:
         await ns.login(usr.login, usr.password, 1)
         diary = await ns.diary(start=d)
