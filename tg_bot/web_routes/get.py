@@ -7,6 +7,7 @@ from aiogram.utils.web_app import safe_parse_webapp_init_data, check_webapp_sign
 from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_request import Request
 from aiohttp.web_response import json_response
+from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
 
 from db.methods.get import (get_student_by_telegram_id,
                             get_schedule, get_homework,
