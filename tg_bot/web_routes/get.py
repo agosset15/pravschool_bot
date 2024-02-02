@@ -166,9 +166,10 @@ async def getdb_comments(request: Request):
     cid = data['hash_id']
     cid = cid.split('a')
     d = datetime.date(int(cid[0]), int(cid[1]), int(cid[2]))
+    child = int(cid[5]) if cid[5] else None
     try:
         await ns.login(usr.login, usr.password, 1)
-        diary = await ns.diary(start=d)
+        diary = await ns.diary(start=d, student_id=child)
         await ns.logout()
         await ns.logout()
         await ns.logout()

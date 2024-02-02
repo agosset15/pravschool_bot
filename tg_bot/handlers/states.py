@@ -335,7 +335,7 @@ async def get_ns_child(call: CallbackQuery, state: FSMContext):
         assig = less.assignments
         if assig:
             for i, asss in zip(assig, range(5)):
-                link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}"
+                link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}a{child_id}"
                 if i.mark is None:
                     if i.is_duty is True:
                         message_text.append(
