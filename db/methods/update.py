@@ -20,6 +20,13 @@ def switch_student_ns(telegram_id: int) -> None:
         Database().session.commit()
 
 
+def switch_student_parent(telegram_id: int, i: bool = True) -> None:
+    student = get_student_by_telegram_id(telegram_id)
+    if student:
+        student.isParent = int(i)
+        Database().session.commit()
+
+
 def switch_student_teasher_true(telegram_id: int) -> None:
     student = get_student_by_telegram_id(telegram_id)
     if student:

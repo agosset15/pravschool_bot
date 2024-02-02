@@ -10,7 +10,7 @@ from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromSe
 from ..backend.add_rasp import Exel
 from db.methods.update import (edit_student_clas, switch_student_admin, edit_student_login, edit_student_password,
                                edit_homework, edit_homework_upd_date, switch_student_ns, switch_student_teasher_false,
-                               switch_student_teasher_true, update_student_blocked)
+                               switch_student_teasher_true, update_student_blocked, switch_student_parent)
 from db.methods.create import create_homework
 from db.methods.get import get_kab_schedule, get_all_students, get_student_by_telegram_id, get_homework
 from db.methods.delete import delete_schedules, delete_student
@@ -208,6 +208,8 @@ async def add_ns_login(message: Message, state: FSMContext):
     edit_student_login(message.from_user.id, data['login'])
     edit_student_password(message.from_user.id, message.text)
     switch_student_ns(message.from_user.id)
+    if len(await ns.students()) > 1:
+        switch_student_parent(message.from_user.id)
     await message.answer("Отлично, теперь вы можете настроить уведомления о просроченных заданиях(в разработке), "
                          "а также получать информацию об актуальных.", reply_markup=kb.uinb())
     await state.clear()
