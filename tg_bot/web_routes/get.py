@@ -2,6 +2,7 @@ import ast
 import json
 from pathlib import Path
 
+from aiogram.utils.web_app import safe_parse_webapp_init_data, check_webapp_signature
 from aiohttp.web_fileresponse import FileResponse
 from aiohttp.web_request import Request
 from aiohttp.web_response import json_response
@@ -28,14 +29,14 @@ async def demo_handler(request: Request):
 
 async def getdb_user(request: Request):
     full = request.query
+    if not (check_webapp_signature(bot.token, full["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=full["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
@@ -147,19 +148,18 @@ async def getdb_count(request: Request):
 
 async def getdb_comments(request: Request):
     full = request.query
+    if not (check_webapp_signature(bot.token, full["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=full["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-
     cid = full['_id']
     cid = cid.split('a')
     d = datetime.date(cid[0], cid[1], cid[2])
