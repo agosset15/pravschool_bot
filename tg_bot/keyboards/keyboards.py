@@ -1,4 +1,5 @@
 import ast
+import datetime
 from aiogram import types, html
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder, InlineKeyboardButton, \
     InlineKeyboardMarkup
@@ -117,7 +118,7 @@ async def inline_ns_kb(usr: Student):
             assig = less.assignments
             if assig:
                 for i, asss in zip(assig, range(5)):
-                    link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}"
+                    link = f"t.me/pravschool_bot/journal?startapp={datetime.date.today().strftime('%Ya%ma%d')}a{le}a{asss}"
                     if i.mark is None:
                         if i.is_duty is True:
                             message_text.append(
