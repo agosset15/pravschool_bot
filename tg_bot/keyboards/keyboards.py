@@ -337,7 +337,7 @@ def inline_text_kb(text: str, call: str = None):
 
 def arr_kb(arr: list):
     kb = InlineKeyboardBuilder()
-    for ar, i in zip(arr, range(1, len(arr))):
+    for ar, i in zip(arr, range(len(arr))):
         kb.button(text=ar, callback_data=f"{i}")
     kb.adjust(1)
     return kb.as_markup()
