@@ -178,6 +178,7 @@ class NetSchoolAPI:
         self,
         start: Optional[date] = None,
         end: Optional[date] = None,
+        student_id: Optional[int] = self._student_id,
         requests_timeout: int = None,
     ) -> schemas.Diary:
         if not start:
@@ -192,7 +193,7 @@ class NetSchoolAPI:
                 method="GET",
                 url="student/diary",
                 params={
-                    'studentId': self._student_id,
+                    'studentId': student_id,
                     'yearId': self._year_id,
                     'weekStart': start.isoformat(),
                     'weekEnd': end.isoformat(),

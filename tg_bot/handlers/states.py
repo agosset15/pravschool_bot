@@ -263,6 +263,12 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             await call.message.answer("Нет ответа от сервера. Повторите попытку.",
                                       reply_markup=kb.inline_text_kb("Повторить попытку", call.data))
             return
+        if l_p.isParent is True:
+            st = []
+            for i in stt[0]:
+                st.append(i['nickName'])
+            await call.message.answer("Выберите ребенка:", reply_markup=kb.arr_kb(st))
+            await state.set_state(GetNS.child)
         await call.message.answer(f"{stt}")
         lesson = day.lessons
         message_text = []
@@ -291,6 +297,65 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
         await call.message.answer("В настройках вы можете подписаться на ежедневные напоминания о "
                                   "просроченных заданиях", reply_markup=kb.uinb())
         await state.clear()
+
+
+@router.callback_query(GetNS.child)
+async def get_ns_child(call: CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    await state.update_data(child=call.data)
+    data = await state.get_data()
+    start = data['start']
+    start = datetime.strptime(start, '%d.%m.%Y')
+    usersmessage = int(data['day'])
+    l_p = get_student_by_telegram_id(call.from_user.id)
+    d = datetime.date(start + timedelta(days=usersmessage))
+    try:
+        await ns.login(l_p.login, l_p.password, 1)
+        stt = await ns.students()
+        child_id = stt[0][int(call.data)]['studentId']
+        diary = await ns.diary(start=start, student_id=child_id)
+        await ns.logout()
+        await ns.logout()
+        await ns.logout()
+        day = next((item for item in diary.schedule if item.day == d), None)
+    except SchoolNotFoundError or AuthError:
+        await ns.logout()
+        await state.clear()
+        await call.message.answer("Неверный логин/пароль.")
+        return
+    except NoResponseFromServer:
+        await call.message.answer("Нет ответа от сервера. Повторите попытку.",
+                                  reply_markup=kb.inline_text_kb("Повторить попытку", call.data))
+        return
+    await call.message.answer(f"{stt}")
+    lesson = day.lessons
+    message_text = []
+    for less, le in zip(lesson, range(10)):
+        assig = less.assignments
+        if assig:
+            for i, asss in zip(assig, range(5)):
+                link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}"
+                if i.mark is None:
+                    if i.is_duty is True:
+                        message_text.append(
+                            f"⚠️ДОЛГ!\n{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
+                    else:
+                        message_text.append(
+                            f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
+                else:
+                    message_text.append(
+                        f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content} -- {html.bold(i.mark)}")
+        else:
+            message_text.append(f"{html.bold(less.subject)}\nЗаданий нет.")
+    msg = "\n\n".join(message_text)
+    if len(msg) > 4096:
+        for x in range(0, len(msg), 4096):
+            await call.message.answer(msg[x:x + 4096], parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+    else:
+        await call.message.answer(msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+    await call.message.answer("В настройках вы можете подписаться на ежедневные напоминания о "
+                              "просроченных заданиях", reply_markup=kb.uinb())
+    await state.clear()
 
 
 @router.callback_query(EditHomework.lesson)

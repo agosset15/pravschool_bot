@@ -277,7 +277,7 @@ def clases():
 
 def rasp_kb(arr: list):
     kb = InlineKeyboardBuilder()
-    for i in range(1, len(arr) + 1):
+    for i in range(1, len(arr)):
         kb.button(text=arr[i - 1], callback_data=f"{i}")
     kb.adjust(1)
     return kb.as_markup()
@@ -331,6 +331,14 @@ def reply_text_kb(text: str, placeholder: str = None):
 def inline_text_kb(text: str, call: str = None):
     kb = InlineKeyboardBuilder()
     kb.button(text=text, callback_data=call)
+    kb.adjust(1)
+    return kb.as_markup()
+
+
+def arr_kb(arr: list):
+    kb = InlineKeyboardBuilder()
+    for ar, i in zip(arr, range(1, len(arr))):
+        kb.button(text=ar, callback_data=f"{i}")
     kb.adjust(1)
     return kb.as_markup()
 

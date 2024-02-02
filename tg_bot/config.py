@@ -181,6 +181,7 @@ class AddNS(StatesGroup):
 
 class GetNS(StatesGroup):
     day = State()
+    child = State()
 
 
 class EditHomework(StatesGroup):
