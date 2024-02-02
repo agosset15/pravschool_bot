@@ -113,19 +113,21 @@ async def inline_ns_kb(usr: Student):
     for da in day:
         lesson = da.lessons
         message_text = []
-        for less in lesson:
+        for less, le in zip(lesson, range(10)):
             assig = less.assignments
             if assig:
-                for i in assig:
+                for i, asss in zip(assig, range(5)):
+                    link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}"
                     if i.mark is None:
                         if i.is_duty is True:
                             message_text.append(
-                                f"⚠️ДОЛГ!\n{html.bold(i.type)}({less.subject})\n{i.content}")
+                                f"⚠️ДОЛГ!\n{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
                         else:
-                            message_text.append(f"{html.bold(i.type)}({less.subject})\n{i.content}")
+                            message_text.append(
+                                f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
                     else:
                         message_text.append(
-                            f"{html.bold(i.type)}({less.subject})\n{i.content} -- {html.bold(i.mark)}")
+                            f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content} -- {html.bold(i.mark)}")
             else:
                 message_text.append(f"{html.bold(less.subject)}\nЗаданий нет.")
         msg = "\n\n".join(message_text)

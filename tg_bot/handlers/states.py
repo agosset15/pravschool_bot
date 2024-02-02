@@ -5,7 +5,7 @@ from aiogram import Router, F, html
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError, TelegramNotFound
-from netschoolapi.errors import SchoolNotFoundError, AuthError
+from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
 
 from ..backend.add_rasp import Exel
 from db.methods.update import (edit_student_clas, switch_student_admin, edit_student_login, edit_student_password,
@@ -253,14 +253,17 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             await state.clear()
             await call.message.answer("Неверный логин/пароль.")
             return
+        except NoResponseFromServer:
+            await call.message.answer("Нет ответа от сервера. Повторите попытку.",
+                                      reply_markup=kb.inline_text_kb("Повторить попытку", call.data))
+            return
         lesson = day.lessons
         message_text = []
         for less,le in zip(lesson, range(10)):
             assig = less.assignments
             if assig:
                 for i, asss in zip(assig, range(5)):
-                    di = {"date": d, "lesson": le, "ass": asss}
-                    link = f"t.me/pravschool_bot/journal?startapp={di}"
+                    link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}"
                     if i.mark is None:
                         if i.is_duty is True:
                             message_text.append(
