@@ -178,7 +178,7 @@ async def getdb_comments(request: Request):
         await state.clear()
         await call.message.answer("Неверный логин/пароль.")
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
-    lesson = day[int(cid[3])]
+    lesson = day.lessons[int(cid[3])]
     assignment = lesson.assignments[int(cid[4])]
     asss = assignment.to_json()
     return json_response({'ok': True, 'assignment': asss})
