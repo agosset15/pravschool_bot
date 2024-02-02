@@ -11,7 +11,7 @@ from db.methods.get import (get_student_by_telegram_id,
                             get_schedule, get_homework,
                             get_teacher_schedule,
                             get_kab_schedule, get_count)
-from ..config import MyEncoder, ns
+from ..config import MyEncoder, ns, bot
 
 
 async def demo_handler(request: Request):
