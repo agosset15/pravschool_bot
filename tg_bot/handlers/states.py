@@ -269,6 +269,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
                 st.append(i['nickName'])
             await call.message.answer("Выберите ребенка:", reply_markup=kb.arr_kb(st))
             await state.set_state(GetNS.child)
+            return
         await call.message.answer(f"{stt}")
         lesson = day.lessons
         message_text = []
