@@ -208,7 +208,7 @@ async def add_ns_login(message: Message, state: FSMContext):
     edit_student_login(message.from_user.id, data['login'])
     edit_student_password(message.from_user.id, message.text)
     switch_student_ns(message.from_user.id)
-    if len(await ns.students()) > 1:
+    if len(await ns.students()[0]) > 1:
         switch_student_parent(message.from_user.id)
     await message.answer("Отлично, теперь вы можете настроить уведомления о просроченных заданиях(в разработке), "
                          "а также получать информацию об актуальных.", reply_markup=kb.uinb())

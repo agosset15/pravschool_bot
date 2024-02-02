@@ -115,7 +115,7 @@ class NetSchoolAPI:
             method="GET", url='student/diary/init',
         ))
         diary_info = response.json()
-        self._students = diary_info['students']
+        self._students = [diary_info['students'], diary_info['currentStudentId']]
         student = diary_info['students'][diary_info['currentStudentId']]
         self._student_id = student['studentId']
 
