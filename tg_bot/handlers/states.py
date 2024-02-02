@@ -270,7 +270,6 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             await call.message.answer("Выберите ребенка:", reply_markup=kb.arr_kb(st))
             await state.set_state(GetNS.child)
             return
-        await call.message.answer(f"{stt}")
         lesson = day.lessons
         message_text = []
         for less,le in zip(lesson, range(10)):
@@ -328,7 +327,6 @@ async def get_ns_child(call: CallbackQuery, state: FSMContext):
         await call.message.answer("Нет ответа от сервера. Повторите попытку.",
                                   reply_markup=kb.inline_text_kb("Повторить попытку", call.data))
         return
-    await call.message.answer(f"{stt}")
     lesson = day.lessons
     message_text = []
     for less, le in zip(lesson, range(10)):
