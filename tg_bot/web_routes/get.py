@@ -161,9 +161,8 @@ async def getdb_comments(request: Request):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
 
     cid = full['_id']
-    d1 = cid.replace("'", "\"")
-    cid = json.loads(d1)
-    d = datetime.date(cid['date'])
+    cid = cid.split('a')
+    d = datetime.date(cid[0], cid[1], cid[2])
     try:
         await ns.login(usr.login, usr.password, 1)
         diary = await ns.diary(start=d)
@@ -176,8 +175,8 @@ async def getdb_comments(request: Request):
         await state.clear()
         await call.message.answer("Неверный логин/пароль.")
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
-    lesson = day[int(cid['lesson'])]
-    assignment = lesson.assignments[int(cid['ass'])]
+    lesson = day[int(cid[3])]
+    assignment = lesson.assignments[int(cid[4])]
     asss = assignment.to_json()
     return json_response({'ok': True, 'assignment': asss})
 
