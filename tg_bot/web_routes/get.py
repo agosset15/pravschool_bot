@@ -11,7 +11,7 @@ from db.methods.get import (get_student_by_telegram_id,
                             get_schedule, get_homework,
                             get_teacher_schedule,
                             get_kab_schedule, get_count)
-from ..config import MyEncoder, ns, bot
+from ..config import MyEncoder, ns
 
 
 async def demo_handler(request: Request):
@@ -29,6 +29,7 @@ async def demo_handler(request: Request):
 
 async def getdb_user(request: Request):
     full = request.query
+    bot: Bot = request.app["bot"]
     if not (check_webapp_signature(bot.token, full["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
@@ -147,8 +148,8 @@ async def getdb_count(request: Request):
 
 
 async def getdb_comments(request: Request):
-    full = request.query
-    data = await request.post()
+    bot: Bot = request.app["bot"]
+    data = await request.json()
     if not (check_webapp_signature(bot.token, data["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
@@ -161,7 +162,7 @@ async def getdb_comments(request: Request):
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-    cid = full['_id']
+    cid = data['hash_id']
     cid = cid.split('a')
     d = datetime.date(cid[0], cid[1], cid[2])
     try:
