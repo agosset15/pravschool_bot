@@ -149,7 +149,7 @@ async def getdb_count(request: Request):
 
 async def getdb_comments(request: Request):
     bot: Bot = request.app["bot"]
-    data = await request.json()
+    data = request.query
     if not (check_webapp_signature(bot.token, data["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
