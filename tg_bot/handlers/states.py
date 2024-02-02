@@ -202,6 +202,12 @@ async def add_ns_login(message: Message, state: FSMContext):
 @router.message(AddNS.password)
 async def add_ns_login(message: Message, state: FSMContext):
     data = await state.get_data()
+    try:
+        await ns.login(data['login'], message.text, 1)
+    except AuthError:
+        await message.answer("Неверные данные. Попробуйте еще раз.", reply_markup=kb.settings())
+        await state.clear()
+        return
     edit_student_login(message.from_user.id, data['login'])
     edit_student_password(message.from_user.id, message.text)
     switch_student_ns(message.from_user.id)
@@ -243,6 +249,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
         d = datetime.date(start + timedelta(days=usersmessage))
         try:
             await ns.login(l_p.login, l_p.password, 1)
+            stt = await ns.students()
             diary = await ns.diary(start=start)
             await ns.logout()
             await ns.logout()
@@ -257,6 +264,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             await call.message.answer("Нет ответа от сервера. Повторите попытку.",
                                       reply_markup=kb.inline_text_kb("Повторить попытку", call.data))
             return
+        await call.message.answer(f"{stt}")
         lesson = day.lessons
         message_text = []
         for less,le in zip(lesson, range(10)):

@@ -31,6 +31,7 @@ class NetSchoolAPI:
         )
 
         self._student_id = -1
+        self._students = []
         self._year_id = -1
         self._school_id = -1
 
@@ -114,6 +115,7 @@ class NetSchoolAPI:
             method="GET", url='student/diary/init',
         ))
         diary_info = response.json()
+        self._students = diary_info['students']
         student = diary_info['students'][diary_info['currentStudentId']]
         self._student_id = student['studentId']
 
@@ -342,3 +344,6 @@ class NetSchoolAPI:
                 follow_redirects=True,
             )
         ).content)
+
+    async def students(self):
+        return self._students
