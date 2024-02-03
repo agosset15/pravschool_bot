@@ -322,20 +322,19 @@ async def add_time(call: CallbackQuery):
     new = []
     day = call.message.text.split("\n")[0]
     for lesson, i in zip(call.message.text.split("\n")[0:], range(8)):
-        n = f"{lesson}) ({times[i]})"
-        if n.split()[0][3] == ")":
-            n = f"{lesson} ({times[i]})"
+        n = f"{lesson} ({times[i]})"
         new.append(n)
     msg = html.bold(day) + "\n" + "\n".join(new)
-    await call.message.edit_text(msg, reply_markup=kb.inline_text_kb("Убрать время", 'del_time'))
+    await call.message.edit_text(msg, reply_markup=kb.inline_text_kb("Убрать время", 'del_time'),
+                                 parse_mode='HTML')
 
 
 @router.callback_query(F.data == "del_time")
 async def del_time(call: CallbackQuery):
     await call.answer("Обновляю...")
-    times = ['08:40 - 09:25', '09:35 - 10:20', '10:30 - 11:15', '11:25 - 12:10', '12:25 - 13:10', '13:25 - 14:10',
-             '14:25 - 15:10', '15:25 - 16:10']
     new = []
-    for lesson, i in zip(call.message.text.split("\n"), range(8)):
-        new.append(f"{lesson.split('(')[0]}")
+    day = call.message.text.split("\n")[0]
+    for lesson, i in zip(call.message.text.split("\n")[0:], range(8)):
+        new.append(f"{lesson.split('(')[0]}({lesson.split('(')[1]}")
+    msg = html.bold(day) + "\n" + "\n".join(new)
     await call.message.edit_text("\n".join(new), reply_markup=kb.inline_text_kb("Посмотреть время", 'add_time'))
