@@ -1,3 +1,4 @@
+import ast
 from datetime import date, timedelta
 from hashlib import md5
 from io import BytesIO
@@ -34,6 +35,7 @@ class NetSchoolAPI:
         self._students = []
         self._year_id = -1
         self._school_id = -1
+        self._note = None
 
         self._assignment_types: Dict[int, str] = {}
         self._login_data = ()
@@ -62,11 +64,16 @@ class NetSchoolAPI:
         login_meta = response.json()
         salt = login_meta.pop('salt')
 
-        encoded_password = md5(
-            password.encode('windows-1251')
-        ).hexdigest().encode()
-        pw2 = md5(salt.encode() + encoded_password).hexdigest()
-        pw = pw2[: len(password)]
+        try:
+            passs = ast.literal_eval(password)
+            pw = passs[0]
+            pw2 = passs[1]
+        except TypeError or ValueError:
+            encoded_password = md5(
+                password.encode('windows-1251')
+            ).hexdigest().encode()
+            pw2 = md5(salt.encode() + encoded_password).hexdigest()
+            pw = pw2[: len(password)]
 
         try:
             response = await requester(
@@ -134,6 +141,7 @@ class NetSchoolAPI:
             for assignment in assignment_reference
         }
         self._login_data = (user_name, password, school_name_or_id)
+        return [pw, pw2]
 
     async def _request_with_optional_relogin(
             self, requests_timeout: Optional[int], request: httpx.Request,
@@ -205,12 +213,14 @@ class NetSchoolAPI:
         diary_schema = schemas.DiarySchema()
         diary_schema.context['assignment_types'] = self._assignment_types
         diary = diary_schema.load(response.json())
+        print(response.json())
         return diary  # type: ignore
 
     async def overdue(
         self,
         start: Optional[date] = None,
         end: Optional[date] = None,
+        student_id: Optional[int] = None,
         requests_timeout: int = None,
     ) -> List[schemas.Assignment]:
         if not start:
@@ -218,6 +228,8 @@ class NetSchoolAPI:
             start = monday
         if not end:
             end = start + timedelta(days=5)
+        if not student_id:
+            student_id = self._student_id
 
         response = await self._request_with_optional_relogin(
             requests_timeout,
@@ -225,7 +237,7 @@ class NetSchoolAPI:
                 method="GET",
                 url='student/diary/pastMandatory',
                 params={
-                    'studentId': self._student_id,
+                    'studentId': student_id,
                     'yearId': self._year_id,
                     'weekStart': start.isoformat(),
                     'weekEnd': end.isoformat(),
@@ -235,6 +247,29 @@ class NetSchoolAPI:
         assignments_schema = schemas.AssignmentSchema()
         assignments_schema.context['assignment_types'] = self._assignment_types
         assignments = assignments_schema.load(response.json(), many=True)
+        return assignments  # type: ignore
+
+    async def assignment_info(
+        self,
+        assignment_id: int,
+        student_id: Optional[int] = None,
+        requests_timeout: int = None,
+    ) -> schemas.AssignmentInfo:
+        if not student_id:
+            student_id = self._student_id
+
+        response = await self._request_with_optional_relogin(
+            requests_timeout,
+            self._wrapped_client.client.build_request(
+                method="GET",
+                url=f"student/diary/assigns/{assignment_id}",
+                params={
+                    'studentId': student_id,
+                    },
+            )
+        )
+        assignments_schema = schemas.AssignmentInfoSchema()
+        assignments = assignments_schema.load(response.json())
         return assignments  # type: ignore
 
     async def announcements(

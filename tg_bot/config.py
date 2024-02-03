@@ -1,12 +1,13 @@
 import os
 import ast
+from typing import Optional, Coroutine
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from json import JSONEncoder
 from aiogram.fsm.state import State, StatesGroup
 from aiogram import Bot, html
 from netschoolapi import NetSchoolAPI
-from netschoolapi.errors import SchoolNotFoundError, AuthError
+from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
 
 from db import Student
 from db.methods.get import get_schedule
@@ -34,38 +35,26 @@ async def id_ad(a):
         ids.write(f"{a}")
 
 
-async def get_duty(student: Student) -> str:
-    await ns.login(student.login, student.password, 'Свято-Димитриевская школа')
-    ass = await ns.overdue()
-    await ns.logout()
-    await ns.logout()
-    await ns.logout()
-    if ass is not None:
-        arr = []
-        for i in ass:
-            date = i.deadline
-            await ns.login(student.login, student.password, 'Свято-Димитриевская школа')
-            diary = await ns.diary(start=date)
-            await ns.logout()
-            await ns.logout()
-            await ns.logout()
-            day = diary.schedule[0]
-            lesson = day.lessons
-            for less in lesson:
-                assig = less.assignments
-                if assig:
-                    for qw in assig:
-                        if qw.id == i.id:
-                            arr.append(f'Долг -- {qw.type} по предмету {less.subject}:\n{qw.content}')
-        text = "\n\n".join(arr)
-        text = f"Вот ваши долги на данное время:\n\n{text}"
-    else:
-        text = "На данный момент просроченных заданий нет!"
-    return text
-
-
-async def send_duty(student: Student):
-    await bot.send_message(student.id, await get_duty(student))
+async def get_duty(student: Student, student_id: Optional[int] = None) -> str:
+    try:
+        await ns.login(student.login, student.password, 1)
+        ass = await ns.overdue(student_id=student_id)
+        if ass is not None:
+            arr = []
+            for i in ass:
+                asss = await ns.assignment_info(i.id, student_id)
+                arr.append(f'Долг -- {i.type} по предмету {asss.subjectGroup.name}:\n{asss.name}')
+            text = "\n\n".join(arr)
+            text = f"Вот ваши долги на данное время:\n\n{text}"
+        else:
+            text = "На данный момент просроченных заданий нет!"
+        await ns.logout()
+        await ns.logout()
+        await ns.logout()
+        return text
+    except SchoolNotFoundError or AuthError or NoResponseFromServer:
+        await ns.logout()
+        return None
 
 
 async def send_greeting(student: Student, text: str, morning: bool = False):

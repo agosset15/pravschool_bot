@@ -48,9 +48,10 @@ class Assignment(NetSchoolAPISchema):
     mark: int = field(metadata=dict(allow_none=True, data_key='mark'))
     is_duty: bool = field(metadata=dict(data_key='dutyMark'))
     deadline: datetime.date = field(metadata=dict(data_key='dueDate'))
+    lesson_id: int = field(metadata=dict(data_key='classMeetingId'))
 
     def to_json(self):
-        return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark, 'is_duty': self.is_duty, 'deadline': self.deadline.strftime('%d/%m')}
+        return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark, 'is_duty': self.is_duty, 'deadline': self.deadline.strftime('%d/%m'), 'lesson_id': self.lesson_id}
 
     @pre_load
     def unwrap_marks(self, assignment: Dict[str, Any], **_) -> Dict[str, str]:
@@ -66,8 +67,32 @@ class Assignment(NetSchoolAPISchema):
 
 
 @dataclass
+class Teacher(NetSchoolAPISchema):
+    id: int
+    name: str
+
+
+@dataclass
+class SubjectGroup(NetSchoolAPISchema):
+    id: int
+    name: str
+
+
+@dataclass
+class AssignmentInfo(NetSchoolAPISchema):
+    id: int
+    name: str = field(metadata=dict(data_key='assignmentName'))
+    subjectGroup: SubjectGroup
+    teachers: List[Teacher]
+    weight: int = field(metadata=dict(data_key='weight'))
+    date: datetime.date = field(metadata=dict(data_key='date'))
+    description: str = field(metadata=dict(data_key='description', missing='', allow_none=True, required=False))
+
+
+@dataclass
 class Lesson(NetSchoolAPISchema):
     day: datetime.date
+    lesson_id: int = field(metadata=dict(data_key='classmeetingId'))
     start: datetime.time = field(metadata=dict(data_key='startTime'))
     end: datetime.time = field(metadata=dict(data_key='endTime'))
     room: str = field(metadata=dict(
@@ -125,6 +150,7 @@ class School(NetSchoolAPISchema):
 
 AttachmentSchema = class_schema(Attachment)
 DiarySchema = class_schema(Diary)
+AssignmentInfoSchema = class_schema(AssignmentInfo)
 AssignmentSchema = class_schema(Assignment)
 ShortSchoolSchema = class_schema(ShortSchool)
 SchoolSchema = class_schema(School)

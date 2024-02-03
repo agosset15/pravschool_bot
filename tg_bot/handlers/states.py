@@ -192,7 +192,8 @@ async def deluser_id(message: Message, state: FSMContext):
 @router.message(AddNS.login)
 async def add_ns_login(message: Message, state: FSMContext):
     await state.update_data(login=message.text)
-    await message.answer("Теперь пришлите свой пароль")
+    await message.answer(f"Теперь пришлите свой пароль."
+                         f"\nВсе пароли хранятся в боте в {html.underline('зашифрованном виде')}", parse_mode='HTML')
     await state.set_state(AddNS.password)
 
 
@@ -200,13 +201,13 @@ async def add_ns_login(message: Message, state: FSMContext):
 async def add_ns_login(message: Message, state: FSMContext):
     data = await state.get_data()
     try:
-        await ns.login(data['login'], message.text, 1)
+        p = await ns.login(data['login'], message.text, 1)
     except AuthError:
         await message.answer("Неверные данные. Попробуйте еще раз.", reply_markup=kb.settings())
         await state.clear()
         return
     edit_student_login(message.from_user.id, data['login'])
-    edit_student_password(message.from_user.id, message.text)
+    edit_student_password(message.from_user.id, f"{p}")
     switch_student_ns(message.from_user.id)
     if len(await ns.students()[0]) > 1:
         switch_student_parent(message.from_user.id)
