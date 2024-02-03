@@ -332,9 +332,15 @@ async def add_time(call: CallbackQuery):
 @router.callback_query(F.data == "del_time")
 async def del_time(call: CallbackQuery):
     await call.answer("Обновляю...")
+    times = ['08:40 - 09:25', '09:35 - 10:20', '10:30 - 11:15', '11:25 - 12:10', '12:25 - 13:10', '13:25 - 14:10',
+             '14:25 - 15:10', '15:25 - 16:10']
     new = []
     day = call.message.text.split("\n")[0]
     for lesson, i in zip(call.message.text.split("\n")[1:], range(8)):
-        new.append(f"{lesson.split('(')[0]}({lesson.split('(')[1]}")
+        if lesson.split('(')[1] in times:
+            new.append(f"{lesson.split('(')[0]}")
+        else:
+            new.append(f"{lesson.split('(')[0]}({lesson.split('(')[1]}")
     msg = html.bold(day) + "\n" + "\n".join(new)
-    await call.message.edit_text("\n".join(new), reply_markup=kb.inline_text_kb("Посмотреть время", 'add_time'))
+    await call.message.edit_text(msg, reply_markup=kb.inline_text_kb("Посмотреть время", 'add_time'),
+                                 parse_mode='HTML')
