@@ -334,7 +334,7 @@ async def del_time(call: CallbackQuery):
     await call.answer("Обновляю...")
     new = []
     day = call.message.text.split("\n")[0]
-    for lesson, i in zip(call.message.text.split("\n")[0:], range(8)):
+    for lesson, i in zip(call.message.text.split("\n")[1:], range(8)):
         new.append(f"{lesson.split('(')[0]}({lesson.split('(')[1]}")
     msg = html.bold(day) + "\n" + "\n".join(new)
     await call.message.edit_text("\n".join(new), reply_markup=kb.inline_text_kb("Посмотреть время", 'add_time'))
