@@ -20,15 +20,6 @@ from db.methods.update import edit_homework, edit_homework_upd_date, edit_studen
 from db.methods.create import create_homework
 
 
-async def check_data_handler(request: Request):
-    bot: Bot = request.app["bot"]
-
-    data = await request.post()
-    if check_webapp_signature(bot.token, data["_auth"]):
-        return json_response({"ok": True})
-    return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-
-
 async def send_message_handler(request: Request):
     bot: Bot = request.app["bot"]
     data = await request.post()
@@ -74,7 +65,7 @@ async def add_db_homework(request: Request):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
 
     if get_homework(int(str(data['lesson'])), usr.clas, int(str(data['day']))) is not None:
-        edit_homework(int(str(data['day'])), int(str(data['lesson'])), usr.clas, data['homework'])
+        edit_homework(int(str(data['day'])), int(str(data['lesson'])), usr.clas, data['homework'], None)
         edit_homework_upd_date(int(str(data['day'])), int(str(data['lesson'])), usr.clas,
                                str(datetime.now().strftime('%H:%M %d.%m.%Y')))
     else:
@@ -84,45 +75,40 @@ async def add_db_homework(request: Request):
 
 
 async def edit_db_class(request: Request):
-    full = request.query
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-        clas = full['class']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-        clas = full['class']
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
 
-    edit_student_clas(usr.id, int(clas))
+    edit_student_clas(usr.id, int(data['class']))
     return json_response({"ok": True})
 
 
 async def edit_db_ns(request: Request):
-    full = request.query
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-        login = full['login']
-        password = full['password']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-        login = full['login']
-        password = full['password']
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-
-    edit_student_login(usr.id, login)
-    edit_student_password(usr.id, password)
+    edit_student_login(usr.id, data['login'])
+    edit_student_password(usr.id, data['password'])
     return json_response({"ok": True})

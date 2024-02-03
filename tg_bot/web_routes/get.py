@@ -16,26 +16,13 @@ from db.methods.get import (get_student_by_telegram_id,
 from ..config import MyEncoder, ns
 
 
-async def demo_handler(request: Request):
-    full = request.query
-    try:
-        if int(full['nextpage']) == 2:
-            return FileResponse(Path(__file__).parent.resolve() / "profile.html")
-        elif int(full['nextpage']) == 1:
-            return FileResponse(Path(__file__).parent.resolve() / "demo.html")
-        else:
-            return json_response({"ok": False, "err": "Not Found"}, status=404)
-    except:
-        return json_response({"ok": False, "err": "Not Found"}, status=404)
-
-
 async def getdb_user(request: Request):
-    full = request.query
     bot: Bot = request.app["bot"]
-    if not (check_webapp_signature(bot.token, full["_auth"])):
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=full["_auth"])
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
@@ -52,52 +39,53 @@ async def getdb_user(request: Request):
     if classs in class_list:
         classs = list1[classs]
     return json_response(
-        {'ok': True, 'name': usr.name, 'clas': classs, 'id': usr.id, 'isTeacher': usr.isTeacher, 'isNs': usr.isNs,
-         'ntf': usr.duty_notification, 'isAdmin': usr.isAdmin, 'pass': usr.password, 'login': usr.login})
+        {'ok': True, 'user': {'name': usr.name, 'clas': classs, 'id': usr.id, 'isTeacher': usr.isTeacher, 'isNs': usr.isNs,
+         'ntf': usr.duty_notification, 'isAdmin': usr.isAdmin, 'pass': usr.password, 'login': usr.login}})
 
 
 async def getdb_rasp(request: Request):
-    full = request.query
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
-        print('ERROR')
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     if usr.isTeacher is True:
-        rasp = get_teacher_schedule(usr.clas, int(full['day']))
+        rasp = get_teacher_schedule(usr.clas, int(data['day']))
     else:
-        rasp = get_schedule(usr.clas, int(full['day']))
+        rasp = get_schedule(usr.clas, int(data['day']))
     res = '\n'.join(ast.literal_eval(rasp))
     return json_response({'ok': True, 'rasp': res})
 
 
 async def getdb_homework(request: Request):
-    full = request.query
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
 
-    day = ast.literal_eval(get_schedule(usr.clas, int(full['day'])))
+    day = ast.literal_eval(get_schedule(usr.clas, int(data['day'])))
     homework = []
     for i in range(1, len(day) + 1):
-        hm = get_homework(i, usr.clas, int(full['day']))
+        hm = get_homework(i, usr.clas, int(data['day']))
         if hm is None:
             homework.append(f"#<b>{day[i - 1]}</b> - Нет")
         else:
@@ -107,15 +95,16 @@ async def getdb_homework(request: Request):
 
 
 async def getdb_kab_rasp(request: Request):
-    full = request.query
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
@@ -123,7 +112,7 @@ async def getdb_kab_rasp(request: Request):
 
     value = []
     for i in range(1, 6):
-        value.append('#\n'.join(ast.literal_eval(get_kab_schedule(int(full['kab']), i))))
+        value.append('#\n'.join(ast.literal_eval(get_kab_schedule(int(data['kab']), i))))
     val = f"#<b>Понедельник:</b>\n#{value[0]}\n\n#<b>Вторник:</b>\n#{value[1]}" \
           f"\n\n#<b>Среда:</b>\n#{value[2]}\n\n#<b>Четверг:</b>\n#{value[3]}" \
           f"\n\n#<b>Пятница:</b>\n#{value[4]}"
@@ -131,15 +120,16 @@ async def getdb_kab_rasp(request: Request):
 
 
 async def getdb_count(request: Request):
-    full = request.query
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        uusr = full['user']
-    except KeyError:
-        uusr = full['_auth'].split('&')[1].split('=')[1]
-    d = uusr.replace("'", "\"")
-    uusr = json.loads(d)
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
-        usr = get_student_by_telegram_id(int(uusr['id']))
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:

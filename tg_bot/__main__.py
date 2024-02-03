@@ -41,7 +41,6 @@ def main():
     app = Application()
     app["bot"] = bot
 
-    app.router.add_get("/demo", demo_handler)
     app.router.add_post("/demo/checkData", check_data_handler)
     app.router.add_post("/demo/sendMessage", send_message_handler)
     app.router.add_get("/demo/getDb/homework", getdb_homework)
