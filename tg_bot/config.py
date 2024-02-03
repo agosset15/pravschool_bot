@@ -35,28 +35,6 @@ async def id_ad(a):
         ids.write(f"{a}")
 
 
-async def get_duty(student: Student, student_id: Optional[int] = None) -> str:
-    try:
-        await ns.login(student.login, student.password, 1)
-        ass = await ns.overdue(student_id=student_id)
-        if ass is not None:
-            arr = []
-            for i in ass:
-                asss = await ns.assignment_info(i.id, student_id)
-                arr.append(f'Долг -- {i.type} по предмету {asss.subjectGroup.name}:\n{asss.name}')
-            text = "\n\n".join(arr)
-            text = f"Вот ваши долги на данное время:\n\n{text}"
-        else:
-            text = "На данный момент просроченных заданий нет!"
-        await ns.logout()
-        await ns.logout()
-        await ns.logout()
-        return text
-    except SchoolNotFoundError or AuthError or NoResponseFromServer:
-        await ns.logout()
-        return None
-
-
 async def send_greeting(student: Student, text: str, morning: bool = False):
     if morning:
         mor = "сегодня"

@@ -1,14 +1,36 @@
 import requests
 import os
 import json
-from ..config import send_duty, send_greeting
+from ..config import bot, send_greeting, ns
 from db.methods.get import get_students_with_duty_notification, get_students_with_greet_notification
+
+
+async def get_duty(student: Student, student_id: Optional[int] = None) -> str:
+    try:
+        await ns.login(student.login, student.password, 1)
+        ass = await ns.overdue(student_id=student_id)
+        if ass is not None:
+            arr = []
+            for i in ass:
+                asss = await ns.assignment_info(i.id, student_id)
+                arr.append(f'Долг -- {i.type} по предмету {asss.subjectGroup.name}:\n{asss.name}')
+            text = "\n\n".join(arr)
+            text = f"Вот ваши долги на данное время:\n\n{text}"
+        else:
+            text = "На данный момент просроченных заданий нет!"
+        await ns.logout()
+        await ns.logout()
+        await ns.logout()
+        return text
+    except SchoolNotFoundError or AuthError or NoResponseFromServer:
+        await ns.logout()
+        return None
 
 
 async def send_user_ns_duty():
     ids = get_students_with_duty_notification()
     for z in ids:
-        await send_duty(z)
+        await bot.send_message(z.tgid, )
 
 
 async def send_greet(morning: bool = False):

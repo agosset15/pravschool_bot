@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from db.methods.create import create_student
 from db.methods.get import get_student_by_telegram_id, get_all_students
 from db.methods.update import update_student_nonblocked, update_student_blocked
+from ..backend.notifications import get_duty
 from ..keyboards import keyboards as kb
 from ..config import *
 
