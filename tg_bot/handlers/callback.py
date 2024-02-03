@@ -321,9 +321,12 @@ async def add_time(call: CallbackQuery):
              '14:25 - 15:10', '15:25 - 16:10']
     new = []
     day = call.message.text.split("\n")[0]
-    for lesson, i in zip(call.message.text.split(")\n")[0:], range(8)):
-        new.append(f"{lesson}) ({times[i]})")
-    msg = day + "\n" + "\n".join(new)
+    for lesson, i in zip(call.message.text.split("\n")[0:], range(8)):
+        n = f"{lesson}) ({times[i]})"
+        if n.split()[0][3] == ")":
+            n = f"{lesson} ({times[i]})"
+        new.append(n)
+    msg = html.bold(day) + "\n" + "\n".join(new)
     await call.message.edit_text(msg, reply_markup=kb.inline_text_kb("Убрать время", 'del_time'))
 
 
