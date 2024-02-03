@@ -13,7 +13,7 @@ from db import register_models
 from .config import bot
 from .handlers import common, states, callback, text, inline
 from .backend.notifications import send_user_ns_duty
-from .web_routes import (add_db_homework, check_data_handler, send_message_handler, getdb_user,
+from .web_routes import (add_db_homework, send_message_handler, getdb_user,
                          getdb_rasp,
                          getdb_kab_rasp,
                          getdb_homework,
