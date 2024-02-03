@@ -62,7 +62,7 @@ async def getdb_rasp(request: Request):
         rasp = get_teacher_schedule(usr.clas, int(data['day']))
     else:
         rasp = get_schedule(usr.clas, int(data['day']))
-    res = '#'.join(ast.literal_eval(rasp))
+    res = ''.join(ast.literal_eval(rasp))
     return json_response({'ok': True, 'rasp': res})
 
 
