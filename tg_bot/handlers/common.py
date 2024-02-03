@@ -111,7 +111,7 @@ async def cmd_admin(message: Message):
 async def cmd_duty(message: Message):
     user = get_student_by_telegram_id(message.from_user.id)
     if user.isNs is True:
-        duty = get_duty(user)
+        duty = await get_duty(user)
         if duty:
             await message.answer(duty)
         else:
