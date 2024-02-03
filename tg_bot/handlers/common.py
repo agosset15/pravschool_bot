@@ -52,7 +52,7 @@ async def cmd_start(message: Message, state: FSMContext):
                                  f"\n{html.link('Книга отзывов и предложений', 'tg://resolve?domain=agosset15bot')}",
                                  reply_markup=kb.uinb(), parse_mode="HTML")
             print("Новый пользователь!")
-            await bot.send_message(-1001845347264, f"{message.from_user.id} Новый пользователь!")
+            await bot.send_message(-1001845347264, f"{message.from_user.id} Новый пользователь!\n{code}")
         else:
             await message.answer("Вы у меня впервые!")
             if message.chat.type != 'private':
@@ -67,7 +67,7 @@ async def cmd_start(message: Message, state: FSMContext):
                                      reply_markup=kb.uchitel())
                 await state.set_state(ClassWait.clas)
                 print("Новый пользователь!")
-                await bot.send_message(-1001845347264, f"{message.from_user.id} Новый пользователь!")
+                await bot.send_message(-1001845347264, f"{message.from_user.id} Новый пользователь!\n{code}")
     else:
         if usr.isTeacher is True:
             await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
@@ -120,7 +120,7 @@ async def clb_usr(callback: CallbackQuery):
     userbase = get_all_students()
     message = "Пользователи:\nID    Класс    Имя    Реф\n\n"
     for z in userbase:
-        message = message + f"{z.id}  {z.clas}  {z.name}    {z.ref}\n\n"
+        message = message + f"{z.tgid}  {z.clas}  {z.name}    {z.ref}\n\n"
     if len(message) > 4096:
         for x in range(0, len(message), 4096):
             await callback.message.answer(message[x:x + 4096])

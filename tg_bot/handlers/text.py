@@ -26,12 +26,11 @@ async def text(message: Message, state: FSMContext):
                 usersmessage = dase[message.text]
                 value = ast.literal_eval(get_schedule(clas, usersmessage))
                 value = '\n'.join(value)
-                await message.answer(f"<b>{message.text}</b>:\n{value}", reply_markup=kb.get_startkeyboard(),
+                await message.answer(f"<b>{message.text}</b>:\n{value}", reply_markup=kb.inline_text_kb("Посмотреть время", 'add_time'),
                                      parse_mode='HTML')
             except TypeError or ValueError:
-                await message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
+                await message.answer("Ошибка! Нажмите /start")
                 await bot.send_message(admin_id, f"{message.from_user.id} - ошибка текст\учеников")
-                print(message.from_user.id)
                 await bot.send_message(-1001845347264, f"{message.from_user.id} ошибка текст\учеников")
         elif usr.isTeacher == 1:
             try:
@@ -43,9 +42,8 @@ async def text(message: Message, state: FSMContext):
                 await message.answer(f"<b>{message.text}</b>:\n{value}", reply_markup=kb.get_startkeyboard(),
                                      parse_mode='HTML')
             except TypeError or ValueError:
-                await message.answer("Извините, сейчас расписание обновляется. Попробуйте еще раз через минутку.")
+                await message.answer("Ошибка! Нажмите /start")
                 await bot.send_message(admin_id, f"{message.from_user.id} - ошибка текст\учителей")
-                print(message.from_user.id)
                 await bot.send_message(-1001845347264, f"{message.from_user.id} ошибка текст\учителей")
     elif message.text == "ОСОБОЕ МЕНЮ":
         await message.answer("Вы перешли в особое меню.", reply_markup=kb.uinb())

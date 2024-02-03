@@ -72,8 +72,8 @@ async def special(call: CallbackQuery, state: FSMContext):
         else:
             await call.message.answer("Вы не ввели свои данные. Введите их в меню настроек.")
             await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для личных"
-                                      f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
-                                      f"(не заочное отделение и не начальная школа на Якиманке)", show_alert=True)
+                              f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
+                              f"(не заочное отделение и не начальная школа на Якиманке)", show_alert=True)
     if call.data == 'week':
         usr = get_student_by_telegram_id(call.from_user.id)
         clas = usr.clas
@@ -206,7 +206,7 @@ async def call_get_hw_lesson(call: CallbackQuery):
     less = int(call.data.split('_')[1])
     wday = int(call.data.split('_')[2])
     day = ast.literal_eval(get_schedule(usr.clas, wday))
-    hm = get_homework(less+1, usr.clas, wday)
+    hm = get_homework(less + 1, usr.clas, wday)
     text = f"{day[less]} - Нет"
     if hm:
         text = f'{html.bold(day[less])}\n\n{hm.homework} (Добавлено <i>{hm.upd_date}</i>)'
@@ -282,8 +282,8 @@ async def other_call(call: CallbackQuery, state: FSMContext):
     if call.data == "add_ns":
         if get_student_by_telegram_id(call.from_user.id).isNs == 0:
             await call.answer(f"Внимание!!!\n\nДанная функция пока доступна ТОЛЬКО для личных"
-                                      f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
-                                      f"(не заочное отделение и не начальная школа на Якиманке)", show_alert=True)
+                              f"(не родительских и не учительских) дневников ОО АНО СОШ Димитриевская!"
+                              f"(не заочное отделение и не начальная школа на Якиманке)", show_alert=True)
             await call.message.answer("Пришлите свой логин(с учетом регистра)")
             await state.set_state(AddNS.login)
         else:
@@ -312,3 +312,25 @@ async def other_call(call: CallbackQuery, state: FSMContext):
                                   "\nДля того, чтобы получить  такую возможность, нужно написать администратору "
                                   "@ag15bots", reply_markup=kb.settings())
         await call.answer()
+
+
+@router.callback_query(F.data == "add_time")
+async def add_time(call: CallbackQuery):
+    await call.answer("Обновляю...")
+    times = ['08:40 - 09:25', '09:35 - 10:20', '10:30 - 11:15', '11:25 - 12:10', '12:25 - 13:10', '13:25 - 14:10',
+             '14:25 - 15:10', '15:25 - 16:10']
+    new = []
+    for lesson, i in zip(call.message.text.split("\n"), range(8)):
+        new.append(f"{lesson} ({times[i]})")
+    await call.message.edit_text("\n".join(new), reply_markup=kb.inline_text_kb("Убрать время", 'del_time'))
+
+
+@router.callback_query(F.data == "del_time")
+async def del_time(call: CallbackQuery):
+    await call.answer("Обновляю...")
+    times = ['08:40 - 09:25', '09:35 - 10:20', '10:30 - 11:15', '11:25 - 12:10', '12:25 - 13:10', '13:25 - 14:10',
+             '14:25 - 15:10', '15:25 - 16:10']
+    new = []
+    for lesson, i in zip(call.message.text.split("\n"), range(8)):
+        new.append(f"{lesson.split('(')[0]}")
+    await call.message.edit_text("\n".join(new), reply_markup=kb.inline_text_kb("Посмотреть время", 'add_time'))
