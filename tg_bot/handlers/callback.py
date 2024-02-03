@@ -337,7 +337,7 @@ async def del_time(call: CallbackQuery):
     new = []
     day = call.message.text.split("\n")[0]
     for lesson, i in zip(call.message.text.split("\n")[1:], range(8)):
-        if lesson.split('(')[1][:-1] in times:
+        if lesson.split('(')[1].strip()[:-1] in times:
             new.append(f"{lesson.split('(')[0]}")
         else:
             new.append(f"{lesson.split('(')[0]}({lesson.split('(')[1]}")
