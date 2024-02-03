@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+from typing import Optional
 from db import Student
 from ..config import bot, send_greeting, ns
 from db.methods.get import get_students_with_duty_notification, get_students_with_greet_notification
