@@ -301,7 +301,7 @@ async def other_call(call: CallbackQuery, state: FSMContext):
         if usr.duty_notification is False:
             if usr.isNs is True:
                 switch_student_duty_notification(call.from_user.id)
-                await call.message.answer("Подключили вам уведомления. Они будут приходить каждый день в 12:00.")
+                await call.answer("Подключили вам уведомления. Они будут приходить каждый день в 12:00.")
                 await call.answer()
             else:
                 await call.answer("У вас не введены данные для ЭЖ", show_alert=True)

@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+import datetime
 from typing import Optional
 from db import Student
 from ..config import bot, send_greeting, ns
@@ -15,7 +16,7 @@ async def get_duty(student: Student, student_id: Optional[int] = None) -> str:
             arr = []
             for i in ass:
                 asss = await ns.assignment_info(i.id, student_id)
-                arr.append(f'Долг -- {i.type} по предмету {asss.subjectGroup.name}:\n{asss.name}')
+                arr.append(f"{i.type} по предмету {asss.subjectGroup.name.split('/')[1]}:\n{asss.name}")
             text = "\n\n".join(arr)
             text = f"Вот ваши долги на данное время:\n\n{text}"
         else:
@@ -35,7 +36,8 @@ async def send_user_ns_duty():
         await bot.send_message(z.tgid, )
 
 
-async def send_greet(morning: bool = False):
+async def send_greet():
+    morning = datetime.datetime.now().hour < 14
     req = requests.get(f"https://api.weather.yandex.ru/v2/informers?lat=55.723377&lon=37.600595&lang=ru_RU",
                        headers={"X-Yandex-API-Key": os.getenv('WEATHER_TOKEN')})
     forecast = json.loads(req.json())
@@ -51,4 +53,5 @@ async def send_greet(morning: bool = False):
         text = (f"🌃Доброго вечера!\n\nЗавтра на улице {forecast.forecast.parts[1].temp_avg}("
                 f"{forecast.forecast.parts[1].feels_like})°C, {ass_t[forecast.forecast.parts[1].condition]}.\n\n")
     for s in get_students_with_greet_notification():
-        await send_greeting(s, text, morning)
+        text = text + await get_duty(s)
+        await bot.send_message(student.tgid, text)
