@@ -63,12 +63,11 @@ class NetSchoolAPI:
         ))
         login_meta = response.json()
         salt = login_meta.pop('salt')
-
-        try:
+        if password[0] == '[':
             passs = ast.literal_eval(password)
             pw = passs[0]
             pw2 = passs[1]
-        except TypeError or ValueError:
+        else:
             encoded_password = md5(
                 password.encode('windows-1251')
             ).hexdigest().encode()
