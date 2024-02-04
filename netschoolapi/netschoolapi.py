@@ -2,7 +2,7 @@ import ast
 from datetime import date, timedelta
 from hashlib import md5
 from io import BytesIO
-from typing import Optional, Dict, List, Union
+from typing import Optional, Dict, List, Union, Any
 
 import httpx
 from httpx import AsyncClient, Response
@@ -383,5 +383,5 @@ class NetSchoolAPI:
             )
         ).content)
 
-    async def students(self):
+    async def students(self) -> List[Any]:
         return self._students
