@@ -50,7 +50,7 @@ class NetSchoolAPI:
     async def login(
             self, user_name: str, password: str,
             school_name_or_id: Union[int, str],
-            requests_timeout: int = None):
+            requests_timeout: int = None) -> str:
         requester = self._wrapped_client.make_requester(requests_timeout)
         # Getting the `NSSESSIONID` cookie for `auth/getdata`
         await requester(self._wrapped_client.client.build_request(
@@ -63,18 +63,15 @@ class NetSchoolAPI:
         ))
         login_meta = response.json()
         salt = login_meta.pop('salt')
-        print(salt)
         if password[0] == '[':
             passs = ast.literal_eval(password)
-            pw = passs[0]
-            pw2 = passs[1]
+            encoded_password = passs[0]
         else:
             encoded_password = md5(
                 password.encode('windows-1251')
             ).hexdigest().encode()
-            pw2 = md5(salt.encode() + encoded_password).hexdigest()
-            pw = pw2[: len(password)]
-        print(pw2)
+        pw2 = md5(salt.encode() + encoded_password).hexdigest()
+        pw = pw2[: len(password)]
         try:
             response = await requester(
                 self._wrapped_client.client.build_request(
@@ -141,7 +138,7 @@ class NetSchoolAPI:
             for assignment in assignment_reference
         }
         self._login_data = (user_name, f"{[pw, pw2]}", school_name_or_id)
-        return [pw, pw2]
+        return encoded_password
 
     async def _request_with_optional_relogin(
             self, requests_timeout: Optional[int], request: httpx.Request,
