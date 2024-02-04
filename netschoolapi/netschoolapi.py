@@ -63,6 +63,7 @@ class NetSchoolAPI:
         ))
         login_meta = response.json()
         salt = login_meta.pop('salt')
+        print(salt)
         if password[0] == '[':
             passs = ast.literal_eval(password)
             pw = passs[0]
