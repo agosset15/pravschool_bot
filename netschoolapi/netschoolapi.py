@@ -139,7 +139,7 @@ class NetSchoolAPI:
             assignment['id']: assignment['name']
             for assignment in assignment_reference
         }
-        self._login_data = (user_name, password, school_name_or_id)
+        self._login_data = (user_name, f"{[pw, pw2]}", school_name_or_id)
         return [pw, pw2]
 
     async def _request_with_optional_relogin(
