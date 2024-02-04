@@ -1,5 +1,4 @@
 import ast
-import logging
 from datetime import date, timedelta
 from hashlib import md5
 from io import BytesIO
@@ -74,7 +73,7 @@ class NetSchoolAPI:
             ).hexdigest().encode()
             pw2 = md5(salt.encode() + encoded_password).hexdigest()
             pw = pw2[: len(password)]
-        logging.log(2, f"{pw2}")
+        print(pw2)
         try:
             response = await requester(
                 self._wrapped_client.client.build_request(
