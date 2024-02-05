@@ -24,6 +24,7 @@ from ..config import MyEncoder, ns
 async def send_message_handler(request: Request):
     bot: Bot = request.app["bot"]
     data = await request.post()
+    print(*data)
     if not (check_webapp_signature(bot.token, data["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
@@ -39,7 +40,7 @@ async def send_message_handler(request: Request):
     io = BytesIO()
     try:
         await ns.login(usr.login, usr.password, 1)
-        await ns.download_attachment(data['a_id'], io)
+        await ns.download_attachment(data['aid'], io)
         await ns.logout()
         await ns.logout()
         await ns.logout()
