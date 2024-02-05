@@ -23,7 +23,7 @@ from ..config import MyEncoder, ns
 
 async def send_message_handler(request: Request):
     bot: Bot = request.app["bot"]
-    data = request.query
+    data = request.post()
     if not (check_webapp_signature(bot.token, data["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
