@@ -164,19 +164,20 @@ async def getdb_comments(request: Request):
     try:
         await ns.login(usr.login, usr.password, 1)
         diary = await ns.diary(start=d, student_id=child)
+        assignment = diary.schedule[0].lessons[int(cid[3])].assignments[int(cid[4])]
+        info = await ns.assignment_info(assignment.id, child)
         await ns.logout()
         await ns.logout()
         await ns.logout()
-        day = next((item for item in diary.schedule if item.day == d), None)
-    except SchoolNotFoundError or AuthError:
+    except SchoolNotFoundError:
         await ns.logout()
-        await state.clear()
-        await call.message.answer("Неверный логин/пароль.")
+        return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
+    except AuthError:
+        await ns.logout()
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
     except NoResponseFromServer:
         return json_response({"ok": False, "err": "Сервер электронного журнала не отвечает"}, status=504)
-    lesson = day.lessons[int(cid[3])]
-    assignment = lesson.assignments[int(cid[4])]
     asss = assignment.to_json()
-    return json_response({'ok': True, 'assignment': asss})
+    details = info.__dict__
+    return json_response({'ok': True, 'assignment': asss, 'details': details})
 

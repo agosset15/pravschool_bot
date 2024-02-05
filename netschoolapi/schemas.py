@@ -51,7 +51,8 @@ class Assignment(NetSchoolAPISchema):
     lesson_id: int = field(metadata=dict(data_key='classMeetingId'))
 
     def to_json(self):
-        return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark, 'is_duty': self.is_duty, 'deadline': self.deadline.strftime('%d/%m'), 'lesson_id': self.lesson_id}
+        return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark,
+                'is_duty': self.is_duty, 'deadline': self.deadline.strftime('%d/%m'), 'lesson_id': self.lesson_id}
 
     @pre_load
     def unwrap_marks(self, assignment: Dict[str, Any], **_) -> Dict[str, str]:
@@ -87,6 +88,8 @@ class AssignmentInfo(NetSchoolAPISchema):
     weight: int = field(metadata=dict(data_key='weight'))
     date: datetime.date = field(metadata=dict(data_key='date'))
     description: str = field(metadata=dict(data_key='description', missing='', allow_none=True, required=False))
+    attachments: List[Attachment] = field(
+        metadata=dict(data_key='attachments', default_factory=list))
 
 
 @dataclass
