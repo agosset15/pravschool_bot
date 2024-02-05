@@ -38,7 +38,7 @@ async def send_message_handler(request: Request):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     io = BytesIO()
     try:
-        await ns.login(usr.login, usr.password)
+        await ns.login(usr.login, usr.password, 1)
         await ns.download_attachment(data['a_id'], io)
         await ns.logout()
         await ns.logout()
