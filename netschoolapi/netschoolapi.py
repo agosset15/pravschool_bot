@@ -210,7 +210,6 @@ class NetSchoolAPI:
         diary_schema = schemas.DiarySchema()
         diary_schema.context['assignment_types'] = self._assignment_types
         diary = diary_schema.load(response.json())
-        print(response.json())
         return diary  # type: ignore
 
     async def overdue(

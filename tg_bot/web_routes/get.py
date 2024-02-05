@@ -178,6 +178,10 @@ async def getdb_comments(request: Request):
     except NoResponseFromServer:
         return json_response({"ok": False, "err": "Сервер электронного журнала не отвечает"}, status=504)
     asss = assignment.to_json()
-    details = info.__dict__
+    details = {'id': info.id, 'name': info.name, 'subject': info.subjectGroup.name, 'teachers': [], 'weight': info.weight, 'description': info.description, 'attachments': []}
+    for i in info.teachers:
+        details['teachers'].append({'id': i.id, 'name': i.name})
+    for i in info.attachments:
+        details['attachments'].append({'id': i.id, 'name': i.name, 'description': i.description})
     return json_response({'ok': True, 'assignment': asss, 'details': details})
 
