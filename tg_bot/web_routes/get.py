@@ -185,3 +185,22 @@ async def getdb_comments(request: Request):
         details['attachments'].append({'id': i.id, 'name': i.name, 'description': i.description})
     return json_response({'ok': True, 'assignment': asss, 'details': details})
 
+
+async def getdb_report(request: Request):
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    try:
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    try:
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
+        if usr is None:
+            return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    r_id = int(data["r_id"])
+
+

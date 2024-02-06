@@ -149,8 +149,8 @@ class NetSchoolAPI:
             )
         except httpx.HTTPStatusError as http_status_error:
             if (
-                http_status_error.response.status_code
-                == httpx.codes.UNAUTHORIZED
+                    http_status_error.response.status_code
+                    == httpx.codes.UNAUTHORIZED
             ):
                 if self._login_data:
                     await self.login(*self._login_data)
@@ -167,31 +167,12 @@ class NetSchoolAPI:
         else:
             return response
 
-    async def download_attachment(
-            self, attachment_id: int, buffer: BytesIO,
-            requests_timeout: int = None):
-        self._wrapped_client.client.headers['responseType'] = "arraybuffer"
-        self._wrapped_client.client.headers['referer'] = "http://d.pravschool.ru/angular/school/studentdiary/"
-        self._wrapped_client.client.headers['Accept-Language'] = "ru,en;q=0.9,es;q=0.8"
-        self._wrapped_client.client.headers['x-requested-with'] = "XMLHttpRequest"
-        print(self._wrapped_client.client.cookies)
-        print(self._wrapped_client.client.headers)
-        buffer.write((
-            await self._request_with_optional_relogin(
-                requests_timeout,
-                self._wrapped_client.client.build_request(
-                    method="GET", url=f"attachments/{attachment_id}"
-                )
-            )
-        ).content)
-        del self._wrapped_client.client.headers['responseType']
-
     async def diary(
-        self,
-        start: Optional[date] = None,
-        end: Optional[date] = None,
-        student_id: Optional[int] = None,
-        requests_timeout: int = None,
+            self,
+            start: Optional[date] = None,
+            end: Optional[date] = None,
+            student_id: Optional[int] = None,
+            requests_timeout: int = None,
     ) -> schemas.Diary:
         if not start:
             monday = date.today() - timedelta(days=date.today().weekday())
@@ -220,11 +201,11 @@ class NetSchoolAPI:
         return diary  # type: ignore
 
     async def overdue(
-        self,
-        start: Optional[date] = None,
-        end: Optional[date] = None,
-        student_id: Optional[int] = None,
-        requests_timeout: int = None,
+            self,
+            start: Optional[date] = None,
+            end: Optional[date] = None,
+            student_id: Optional[int] = None,
+            requests_timeout: int = None,
     ) -> List[schemas.Assignment]:
         if not start:
             monday = date.today() - timedelta(days=date.today().weekday())
@@ -253,10 +234,10 @@ class NetSchoolAPI:
         return assignments  # type: ignore
 
     async def assignment_info(
-        self,
-        assignment_id: int,
-        student_id: Optional[int] = None,
-        requests_timeout: int = None,
+            self,
+            assignment_id: int,
+            student_id: Optional[int] = None,
+            requests_timeout: int = None,
     ) -> schemas.AssignmentInfo:
         if not student_id:
             student_id = self._student_id
@@ -268,7 +249,7 @@ class NetSchoolAPI:
                 url=f"student/diary/assigns/{assignment_id}",
                 params={
                     'studentId': student_id,
-                    },
+                },
             )
         )
         assignments_schema = schemas.AssignmentInfoSchema()
@@ -290,14 +271,17 @@ class NetSchoolAPI:
         return announcements  # type: ignore
 
     async def attachments(
-            self, assignment_id: int,
+            self, assignment_id: int, student_id: Optional[int] = None,
             requests_timeout: int = None) -> List[schemas.Attachment]:
+        if not student_id:
+            student_id = self._student_id
+
         response = await self._request_with_optional_relogin(
             requests_timeout,
             self._wrapped_client.client.build_request(
                 method="POST",
                 url='student/diary/get-attachments',
-                params={'studentId': self._student_id},
+                params={'studentId': student_id},
                 json={'assignId': [assignment_id]},
             ),
         )
@@ -307,6 +291,20 @@ class NetSchoolAPI:
         attachments_json = response[0]['attachments']
         attachments = schemas.AttachmentSchema().load(attachments_json, many=True)
         return attachments  # type: ignore
+
+    async def download_attachment(
+            self, attachment_id: int, buffer: BytesIO, assignment_id: int, student_id: Optional[int] = None,
+            requests_timeout: int = None):
+        await self.attachments(assignment_id, student_id)
+        buffer.write((
+                         await self._request_with_optional_relogin(
+                             requests_timeout,
+                             self._wrapped_client.client.build_request(
+                                 method="GET", url=f"attachments/{attachment_id}"))
+                     ).content)
+
+    async def report(self, report_url: str, ):
+        return
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
         response = await self._request_with_optional_relogin(
@@ -330,8 +328,8 @@ class NetSchoolAPI:
             )
         except httpx.HTTPStatusError as http_status_error:
             if (
-                http_status_error.response.status_code
-                == httpx.codes.UNAUTHORIZED
+                    http_status_error.response.status_code
+                    == httpx.codes.UNAUTHORIZED
             ):
                 # Session is dead => we are logged out already
                 # OR
@@ -375,16 +373,16 @@ class NetSchoolAPI:
             self, user_id: int, buffer: BytesIO,
             requests_timeout: int = None):
         buffer.write((
-            await self._request_with_optional_relogin(
-                requests_timeout,
-                self._wrapped_client.client.build_request(
-                    method="GET",
-                    url="users/photo",
-                    params={"at": self._access_token, "userId": user_id},
-                ),
-                follow_redirects=True,
-            )
-        ).content)
+                         await self._request_with_optional_relogin(
+                             requests_timeout,
+                             self._wrapped_client.client.build_request(
+                                 method="GET",
+                                 url="users/photo",
+                                 params={"at": self._access_token, "userId": user_id},
+                             ),
+                             follow_redirects=True,
+                         )
+                     ).content)
 
     async def students(self) -> List[Any]:
         return self._students
