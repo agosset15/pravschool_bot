@@ -175,9 +175,8 @@ class NetSchoolAPI:
                 requests_timeout,
                 self._wrapped_client.client.build_request(
                     method="GET", url=f"attachments/{attachment_id}",
-                    headers={'user-agent': 'NetSchoolAPI/5.0.3',
-                             'referer': 'http://d.pravschool.ru/angular/school/studentdiary/',
-                             'responseType': 'arraybuffer', 'x-requested-with': 'XMLHttpRequest'}
+                    headers={'responseType': 'arraybuffer', 'x-requested-with': 'XMLHttpRequest',
+                             "AT": '00930638428348742717078436'}
                 )
             )
         ).content)
