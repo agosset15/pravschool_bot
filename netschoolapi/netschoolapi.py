@@ -115,7 +115,6 @@ class NetSchoolAPI:
         self._access_token = auth_result["at"]
         self._wrapped_client.client.headers['AT'] = auth_result['at']
         print(self._access_token)
-        self._wrapped_client.client.cookies = response.cookies
 
         response = await requester(self._wrapped_client.client.build_request(
             method="GET", url='student/diary/init',
