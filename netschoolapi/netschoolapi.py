@@ -171,6 +171,8 @@ class NetSchoolAPI:
             self, attachment_id: int, buffer: BytesIO,
             requests_timeout: int = None):
         self._wrapped_client.client.headers['responseType'] = "arraybuffer"
+        print(self._wrapped_client.client.cookies)
+        print(self._wrapped_client.client.headers)
         buffer.write((
             await self._request_with_optional_relogin(
                 requests_timeout,
