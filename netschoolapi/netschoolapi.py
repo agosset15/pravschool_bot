@@ -177,8 +177,7 @@ class NetSchoolAPI:
                     method="GET", url=f"attachments/{attachment_id}",
                     headers={'user-agent': 'NetSchoolAPI/5.0.3',
                              'referer': 'http://d.pravschool.ru/angular/school/studentdiary/',
-                             'responseType': 'arraybuffer', 'x-requested-with': 'XMLHttpRequest',
-                             "AT": '00930638428348742717078436'}
+                             'responseType': 'arraybuffer', 'x-requested-with': 'XMLHttpRequest'}
                 )
             )
         ).content)
