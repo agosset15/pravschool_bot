@@ -293,10 +293,10 @@ class NetSchoolAPI:
         return attachments  # type: ignore
 
     async def download_attachment(
-            self, attachment_id: int, buffer: BytesIO, assignment_id: int, student_id: Optional[int] = None,
+            self, attachment_id: int, assignment_id: int, student_id: Optional[int] = None,
             requests_timeout: int = None):
         await self.attachments(assignment_id, student_id)
-        buffer.write((
+        return ((
                          await self._request_with_optional_relogin(
                              requests_timeout,
                              self._wrapped_client.client.build_request(

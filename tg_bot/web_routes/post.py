@@ -36,10 +36,9 @@ async def send_message_handler(request: Request):
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-    io = BytesIO()
     try:
         await ns.login(usr.login, usr.password, 1)
-        await ns.download_attachment(data['aid'], io, data['a_id'], data['child'])
+        a = await ns.download_attachment(data['aid'], data['a_id'], data['child'])
         await ns.logout()
         await ns.logout()
         await ns.logout()
@@ -49,7 +48,7 @@ async def send_message_handler(request: Request):
     except AuthError:
         await ns.logout()
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
-    await bot.send_document(usr.tgid, BufferedInputFile(io.read(), data['name']))
+    await bot.send_document(usr.tgid, BufferedInputFile(a, data['name']))
     return json_response({"ok": True})
 
 
