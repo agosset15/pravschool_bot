@@ -25,7 +25,7 @@ class NetSchoolAPI:
         self._wrapped_client = AsyncClientWrapper(
             async_client=AsyncClient(
                 base_url=f'{url}/webapi',
-                headers={'user-agent': 'NetSchoolAPI/5.0.3', 'referer': url},
+                headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36', 'referer': url},
                 event_hooks={'response': [_die_on_bad_status]},
             ),
             default_requests_timeout=default_requests_timeout,
@@ -113,7 +113,7 @@ class NetSchoolAPI:
             raise errors.AuthError(auth_result['message'])
 
         self._access_token = auth_result["at"]
-        self._wrapped_client.client.headers['at'] = auth_result['at']
+        self._wrapped_client.client.headers['AT'] = auth_result['at']
 
         response = await requester(self._wrapped_client.client.build_request(
             method="GET", url='student/diary/init',
@@ -172,6 +172,8 @@ class NetSchoolAPI:
             requests_timeout: int = None):
         self._wrapped_client.client.headers['responseType'] = "arraybuffer"
         self._wrapped_client.client.headers['referer'] = "http://d.pravschool.ru/angular/school/studentdiary/"
+        self._wrapped_client.client.headers['Accept-Language'] = "Accept-Language: ru,en;q=0.9,es;q=0.8"
+        self._wrapped_client.client.headers['x-requested-with'] = "XMLHttpRequest"
         print(self._wrapped_client.client.cookies)
         print(self._wrapped_client.client.headers)
         buffer.write((
