@@ -114,7 +114,6 @@ class NetSchoolAPI:
 
         self._access_token = auth_result["at"]
         self._wrapped_client.client.headers['AT'] = auth_result['at']
-        print(self._access_token)
 
         response = await requester(self._wrapped_client.client.build_request(
             method="GET", url='student/diary/init',
@@ -171,10 +170,10 @@ class NetSchoolAPI:
     async def download_attachment(
             self, attachment_id: int, buffer: BytesIO,
             requests_timeout: int = None):
-        self._wrapped_client.client.headers['responseType'] = "arraybuffer"
-        self._wrapped_client.client.headers['referer'] = "http://d.pravschool.ru/angular/school/studentdiary/"
-        self._wrapped_client.client.headers['Accept-Language'] = "ru,en;q=0.9,es;q=0.8"
-        self._wrapped_client.client.headers['x-requested-with'] = "XMLHttpRequest"
+        #self._wrapped_client.client.headers['responseType'] = "arraybuffer"
+        #self._wrapped_client.client.headers['referer'] = "http://d.pravschool.ru/angular/school/studentdiary/"
+        #self._wrapped_client.client.headers['Accept-Language'] = "ru,en;q=0.9,es;q=0.8"
+        #self._wrapped_client.client.headers['x-requested-with'] = "XMLHttpRequest"
         print(self._wrapped_client.client.cookies)
         print(self._wrapped_client.client.headers)
         buffer.write((
