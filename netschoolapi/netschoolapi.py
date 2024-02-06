@@ -25,7 +25,7 @@ class NetSchoolAPI:
         self._wrapped_client = AsyncClientWrapper(
             async_client=AsyncClient(
                 base_url=f'{url}/webapi',
-                headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36', 'referer': url},
+                headers={'user-agent': 'NetSchoolAPI/5.0.3', 'referer': url},
                 event_hooks={'response': [_die_on_bad_status]},
             ),
             default_requests_timeout=default_requests_timeout,
