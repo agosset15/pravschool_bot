@@ -50,7 +50,7 @@ async def send_message_handler(request: Request):
     except AuthError:
         await ns.logout()
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
-
+    print(io.name)
     await bot.send_document(usr.tgid, BufferedInputFile(io.read(), data['name']))
     return json_response({"ok": True})
 
