@@ -170,16 +170,16 @@ class NetSchoolAPI:
     async def download_attachment(
             self, attachment_id: int, buffer: BytesIO,
             requests_timeout: int = None):
+        self._wrapped_client.client.headers['responseType'] = "arraybuffer"
         buffer.write((
             await self._request_with_optional_relogin(
                 requests_timeout,
                 self._wrapped_client.client.build_request(
-                    method="GET", url=f"attachments/{attachment_id}",
-                    headers={'responseType': 'arraybuffer', 'x-requested-with': 'XMLHttpRequest',
-                             "AT": '00930638428348742717078436'}
+                    method="GET", url=f"attachments/{attachment_id}"
                 )
             )
         ).content)
+        del self._wrapped_client.client.headers['responseType']
 
     async def diary(
         self,
