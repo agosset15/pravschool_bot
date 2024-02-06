@@ -171,6 +171,7 @@ class NetSchoolAPI:
             self, attachment_id: int, buffer: BytesIO,
             requests_timeout: int = None):
         self._wrapped_client.client.headers['responseType'] = "arraybuffer"
+        self._wrapped_client.client.headers['referer'] = "http://d.pravschool.ru/angular/school/studentdiary/"
         print(self._wrapped_client.client.cookies)
         print(self._wrapped_client.client.headers)
         buffer.write((
