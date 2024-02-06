@@ -39,7 +39,7 @@ async def send_message_handler(request: Request):
     io = BytesIO()
     try:
         await ns.login(usr.login, usr.password, 1)
-        await ns.download_attachment(data['aid'], io)
+        await ns.download_attachment(data['aid'], io, data['a_id'], data['child'])
         await ns.logout()
         await ns.logout()
         await ns.logout()

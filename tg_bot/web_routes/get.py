@@ -183,7 +183,7 @@ async def getdb_comments(request: Request):
         details['teachers'].append({'id': i.id, 'name': i.name})
     for i in info.attachments:
         details['attachments'].append({'id': i.id, 'name': i.name, 'description': i.description})
-    return json_response({'ok': True, 'assignment': asss, 'details': details})
+    return json_response({'ok': True, 'assignment': asss, 'details': details, 'child': child})
 
 
 async def getdb_report(request: Request):
