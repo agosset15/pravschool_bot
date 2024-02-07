@@ -339,7 +339,7 @@ class NetSchoolAPI:
                f"&at={query['at']}"
                f"&connectionToken={query['connectionToken']}"
                f"&connectionData={query['connectionData']}")
-        async with websockets.client.connect(uri) as ws:
+        async with websockets.connect(uri) as ws:
             await self._request_with_optional_relogin(requests_timeout,
                                                       self._wrapped_client.client.build_request(
                                                           method="GET", url="signalr/start", params=query), )
