@@ -326,19 +326,19 @@ class NetSchoolAPI:
                               {"name": "FULLSCHOOLNAME",
                                "value": "Автономная некоммерческая организация - средняя общеобразовательная школа \"Димитриевская\" (создано в @pravschool_bot)"},
                               {"name": "DATEFORMAT", "value": "d\u0001mm\u0001yy\u0001."}]}
-        query = {_: self._version, at: self._access_token, transport: "webSockets", clientProtocol: 1.5,
-                 connectionData: '[{"name":"queuehub"}]', }
+        query = {'_': self._version, 'at': self._access_token, 'transport': "webSockets", 'clientProtocol': 1.5,
+                 'connectionData': '[{"name":"queuehub"}]', }
         response = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  method="GET", url="signalr/negotiate",
                                                                  params=query), )
         response = response.json()
-        query[connectionToken] = response['connectionToken']
+        query['connectionToken'] = response['connectionToken']
         uri = (f"signalr/connect?transport=webSockets"
                f"&clientProtocol=1.5"
-               f"&at={query[at]}"
-               f"&connectionToken={query[connectionToken]}"
-               f"&connectionData={query[connectionData]}")
+               f"&at={query['at']}"
+               f"&connectionToken={query['connectionToken']}"
+               f"&connectionData={query['connectionData']}")
         async with websockets.client.connect(uri) as ws:
             await self._request_with_optional_relogin(requests_timeout,
                                                       self._wrapped_client.client.build_request(
