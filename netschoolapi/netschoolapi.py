@@ -316,12 +316,12 @@ class NetSchoolAPI:
                                                                  method="GET", url=report_url), )
         response = response.json()
         payload = {"selectedData": [{"filterId": "SID", "filterValue": f"{student_id}",
-                                     "filterText": f"{next((i.title for i in response.filterSources[0].items if i.value == student_id), None)}"},
+                                     "filterText": f"{next((i['title'] for i in response['filterSources'][0]['items'] if i['value'] == student_id), None)}"},
                                     {"filterId": "PCLID", "filterValue": f"{class_id}",
-                                     "filterText": f"{next((i.title for i in response.filterSources[1].items if i.value == class_id), None)}"},
+                                     "filterText": f"{next((i['title'] for i in response['filterSources'][1]['items'] if i['value'] == class_id), None)}"},
                                     {"filterId": "period",
-                                     "filterValue": f"{response.filterSources[2].defaultValue}",
-                                     "filterText": f"{' - '.join([response.filterSources[2].defaultValue.split('T')[0], response.filterSources[2].defaultValue.split('T')[1].split(' - ')[1]])}"}],
+                                     "filterValue": f"{response['filterSources'][2]['defaultValue']}",
+                                     "filterText": f"{' - '.join([response['filterSources'][2]['defaultValue'].split('T')[0], response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1]])}"}],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
                                "value": "Автономная некоммерческая организация - средняя общеобразовательная школа \"Димитриевская\" (создано в @pravschool_bot)"},
