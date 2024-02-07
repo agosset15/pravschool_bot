@@ -66,7 +66,7 @@ class NetSchoolAPI:
         ))
         login_meta = response.json()
         salt = login_meta.pop('salt')
-        self._version = login_meta.pop("ver")
+        self._version = login_meta["ver"]
         if password[0] == '[':
             passs = ast.literal_eval(password)
             encoded_password = passs[0]
