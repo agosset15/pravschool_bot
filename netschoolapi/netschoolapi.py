@@ -333,7 +333,7 @@ class NetSchoolAPI:
                                                                  method="GET", url="signalr/negotiate",
                                                                  params=query), )
         response = response.json()
-        query['connectionToken'] = response['connectionToken']
+        query['connectionToken'] = response["ConnectionToken"]
         uri = (f"signalr/connect?transport=webSockets"
                f"&clientProtocol=1.5"
                f"&at={query['at']}"
