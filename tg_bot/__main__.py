@@ -19,7 +19,7 @@ from .web_routes import (add_db_homework, send_message_handler, getdb_user,
                          getdb_homework,
                          getdb_count,
                          edit_db_class,
-                         edit_db_ns, getdb_comments)
+                         edit_db_ns, getdb_comments, getdb_report)
 
 WEBHOOK_HOST = 'https://tg.ag15.ru'
 WEBHOOK_PATH = '/webhook/pravschool'
@@ -42,8 +42,9 @@ def main():
     app["bot"] = bot
 
     app.router.add_post("/demo/sendMessage", send_message_handler)
-    app.router.add_get("/demo/getDb/homework", getdb_homework)
+    app.router.add_get("/demo/getDb/rhomework", getdb_homework)
     app.router.add_get("/demo/getDb", getdb_user)
+    app.router.add_get("/demo/getDb/report", getdb_report)
     app.router.add_get("/demo/getDb/rasp", getdb_rasp)
     app.router.add_get("/demo/getDb/rasp/kab", getdb_kab_rasp)
     app.router.add_post("/demo/editDb/homework", add_db_homework)
