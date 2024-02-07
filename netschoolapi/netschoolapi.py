@@ -334,7 +334,7 @@ class NetSchoolAPI:
                                                                  params=query), )
         response = response.json()
         query['connectionToken'] = response["ConnectionToken"]
-        uri = (f"signalr/connect?transport=webSockets"
+        uri = (f"ws://d.pravschool.ru/WebApi/signalr/connect?transport=webSockets"
                f"&clientProtocol=1.5"
                f"&at={query['at']}"
                f"&connectionToken={query['connectionToken']}"
