@@ -201,6 +201,19 @@ async def getdb_report(request: Request):
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-    r_id = int(data["r_id"])
-
+    try:
+        await ns.login(usr.login, usr.password, 1)
+        file = await ns.report("reports/studenttotal", 10270, 10477)
+        await ns.logout()
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": True, "report": file})
+    except AuthError:
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
+    except NoResponseFromServer:
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": False, "err": "Сервер электронного журнала не отвечает"}, status=504)
 
