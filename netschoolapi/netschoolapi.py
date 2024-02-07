@@ -1,9 +1,12 @@
 import ast
+import json
 from datetime import date, timedelta
 from hashlib import md5
+from urllib import parse
 from io import BytesIO
 from typing import Optional, Dict, List, Union, Any
 
+import websockets
 import httpx
 from httpx import AsyncClient, Response
 
@@ -35,7 +38,7 @@ class NetSchoolAPI:
         self._students = []
         self._year_id = -1
         self._school_id = -1
-        self._note = None
+        self._version = -1
 
         self._assignment_types: Dict[int, str] = {}
         self._login_data = ()
@@ -63,6 +66,7 @@ class NetSchoolAPI:
         ))
         login_meta = response.json()
         salt = login_meta.pop('salt')
+        self._version = login_meta.pop("ver")
         if password[0] == '[':
             passs = ast.literal_eval(password)
             encoded_password = passs[0]
@@ -297,14 +301,68 @@ class NetSchoolAPI:
             requests_timeout: int = None):
         await self.attachments(assignment_id, student_id)
         return ((
-                         await self._request_with_optional_relogin(
-                             requests_timeout,
-                             self._wrapped_client.client.build_request(
-                                 method="GET", url=f"attachments/{attachment_id}"))
-                     ).content)
+                    await self._request_with_optional_relogin(
+                        requests_timeout,
+                        self._wrapped_client.client.build_request(
+                            method="GET", url=f"attachments/{attachment_id}"))
+                ).content)
 
-    async def report(self, report_url: str, ):
-        return
+    async def report(self, report_url: str, class_id: int, student_id: Optional[int] = None,
+                     requests_timeout: int = None):
+        if not student_id:
+            student_id = self._student_id
+        response = await self._request_with_optional_relogin(requests_timeout,
+                                                             self._wrapped_client.client.build_request(
+                                                                 method="GET", url=report_url), )
+        response = response.json()
+        payload = {"selectedData": [{"filterId": "SID", "filterValue": f"{student_id}",
+                                     "filterText": f"{next((i.title for i in response.filterSources[0].items if i.value == student_id), None)}"},
+                                    {"filterId": "PCLID", "filterValue": f"{class_id}",
+                                     "filterText": f"{next((i.title for i in response.filterSources[1].items if i.value == class_id), None)}"},
+                                    {"filterId": "period",
+                                     "filterValue": f"{response.filterSources[2].defaultValue}",
+                                     "filterText": f"{' - '.join([response.filterSources[2].defaultValue.split('T')[0], response.filterSources[2].defaultValue.split('T')[1].split(' - ')[1]])}"}],
+                   "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
+                              {"name": "FULLSCHOOLNAME",
+                               "value": "Автономная некоммерческая организация - средняя общеобразовательная школа \"Димитриевская\" (создано в @pravschool_bot)"},
+                              {"name": "DATEFORMAT", "value": "d\u0001mm\u0001yy\u0001."}]}
+        query = {_: self._version, at: self._access_token, transport: "webSockets", clientProtocol: 1.5,
+                 connectionData: '[{"name":"queuehub"}]', }
+        response = await self._request_with_optional_relogin(requests_timeout,
+                                                             self._wrapped_client.client.build_request(
+                                                                 method="GET", url="signalr/negotiate",
+                                                                 params=query), )
+        response = response.json()
+        query[connectionToken] = response['connectionToken']
+        uri = (f"signalr/connect?transport=webSockets"
+               f"&clientProtocol=1.5"
+               f"&at={query[at]}"
+               f"&connectionToken={query[connectionToken]}"
+               f"&connectionData={query[connectionData]}")
+        async with websockets.client.connect(uri) as ws:
+            await self._request_with_optional_relogin(requests_timeout,
+                                                      self._wrapped_client.client.build_request(
+                                                          method="GET", url="signalr/start", params=query), )
+            self._wrapped_client.client.headers["Content-Type"] = "application/json"
+            response = await self._request_with_optional_relogin(requests_timeout,
+                                                                 self._wrapped_client.client.build_request(
+                                                                     method="POST", url=f"{report_url}/queue",
+                                                                     data=payload),)
+            response = response.json()
+            del self._wrapped_client.client.headers["Content-Type"]
+            await ws.send({H: "queuehub", M: "StartTask", A: [response["taskId"]], I: 0})
+            status = "progress"
+            while status != "complete":
+                a = json.loads(await ws.read_message())
+                status = a["M"][0]["M"]
+                if status == "error":
+                    await ws.close(4003, a["M"][0]["A"][0]["Details"])
+            data = a["M"][0]["A"][0]["Data"]
+            await ws.close(4000)
+        file = await self._request_with_optional_relogin(requests_timeout,
+                                                         self._wrapped_client.client.build_request(
+                                                             method="GET", url=f"files/{data}"),)
+        return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
         response = await self._request_with_optional_relogin(
