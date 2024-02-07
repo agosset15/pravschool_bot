@@ -356,9 +356,14 @@ class NetSchoolAPI:
                 a = json.loads(await ws.read_message())
                 status = a["M"][0]["M"]
                 if status == "error":
-                    await ws.close(4003, a["M"][0]["A"][0]["Details"])
+                    await self._request_with_optional_relogin(requests_timeout,
+                                                              self._wrapped_client.client.build_request(
+                                                                  method="POST", url="signalr/abort", params=query), )
+                    return
             data = a["M"][0]["A"][0]["Data"]
-            await ws.close(4000)
+            await self._request_with_optional_relogin(requests_timeout,
+                                                      self._wrapped_client.client.build_request(
+                                                          method="POST", url="signalr/abort", params=query), )
         file = await self._request_with_optional_relogin(requests_timeout,
                                                          self._wrapped_client.client.build_request(
                                                              method="GET", url=f"files/{data}"),)
