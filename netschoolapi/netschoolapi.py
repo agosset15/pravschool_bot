@@ -339,7 +339,7 @@ class NetSchoolAPI:
                f"&at={query['at']}"
                f"&connectionToken={query['connectionToken']}"
                f"&connectionData={query['connectionData']}"
-               f"&tid=4")
+               f"&tid=1")
         async with websockets.connect(uri) as ws:
             await self._request_with_optional_relogin(requests_timeout,
                                                       self._wrapped_client.client.build_request(
