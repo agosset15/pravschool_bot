@@ -127,6 +127,15 @@ class NetSchoolAPI:
         student = diary_info['students'][diary_info['currentStudentId']]
         self._student_id = student['studentId']
 
+        for student, i in zip(self._students[0], range(len(self._students[0]))):
+            clid = await self._request_with_optional_relogin(requests_timeout,
+                                                             self._wrapped_client.client.build_request(
+                                                                 method="POST", url=f"reports/studenttotal/initfilters",
+                                                                 json={"params": None,
+                                                                       "selectedData": {"filterId": "SID", "filterValue": f"{student['studentId']}","filterText": f"{student['nickName']}"}}))
+            resp = clid.json()
+            self._students[0][i]['classId'] = resp[0]['items'][0]['value']
+
         response = await requester(self._wrapped_client.client.build_request(
             method="GET", url='years/current'
         ))

@@ -254,6 +254,7 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
         try:
             await ns.login(l_p.login, l_p.password, 1)
             stt = await ns.students()
+            await call.message.answer(stt)
             diary = await ns.diary(start=start)
             await ns.logout()
             await ns.logout()
