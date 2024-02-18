@@ -8,7 +8,7 @@ from typing import Optional, Dict, List, Union, Any
 
 import websockets
 import httpx
-from httpx import AsyncClient, Response
+from httpx import AsyncClient, Response, request
 
 from netschoolapi import errors, schemas
 
@@ -315,59 +315,16 @@ class NetSchoolAPI:
                                                              self._wrapped_client.client.build_request(
                                                                  method="GET", url=report_url), )
         response = response.json()
-        payload = {"selectedData": [{"filterId": "SID", "filterValue": f"{student_id}",
-                                     "filterText": f"{next((i['title'] for i in response['filterSources'][0]['items'] if i['value'] == student_id), None)}"},
-                                    {"filterId": "PCLID", "filterValue": f"{class_id}",
-                                     "filterText": f"{next((i['title'] for i in response['filterSources'][1]['items'] if i['value'] == class_id), None)}"},
-                                    {"filterId": "period",
-                                     "filterValue": f"{response['filterSources'][2]['defaultValue']}",
-                                     "filterText": f"{' - '.join([response['filterSources'][2]['defaultValue'].split('T')[0], response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1]])}"}],
-                   "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
-                              {"name": "FULLSCHOOLNAME",
-                               "value": "Автономная некоммерческая организация - средняя общеобразовательная школа \"Димитриевская\" (создано в @pravschool_bot)"},
-                              {"name": "DATEFORMAT", "value": "d\u0001mm\u0001yy\u0001."}]}
-        query = {'_': self._version, 'at': self._access_token, 'transport': "webSockets", 'clientProtocol': 1.5,
-                 'connectionData': '[{"name":"queuehub"}]', }
-        response = await self._request_with_optional_relogin(requests_timeout,
-                                                             self._wrapped_client.client.build_request(
-                                                                 method="GET", url="signalr/negotiate",
-                                                                 params=query), )
-        response = response.json()
-        query['connectionToken'] = response["ConnectionToken"]
-        uri = (f"ws://d.pravschool.ru/WebApi/signalr/connect?transport=webSockets"
-               f"&clientProtocol=1.5"
-               f"&at={query['at']}"
-               f"&connectionToken={query['connectionToken']}"
-               f"&connectionData={query['connectionData']}"
-               f"&tid=1")
-        async with websockets.connect(uri) as ws:
-            await self._request_with_optional_relogin(requests_timeout,
-                                                      self._wrapped_client.client.build_request(
-                                                          method="GET", url="signalr/start", params=query), )
-            self._wrapped_client.client.headers["Content-Type"] = "application/json"
-            response = await self._request_with_optional_relogin(requests_timeout,
-                                                                 self._wrapped_client.client.build_request(
-                                                                     method="POST", url=f"{report_url}/queue",
-                                                                     data=payload),)
-            response = response.json()
-            del self._wrapped_client.client.headers["Content-Type"]
-            await ws.send({H: "queuehub", M: "StartTask", A: [response["taskId"]], I: 0})
-            status = "progress"
-            while status != "complete":
-                a = json.loads(await ws.read_message())
-                status = a["M"][0]["M"]
-                if status == "error":
-                    await self._request_with_optional_relogin(requests_timeout,
-                                                              self._wrapped_client.client.build_request(
-                                                                  method="POST", url="signalr/abort", params=query), )
-                    return
-            data = a["M"][0]["A"][0]["Data"]
-            await self._request_with_optional_relogin(requests_timeout,
-                                                      self._wrapped_client.client.build_request(
-                                                          method="POST", url="signalr/abort", params=query), )
-        file = await self._request_with_optional_relogin(requests_timeout,
-                                                         self._wrapped_client.client.build_request(
-                                                             method="GET", url=f"files/{data}"),)
+        payload = {"pload": [{"filterId": "SID", "filterValue": f"{student_id}",
+                              "filterText": f"{next((i['title'] for i in response['filterSources'][0]['items'] if i['value'] == student_id), None)}"},
+                             {"filterId": "PCLID", "filterValue": f"{class_id}",
+                              "filterText": f"{next((i['title'] for i in response['filterSources'][1]['items'] if i['value'] == class_id), None)}"},
+                             {"filterId": "period",
+                              "filterValue": f"{response['filterSources'][2]['defaultValue']}",
+                              "filterText": f"{' - '.join([response['filterSources'][2]['defaultValue'].split('T')[0], response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1]])}"}]}
+        file = request('GET', '127.0.0.1:3000/report',
+                       params={'logi': self._login_data[0], 'pas': {'hash': ast.literal_eval(self._login_data[1])[0]},
+                               'uri': f"{report_url}/queue"}, data=payload)
         return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
