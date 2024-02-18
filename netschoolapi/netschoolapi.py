@@ -315,6 +315,7 @@ class NetSchoolAPI:
                                                              self._wrapped_client.client.build_request(
                                                                  method="GET", url=report_url), )
         response = response.json()
+        print(response)
         payload = {"pload": [{"filterId": "SID", "filterValue": f"{student_id}",
                               "filterText": f"{next((i['title'] for i in response['filterSources'][0]['items'] if i['value'] == student_id), None)}"},
                              {"filterId": "PCLID", "filterValue": f"{class_id}",
@@ -325,7 +326,7 @@ class NetSchoolAPI:
                    "pas": {"hash": ast.literal_eval(self._login_data[1])[0].decode()}}
         file = request('GET', 'http://127.0.0.1:3000/report',
                        params={'logi': self._login_data[0],
-                               'uri': f"{report_url}/queue"}, json=payload, timeout=1000)
+                               'uri': f"{report_url}/queue"}, json=payload, timeout=19116)
         return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
