@@ -132,7 +132,8 @@ class NetSchoolAPI:
                                                              self._wrapped_client.client.build_request(
                                                                  method="POST", url=f"reports/studenttotal/initfilters",
                                                                  json={"params": None,
-                                                                       "selectedData": {"filterId": "SID", "filterValue": f"{student['studentId']}","filterText": f"{student['nickName']}"}}))
+                                                                       "selectedData": [{"filterId": "SID", "filterValue": f"{student['studentId']}","filterText": f"{student['nickName']}"},
+                                                                                        {"filterId":"period","filterValue":"2023-11-27T00:00:00.000Z - 2024-03-17T00:00:00.000Z","filterText":"27.11.2023 - 17.03.2024"}]}))
             resp = clid.json()
             self._students[0][i]['classId'] = resp[0]['items'][0]['value']
 
