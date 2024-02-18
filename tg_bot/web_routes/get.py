@@ -38,9 +38,24 @@ async def getdb_user(request: Request):
     list1 = {101: '10г', 102: "10е", 103: '10ф', 111: '11г', 112: '11е', 113: '11ф'}
     if classs in class_list:
         classs = list1[classs]
-    return json_response(
-        {'ok': True, 'user': {'name': usr.name, 'clas': classs, 'id': usr.id, 'isTeacher': usr.isTeacher, 'isNs': usr.isNs,
-         'ntf': usr.duty_notification, 'isAdmin': usr.isAdmin, 'pass': usr.password, 'login': usr.login}})
+    try:
+        await ns.login(usr.login, usr.password, 1)
+        stt = await ns.students()
+        await ns.logout()
+        await ns.logout()
+        await ns.logout()
+        return json_response(
+            {'ok': True, 'user': {'name': usr.name, 'clas': classs, 'id': usr.id, 'isTeacher': usr.isTeacher,
+                                  'isNs': usr.isNs, 'ntf': usr.duty_notification, 'isAdmin': usr.isAdmin,
+                                  'isParent': usr.isParent, 'pass': usr.password, 'login': usr.login}, 'children': stt})
+    except AuthError:
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
+    except NoResponseFromServer:
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": False, "err": "Сервер электронного журнала не отвечает"}, status=504)
 
 
 async def getdb_rasp(request: Request):
