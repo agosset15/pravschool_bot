@@ -1,6 +1,6 @@
 import ast
 import json
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from hashlib import md5
 from urllib import parse
 from io import BytesIO
@@ -324,8 +324,8 @@ class NetSchoolAPI:
         payload['pload'].append({"filterId": "SID", "filterValue": f"{student_id}",
                                  "filterText": f"{sid}"})
         payload['pload'].append({"filterId": "period",
-                                 "filterValue": f"{response['filterSources'][2]['defaultValue']}",
-                                 "filterText": f"{' - '.join([response['filterSources'][2]['defaultValue'].split('T')[0], response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1]])}"})
+                                 "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
+                                 "filterText": f"{' - '.join([datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y'), datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')])}"})
         pclid = None
         for item in response['filterSources'][1]['items']:
             if int(item['value']) == int(class_id):
