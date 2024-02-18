@@ -218,7 +218,7 @@ async def getdb_report(request: Request):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
         await ns.login(usr.login, usr.password, 1)
-        file = await ns.report("reports/studenttotal", 10270, 10477)
+        file = await ns.report("reports/studenttotal", data['clid'], data['sid'])
         await ns.logout()
         await ns.logout()
         await ns.logout()
