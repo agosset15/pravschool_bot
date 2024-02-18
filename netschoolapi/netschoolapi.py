@@ -325,8 +325,7 @@ class NetSchoolAPI:
                    "pas": {"hash": ast.literal_eval(self._login_data[1])[0]}}
         file = request('GET', 'http://127.0.0.1:3000/report',
                        params={'logi': self._login_data[0],
-                               'uri': f"{report_url}/queue"}, data=payload, timeout=1000, headers=
-                       {'content-type': 'application/json', 'cache-control': 'no-cache'})
+                               'uri': f"{report_url}/queue"}, data=payload, timeout=1000, json=payload)
         return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
