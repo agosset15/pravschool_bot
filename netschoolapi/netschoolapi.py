@@ -322,7 +322,7 @@ class NetSchoolAPI:
                              {"filterId": "period",
                               "filterValue": f"{response['filterSources'][2]['defaultValue']}",
                               "filterText": f"{' - '.join([response['filterSources'][2]['defaultValue'].split('T')[0], response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1]])}"}],
-                   "pas": {"hash": eval(ast.literal_eval(self._login_data[1])[0]).decode()}}
+                   "pas": {"hash": ast.literal_eval(self._login_data[1])[0].decode()}}
         file = request('GET', 'http://127.0.0.1:3000/report',
                        params={'logi': self._login_data[0],
                                'uri': f"{report_url}/queue"}, json=payload, timeout=1000)
