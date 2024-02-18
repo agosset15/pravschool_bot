@@ -322,10 +322,10 @@ class NetSchoolAPI:
             if int(item['value']) == int(student_id):
                 sid = item['title']
         payload['pload'].append({"filterId": "SID", "filterValue": f"{student_id}",
-                              "filterText": f"{sid}"})
+                                 "filterText": f"{sid}"})
         payload['pload'].append({"filterId": "period",
-                              "filterValue": f"{response['filterSources'][2]['defaultValue']}",
-                              "filterText": f"{' - '.join([response['filterSources'][2]['defaultValue'].split('T')[0], response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1]])}"})
+                                 "filterValue": f"{response['filterSources'][2]['defaultValue']}",
+                                 "filterText": f"{' - '.join([response['filterSources'][2]['defaultValue'].split('T')[0], response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1]])}"})
         pclid = None
         for item in response['filterSources'][1]['items']:
             if int(item['value']) == int(class_id):
@@ -333,11 +333,13 @@ class NetSchoolAPI:
         if not pclid:
             resp = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
-                                                                 method="POST", url=f"{report_url}/initfilters", json={"params": None, "selectedData": payload['pload']}))
+                                                                 method="POST", url=f"{report_url}/initfilters",
+                                                                 json={"params": None,
+                                                                       "selectedData": payload['pload']}))
             resp = resp.json()
             pclid = resp[0]['items'][0]['title']
-        payload['pload'].append({"filterId": "PCLID", "filterValue": f"{class_id}",
-                              "filterText": f"{pclid}"})
+        payload['pload'].insert(2, {"filterId": "PCLID", "filterValue": f"{class_id}",
+                                    "filterText": f"{pclid}"})
         file = request('GET', 'http://127.0.0.1:3000/report',
                        params={'logi': self._login_data[0],
                                'uri': f"{report_url}/queue"}, json=payload, timeout=19116)
