@@ -338,7 +338,7 @@ class NetSchoolAPI:
                                                                        "selectedData": payload['pload']}))
             resp = resp.json()
             pclid = resp[0]['items'][0]['title']
-        payload['pload'].insert(2, {"filterId": "PCLID", "filterValue": f"{class_id}",
+        payload['pload'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
                                     "filterText": f"{pclid}"})
         file = request('GET', 'http://127.0.0.1:3000/report',
                        params={'logi': self._login_data[0],
