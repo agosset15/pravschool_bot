@@ -340,10 +340,10 @@ class NetSchoolAPI:
             pclid = resp[0]['items'][0]['title']
         payload['pload'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
                                     "filterText": f"{pclid}"})
+        pars = {'logi': self._login_data[0], 'uri': f"{report_url}/queue"}
         await self.logout()
         file = request('GET', 'http://127.0.0.1:3000/report',
-                       params={'logi': self._login_data[0],
-                               'uri': f"{report_url}/queue"}, json=payload, timeout=19116)
+                       params=pars, json=payload, timeout=19116)
         return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
