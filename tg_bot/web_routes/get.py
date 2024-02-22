@@ -221,6 +221,7 @@ async def getdb_report(request: Request):
         file = await ns.report("reports/studenttotal", data['clid'], data['sid'])
         await ns.logout()
         await ns.logout()
+
         await ns.logout()
         return json_response({"ok": True, "report": file})
     except AuthError:

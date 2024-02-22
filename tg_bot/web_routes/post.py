@@ -5,7 +5,7 @@ from datetime import datetime
 from aiohttp.web_request import Request
 from aiohttp.web_response import json_response
 
-from aiogram import Bot
+from aiogram import Bot, html
 from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -16,8 +16,9 @@ from aiogram.utils.web_app import check_webapp_signature, safe_parse_webapp_init
 from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
 
 from db.methods.get import get_student_by_telegram_id, get_homework
-from db.methods.update import edit_homework, edit_homework_upd_date, edit_student_login, edit_student_password, edit_student_clas
-from db.methods.create import create_homework
+from db.methods.update import (edit_homework, edit_homework_upd_date, edit_student_login, edit_student_password,
+                               edit_student_clas, switch_student_teasher_true, switch_student_duty_notification)
+from db.methods.create import create_homework, create_student
 from ..config import MyEncoder, ns
 
 
@@ -39,6 +40,7 @@ async def send_message_handler(request: Request):
     try:
         await ns.login(usr.login, usr.password, 1)
         a = await ns.download_attachment(data['aid'], data['a_id'], data['child'])
+        info = await ns.assignment_info(a['a_id'], a['child'])
         await ns.logout()
         await ns.logout()
         await ns.logout()
@@ -48,7 +50,8 @@ async def send_message_handler(request: Request):
     except AuthError:
         await ns.logout()
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
-    await bot.send_document(usr.tgid, BufferedInputFile(a, data['name']))
+    await bot.send_document(usr.tgid, BufferedInputFile(a, data['name']),
+                            caption=f"{html.bold(info.subjectGroup[0].name)}\n{info.name}")
     return json_response({"ok": True})
 
 
@@ -109,3 +112,28 @@ async def edit_db_ns(request: Request):
     edit_student_login(usr.id, data['login'])
     edit_student_password(usr.id, data['password'])
     return json_response({"ok": True})
+
+
+async def register_user(request: Request):
+    bot: Bot = request.app['bot']
+    data = await request.post()
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    try:
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    try:
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
+        if usr is None:
+            return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    create_student(int(data['tgid']), data['name'], data['uname'], int(data['class']), "WebApp")
+    edit_student_login(int(data['tgid']), data['ns_uname'])
+    edit_student_password(int(data['tgid']), data['ns_pass'])
+    if data['is_tchr'] == 'on':
+        switch_student_teasher_true(int(data['tgid']))
+    if data['is_noti'] == 'on':
+        switch_student_duty_notification(int(data['tgid']))
+    return json_response({'ok': True})

@@ -14,7 +14,7 @@ from .config import bot
 from .handlers import common, states, callback, text, inline
 from .backend.notifications import send_user_ns_duty
 from .web_routes import (add_db_homework, send_message_handler, getdb_user,
-                         getdb_rasp,
+                         getdb_rasp, register_user,
                          getdb_kab_rasp,
                          getdb_homework,
                          getdb_count,
@@ -41,6 +41,7 @@ def main():
     app = Application()
     app["bot"] = bot
 
+    app.router.add_post('/demo/register', register_user)
     app.router.add_post("/demo/sendMessage", send_message_handler)
     app.router.add_get("/demo/getDb/rhomework", getdb_homework)
     app.router.add_get("/demo/getDb", getdb_user)
