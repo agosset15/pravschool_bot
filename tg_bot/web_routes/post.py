@@ -117,7 +117,6 @@ async def edit_db_ns(request: Request):
 async def register_user(request: Request):
     bot: Bot = request.app['bot']
     data = await request.post()
-    print(data['is_tchr'])
     if not (check_webapp_signature(bot.token, data["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
@@ -132,9 +131,9 @@ async def register_user(request: Request):
                            web_app_init_data.user.username, int(data['class']), "WebApp")
             edit_student_login(web_app_init_data.user.id, data['ns_uname'])
             edit_student_password(web_app_init_data.user.id, data['ns_pass'])
-            if data['is_tchr']:
+            if data['is_tchr'] == 'true':
                 switch_student_teasher_true(web_app_init_data.user.id)
-            if data['is_noti']:
+            if data['is_noti'] == 'true':
                 switch_student_duty_notification(web_app_init_data.user.id)
             return json_response({'ok': True})
     except ValueError:
@@ -143,9 +142,9 @@ async def register_user(request: Request):
                        web_app_init_data.user.username, int(data['class']), "WebApp")
         edit_student_login(web_app_init_data.user.id, data['ns_uname'])
         edit_student_password(web_app_init_data.user.id, data['ns_pass'])
-        if data['is_tchr']:
+        if data['is_tchr'] == 'true':
             switch_student_teasher_true(web_app_init_data.user.id)
-        if data['is_noti']:
+        if data['is_noti'] == 'true':
             switch_student_duty_notification(web_app_init_data.user.id)
         return json_response({'ok': True})
     return json_response({'ok': False, 'err': "Authorized"})
