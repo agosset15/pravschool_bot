@@ -123,13 +123,28 @@ async def register_user(request: Request):
         web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-    create_student(web_app_init_data.user.id,
-                   f"{web_app_init_data.user.first_name} {web_app_init_data.user.last_name}",
-                   web_app_init_data.user.username, int(data['class']), "WebApp")
-    edit_student_login(web_app_init_data.user.id, data['ns_uname'])
-    edit_student_password(web_app_init_data.user.id, data['ns_pass'])
-    if data['is_tchr']:
-        switch_student_teasher_true(web_app_init_data.user.id)
-    if data['is_noti']:
-        switch_student_duty_notification(web_app_init_data.user.id)
-    return json_response({'ok': True})
+    try:
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
+        if usr is None:
+            create_student(web_app_init_data.user.id,
+                           f"{web_app_init_data.user.first_name} {web_app_init_data.user.last_name}",
+                           web_app_init_data.user.username, int(data['class']), "WebApp")
+            edit_student_login(web_app_init_data.user.id, data['ns_uname'])
+            edit_student_password(web_app_init_data.user.id, data['ns_pass'])
+            if data['is_tchr']:
+                switch_student_teasher_true(web_app_init_data.user.id)
+            if data['is_noti']:
+                switch_student_duty_notification(web_app_init_data.user.id)
+            return json_response({'ok': True})
+    except ValueError:
+        create_student(web_app_init_data.user.id,
+                       f"{web_app_init_data.user.first_name} {web_app_init_data.user.last_name}",
+                       web_app_init_data.user.username, int(data['class']), "WebApp")
+        edit_student_login(web_app_init_data.user.id, data['ns_uname'])
+        edit_student_password(web_app_init_data.user.id, data['ns_pass'])
+        if data['is_tchr']:
+            switch_student_teasher_true(web_app_init_data.user.id)
+        if data['is_noti']:
+            switch_student_duty_notification(web_app_init_data.user.id)
+        return json_response({'ok': True})
+    return json_response({'ok': False, 'err': "Authorized"})

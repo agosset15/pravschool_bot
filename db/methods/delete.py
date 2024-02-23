@@ -1,15 +1,15 @@
 from ..base import Database
-from ..tables import Schedule
+from ..tables import Schedule, Student
 from .get import get_student_by_telegram_id, get_homework, get_schedule
 
 
 def delete_student(telegram_id: int):
-    session = Database().session
-    student = get_student_by_telegram_id(telegram_id)
-
-    if student:
-        session.delete(student)
-        session.commit()
+    try:
+        sts = Database().session.query(Student).filter(Student.tgid == telegram_id).all()
+        for st in sts:
+            Database().session.delete(st)
+    except exc.NoResultFound:
+        return None
 
 
 def delete_schedules():
