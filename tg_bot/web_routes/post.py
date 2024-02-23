@@ -117,6 +117,7 @@ async def edit_db_ns(request: Request):
 async def register_user(request: Request):
     bot: Bot = request.app['bot']
     data = await request.post()
+    print(data['is_tchr'])
     if not (check_webapp_signature(bot.token, data["_auth"])):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
@@ -142,7 +143,6 @@ async def register_user(request: Request):
                        web_app_init_data.user.username, int(data['class']), "WebApp")
         edit_student_login(web_app_init_data.user.id, data['ns_uname'])
         edit_student_password(web_app_init_data.user.id, data['ns_pass'])
-        print(data['is_tchr'])
         if data['is_tchr']:
             switch_student_teasher_true(web_app_init_data.user.id)
         if data['is_noti']:
