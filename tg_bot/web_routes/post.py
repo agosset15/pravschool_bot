@@ -128,8 +128,8 @@ async def register_user(request: Request):
                    web_app_init_data.user.username, int(data['class']), "WebApp")
     edit_student_login(web_app_init_data.user.id, data['ns_uname'])
     edit_student_password(web_app_init_data.user.id, data['ns_pass'])
-    if data['is_tchr'] == 'on':
+    if data['is_tchr']:
         switch_student_teasher_true(web_app_init_data.user.id)
-    if data['is_noti'] == 'on':
+    if data['is_noti']:
         switch_student_duty_notification(web_app_init_data.user.id)
     return json_response({'ok': True})
