@@ -255,7 +255,7 @@ async def getdb_rasp_today(request: Request):
     else:
         rasp = get_schedule(usr.clas, date)
     res = '\n'.join(ast.literal_eval(rasp))
-    return json_response(body=str({"ok": "True", "rasp": res, "tomorrow": tomorrow}).encode())
+    return json_response(body=str({"ok": True, "rasp": res, "tomorrow": tomorrow}).encode())
 
 
 async def getdb_rasp_random(request: Request):
@@ -269,10 +269,10 @@ async def getdb_rasp_random(request: Request):
     date = random.randint(1, 7)
     tomorrow = random.choice(["Завтра", "Сегодня"])
     if date > 5:
-        return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": tomorrow}).encode())
+        return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{tomorrow}(ТЕСТ)"}).encode())
     if usr.isTeacher is True:
         rasp = get_teacher_schedule(usr.clas, date)
     else:
         rasp = get_schedule(usr.clas, date)
     res = '\n'.join(ast.literal_eval(rasp))
-    return json_response(body=str({"ok": "True", "rasp": res, "tomorrow": tomorrow}).encode())
+    return json_response(body=str({"ok": True, "rasp": res, "tomorrow": f"{tomorrow}(ТЕСТ)"}).encode())
