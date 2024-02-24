@@ -245,7 +245,7 @@ async def getdb_rasp_today(request: Request):
     date = datetime.date.today().weekday()+1
     tomorrow = False
     if datetime.datetime.now() >= datetime.datetime(datetime.date.today().year, datetime.date.today().month, datetime.date.today().day) + datetime.timedelta(hours=14):
-        date = datetime.date.today().weekday()+2
+        date = datetime.date.today().weekday() + 2
         tomorrow = True
     if date > 4:
         return json_response({"ok": True, "week": "Выходной!", "tomorrow": tomorrow})
