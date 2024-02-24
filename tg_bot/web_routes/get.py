@@ -247,6 +247,7 @@ async def getdb_rasp_today(request: Request):
     if datetime.datetime.now() >= datetime.datetime(datetime.date.today().year, datetime.date.today().month, datetime.date.today().day) + datetime.timedelta(hours=14):
         date = datetime.date.today().weekday() + 2
         tomorrow = True
+    tomorrow = {True: "Завтра", False: "Сегодня"}[tomorrow]
     if date > 4:
         return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": tomorrow}).encode())
     if usr.isTeacher is True:
