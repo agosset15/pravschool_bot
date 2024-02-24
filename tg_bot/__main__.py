@@ -14,7 +14,7 @@ from .config import bot
 from .handlers import common, states, callback, text, inline
 from .backend.notifications import send_user_ns_duty
 from .web_routes import (add_db_homework, send_message_handler, getdb_user,
-                         getdb_rasp, register_user,
+                         getdb_rasp, register_user, getdb_rasp_today,
                          getdb_kab_rasp,
                          getdb_homework,
                          getdb_count,
@@ -53,6 +53,7 @@ def main():
     app.router.add_post('/demo/editDb/class', edit_db_class)
     app.router.add_get("/demo/getDb/count", getdb_count)
     app.router.add_get("/demo/getDb/nsComments", getdb_comments)
+    app.router.add_get("/demo/today", getdb_rasp_today)
 
     scheduler = AsyncIOScheduler()
 
