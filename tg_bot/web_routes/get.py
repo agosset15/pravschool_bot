@@ -254,4 +254,4 @@ async def getdb_rasp_today(request: Request):
     else:
         rasp = get_schedule(usr.clas, date)
     res = ''.join(ast.literal_eval(rasp))
-    return json_response({"ok": "True", "rasp": res.encode('utf-8').decode('utf-8'), "tomorrow": f"{tomorrow}"})
+    return json_response(body=str({"ok": "True", "rasp": res, "tomorrow": tomorrow}).encode())
