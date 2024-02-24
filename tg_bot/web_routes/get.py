@@ -248,7 +248,7 @@ async def getdb_rasp_today(request: Request):
         date = datetime.date.today().weekday() + 2
         tomorrow = True
     tomorrow = {True: "Завтра", False: "Сегодня"}[tomorrow]
-    if date > 4:
+    if date > 5:
         return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": tomorrow}).encode())
     if usr.isTeacher is True:
         rasp = get_teacher_schedule(usr.clas, date)
