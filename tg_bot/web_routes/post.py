@@ -51,7 +51,7 @@ async def send_message_handler(request: Request):
         await ns.logout()
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
     await bot.send_document(usr.tgid, BufferedInputFile(a, data['name']),
-                            caption=f"{html.bold(info.subjectGroup[0].name)}\n{info.name}")
+                            caption=f"{html.bold(info.subjectGroup.name)}\n{info.name}")
     return json_response({"ok": True})
 
 
