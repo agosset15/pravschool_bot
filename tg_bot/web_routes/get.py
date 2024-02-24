@@ -243,10 +243,9 @@ async def getdb_rasp_today(request: Request):
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     date = datetime.date.today().weekday()+1
-    tomorrow = False
-    if datetime.datetime.now() >= datetime.datetime(datetime.date.today().year, datetime.date.today().month, datetime.date.today().day) + datetime.timedelta(hours=14):
+    tomorrow = datetime.datetime.now() > datetime.datetime(datetime.date.today().year, datetime.date.today().month, datetime.date.today().day) + datetime.timedelta(hours=14)
+    if tomorrow:
         date = datetime.date.today().weekday() + 2
-        tomorrow = True
     tomorrow = {True: "Завтра", False: "Сегодня"}[tomorrow]
     if date > 5:
         return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": tomorrow}).encode())
