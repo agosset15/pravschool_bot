@@ -40,7 +40,7 @@ async def send_message_handler(request: Request):
     try:
         await ns.login(usr.login, usr.password, 1)
         a = await ns.download_attachment(data['aid'], data['a_id'], data['child'])
-        info = await ns.assignment_info(a['a_id'], a['child'])
+        info = await ns.assignment_info(data['a_id'], data['child'])
         await ns.logout()
         await ns.logout()
         await ns.logout()
