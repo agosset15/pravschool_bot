@@ -274,5 +274,5 @@ async def getdb_rasp_random(request: Request):
         rasp = get_teacher_schedule(usr.clas, date)
     else:
         rasp = get_schedule(usr.clas, date)
-    res = ''.join(ast.literal_eval(rasp))
+    res = '\n'.join(ast.literal_eval(rasp))
     return json_response(body=str({"ok": "True", "rasp": res, "tomorrow": tomorrow}).encode())
