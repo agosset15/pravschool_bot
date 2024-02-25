@@ -386,9 +386,9 @@ async def get_duty_child(call: CallbackQuery, state: FSMContext):
         return
     duty = await get_duty(user, chid)
     if duty:
-        await message.answer(duty)
+        await call.message.answer(duty)
     else:
-        await message.answer("Ошибка!")
+        await call.message.answer("Ошибка!")
     await state.clear()
 
 
