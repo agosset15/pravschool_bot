@@ -180,7 +180,8 @@ async def getdb_comments(request: Request):
     try:
         await ns.login(usr.login, usr.password, 1)
         diary = await ns.diary(start=d, student_id=child)
-        assignment = diary.schedule[0].lessons[int(cid[3])].assignments[int(cid[4])]
+        lesson = next((item for item in diary.schedule[0].lessons if item.lesson_id == int(cid[3])), None)
+        assignment = next((item for item in lesson.assignments if item.id == int(cid[4])), None)
         info = await ns.assignment_info(assignment.id, child)
         await ns.logout()
         await ns.logout()

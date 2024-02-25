@@ -108,16 +108,33 @@ async def cmd_admin(message: Message):
 
 
 @router.message(Command("duty"))
-async def cmd_duty(message: Message):
+async def cmd_duty(message: Message, state: FSMContext):
     user = get_student_by_telegram_id(message.from_user.id)
     if user.isNs is True:
+        if user.isParent is True:
+            try:
+                await ns.login(user.username, user.password, 1)
+                stt = await ns.students()
+                await ns.logout()
+                await ns.logout()
+                await ns.logout()
+            except SchoolNotFoundError or AuthError or NoResponseFromServer:
+                await ns.logout()
+                await message.answer("Ошибка!")
+                return
+            st = []
+            for i in stt[0]:
+                st.append(i['nickName'])
+            await call.message.answer("Выберите ребенка:", reply_markup=kb.arr_kb(st))
+            await state.set_state(GetDuty.child)
+            return
         duty = await get_duty(user)
         if duty:
             await message.answer(duty)
         else:
             await message.answer("Ошибка!")
     else:
-        await message.answer("У вас не введены данные ЭЖ.")
+        await message.answer("У вас не введены данные ЭЖ. Вы можете сделать это в настройках.")
 
 
 @router.callback_query(F.data == "users_check")

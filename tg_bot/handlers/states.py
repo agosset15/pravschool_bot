@@ -15,6 +15,7 @@ from db.methods.create import create_homework
 from db.methods.get import get_kab_schedule, get_all_students, get_student_by_telegram_id, get_homework
 from db.methods.delete import delete_schedules, delete_student
 from ..keyboards import keyboards as kb
+from ..backend.notifications import get_duty
 from ..config import *
 
 router = Router()
@@ -277,11 +278,11 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
             return
         lesson = day.lessons
         message_text = []
-        for less,le in zip(lesson, range(10)):
+        for less in lesson:
             assig = less.assignments
             if assig:
-                for i, asss in zip(assig, range(5)):
-                    link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}"
+                for i in assig:
+                    link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{less.lesson_id}a{i.id}"
                     if i.mark is None:
                         if i.is_duty is True:
                             message_text.append(
@@ -334,11 +335,11 @@ async def get_ns_child(call: CallbackQuery, state: FSMContext):
         return
     lesson = day.lessons
     message_text = []
-    for less, le in zip(lesson, range(10)):
+    for less in lesson:
         assig = less.assignments
         if assig:
-            for i, asss in zip(assig, range(5)):
-                link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{le}a{asss}a{child_id}"
+            for i in assig:
+                link = f"t.me/pravschool_bot/journal?startapp={d.strftime('%Ya%ma%d')}a{less.lesson_id}a{i.id}a{child_id}"
                 if i.mark is None:
                     if i.is_duty is True:
                         message_text.append(
@@ -359,6 +360,35 @@ async def get_ns_child(call: CallbackQuery, state: FSMContext):
         await call.message.answer(msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard())
     await call.message.answer("В настройках вы можете подписаться на ежедневные напоминания о "
                               "просроченных заданиях", reply_markup=kb.uinb())
+    await state.clear()
+
+
+@router.callback_query(GetDuty.child)
+async def get_duty_child(call: CallbackQuery, state: FSMContext):
+    child = int(call.data)
+    await call.answer("Загрузка долгов...")
+    user = get_student_by_telegram_id(call.from_user.id)
+    try:
+        await ns.login(l_p.login, l_p.password, 1)
+        stt = await ns.students()
+        chid = stt[0][child]['studentId']
+        await ns.logout()
+        await ns.logout()
+        await ns.logout()
+    except SchoolNotFoundError or AuthError:
+        await ns.logout()
+        await state.clear()
+        await call.message.answer("Неверный логин/пароль.")
+        return
+    except NoResponseFromServer:
+        await call.message.answer("Нет ответа от сервера. Повторите попытку.",
+                                  reply_markup=kb.inline_text_kb("Повторить попытку", call.data))
+        return
+    duty = await get_duty(user, chid)
+    if duty:
+        await message.answer(duty)
+    else:
+        await message.answer("Ошибка!")
     await state.clear()
 
 

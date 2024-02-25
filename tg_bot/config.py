@@ -151,6 +151,10 @@ class GetNS(StatesGroup):
     child = State()
 
 
+class GetDuty(StatesGroup):
+    child = State()
+
+
 class EditHomework(StatesGroup):
     lesson = State()
     homework = State()
