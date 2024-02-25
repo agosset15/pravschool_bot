@@ -369,7 +369,7 @@ async def get_duty_child(call: CallbackQuery, state: FSMContext):
     await call.answer("Загрузка долгов...")
     user = get_student_by_telegram_id(call.from_user.id)
     try:
-        await ns.login(l_p.login, l_p.password, 1)
+        await ns.login(user.login, user.password, 1)
         stt = await ns.students()
         chid = stt[0][child]['studentId']
         await ns.logout()
