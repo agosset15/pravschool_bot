@@ -113,7 +113,7 @@ async def cmd_duty(message: Message, state: FSMContext):
     if user.isNs is True:
         if user.isParent is True:
             try:
-                await ns.login(user.username, user.password, 1)
+                await ns.login(user.login, user.password, 1)
                 stt = await ns.students()
                 await ns.logout()
                 await ns.logout()
