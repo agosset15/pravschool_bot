@@ -125,7 +125,7 @@ async def cmd_duty(message: Message, state: FSMContext):
             st = []
             for i in stt[0]:
                 st.append(i['nickName'])
-            await call.message.answer("Выберите ребенка:", reply_markup=kb.arr_kb(st))
+            await message.answer("Выберите ребенка:", reply_markup=kb.arr_kb(st))
             await state.set_state(GetDuty.child)
             return
         duty = await get_duty(user)
