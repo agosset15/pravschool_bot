@@ -194,7 +194,8 @@ async def getdb_comments(request: Request):
     except NoResponseFromServer:
         return json_response({"ok": False, "err": "Сервер электронного журнала не отвечает"}, status=504)
     asss = assignment.to_json()
-    details = {'id': info.id, 'name': info.name, 'subject': info.subjectGroup.name, 'teachers': [], 'weight': info.weight, 'description': info.description, 'attachments': []}
+    details = {'id': info.id, 'name': info.name, 'subject': info.subjectGroup.name, 'teachers': [],
+               'weight': info.weight, 'description': info.description, 'attachments': []}
     for i in info.teachers:
         details['teachers'].append({'id': i.id, 'name': i.name})
     for i in info.attachments:
@@ -243,13 +244,16 @@ async def getdb_rasp_today(request: Request):
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-    date = datetime.date.today().weekday()+1
-    tomorrow = datetime.datetime.now() > datetime.datetime(datetime.date.today().year, datetime.date.today().month, datetime.date.today().day) + datetime.timedelta(hours=14)
+    date = datetime.date.today().weekday() + 1
+    tomorrow = datetime.datetime.now() > datetime.datetime(datetime.date.today().year, datetime.date.today().month,
+                                                           datetime.date.today().day) + datetime.timedelta(hours=14)
     if tomorrow:
         date = datetime.date.today().weekday() + 2
     tomorrow = {True: "Завтра", False: "Сегодня"}[tomorrow]
     if date > 5:
         return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": tomorrow}).encode())
+    elif date > 7:
+        date = date - 7
     if usr.isTeacher is True:
         rasp = get_teacher_schedule(usr.clas, date)
     else:
@@ -270,6 +274,8 @@ async def getdb_rasp_random(request: Request):
     tomorrow = random.choice(["Завтра", "Сегодня"])
     if date > 5:
         return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{tomorrow}(ТЕСТ)"}).encode())
+    elif date > 7:
+        date = date - 7
     if usr.isTeacher is True:
         rasp = get_teacher_schedule(usr.clas, date)
     else:
