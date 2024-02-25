@@ -3,6 +3,7 @@ import os
 import json
 import datetime
 from typing import Optional
+from aiogram import html
 from db import Student
 from ..config import bot, send_greeting, ns
 from db.methods.get import get_students_with_duty_notification, get_students_with_greet_notification

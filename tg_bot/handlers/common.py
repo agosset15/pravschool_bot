@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from db.methods.create import create_student
 from db.methods.get import get_student_by_telegram_id, get_all_students
 from db.methods.update import update_student_nonblocked, update_student_blocked
+from netschoolapi.errors import SchoolNotFoundError, NoResponseFromServer, AuthError
 from ..backend.notifications import get_duty
 from ..keyboards import keyboards as kb
 from ..config import *
@@ -118,7 +119,7 @@ async def cmd_duty(message: Message, state: FSMContext):
                 await ns.logout()
                 await ns.logout()
                 await ns.logout()
-            except SchoolNotFoundError or AuthError or NoResponseFromServer:
+            except (SchoolNotFoundError, AuthError, NoResponseFromServer):
                 await ns.logout()
                 await message.answer("Ошибка!")
                 return
