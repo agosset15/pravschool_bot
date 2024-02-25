@@ -17,7 +17,7 @@ async def get_duty(student: Student, student_id: Optional[int] = None) -> str:
             arr = []
             for i in ass:
                 asss = await ns.assignment_info(i.id, student_id)
-                link = f"t.me/pravschool_bot/journal?startapp={i.deadline.strftime('%Ya%ma%d')}a{asss.subjectGroup.id}a{asss.id}a{student_id}"
+                link = f"t.me/pravschool_bot/journal?startapp={i.deadline.strftime('%Ya%ma%d')}a{i.lesson_id}a{i.id}a{student_id}"
                 arr.append(f"{i.type} по предмету {asss.subjectGroup.name.split('/')[1]} {html.link('·?·', link)}:\n{asss.name}")
             text = "\n\n".join(arr)
             text = f"Вот ваши долги на данное время:\n\n{text}"

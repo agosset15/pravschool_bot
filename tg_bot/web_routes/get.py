@@ -186,10 +186,7 @@ async def getdb_comments(request: Request):
         await ns.logout()
         await ns.logout()
         await ns.logout()
-    except SchoolNotFoundError:
-        await ns.logout()
-        return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
-    except AuthError:
+    except (AuthError, SchoolNotFoundError):
         await ns.logout()
         return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
     except NoResponseFromServer:
