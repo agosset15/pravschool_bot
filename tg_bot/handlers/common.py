@@ -131,7 +131,7 @@ async def cmd_duty(message: Message, state: FSMContext):
             return
         duty = await get_duty(user)
         if duty:
-            await message.answer(duty)
+            await message.answer(duty, parse_mode="HTML")
         else:
             await message.answer("Ошибка!")
     else:
