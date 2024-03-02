@@ -456,7 +456,7 @@ class NetSchoolAPI:
 
     async def _get_school_id(
             self, school_name: str,
-            requester) -> Dict[str, int]:
+            requester: Requester) -> Dict[str, int]:
         schools = (await requester(
             self._wrapped_client.client.build_request(
                 method="GET",
