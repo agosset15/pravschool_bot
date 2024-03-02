@@ -347,7 +347,7 @@ class NetSchoolAPI:
                                         "filterText": f"{sid}"})
         payload['selectedData'].append({"filterId": "period",
                                         "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
-                                        "filterText": f"{' - '.join([datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y'), datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')])}"})
+                                        "filterText": f"{datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}"})
         pclid = None
         for item in response['filterSources'][1]['items']:
             if int(item['value']) == int(class_id):
@@ -362,7 +362,6 @@ class NetSchoolAPI:
             pclid = resp[0]['items'][0]['title']
         payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
                                            "filterText": f"{pclid}"})
-        pars = {'logi': self._login_data[0], 'uri': f"{report_url}/queue"}
         response = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  "GET", "/signalr/negotiate",
@@ -378,15 +377,14 @@ class NetSchoolAPI:
                  'connectionToken': connect_token, 'connectionData': '[{"name":"queuehub"}]', 'tid': try_id,
                  '_': self._version, }
 
-        async with self._wrapped_client.client.stream('GET', 'signalr/connect', timeout=20,
-                                                                       params=query) as r:
+        async with self._wrapped_client.client.stream('GET', 'signalr/connect', timeout=20, params=query) as r:
             async for chunk in r.aiter_text():
                 if 'initialized' in chunk:
                     await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
                         "GET", "signalr/start", params=query))
                     response = await self._wrapped_client.request(requests_timeout,
                                                                   self._wrapped_client.client.build_request(
-                                                                      "POST", "reports/studenttotal/queue",
+                                                                      "POST", f"{report_url}/queue",
                                                                       json=payload))
                     task_id = response.json()['taskId']
                     await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
