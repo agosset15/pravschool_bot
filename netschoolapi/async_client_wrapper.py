@@ -49,7 +49,7 @@ class AsyncClientWrapper:
         except asyncio.TimeoutError:
             raise errors.NoResponseFromServer from None
 
-    async def _infinite_request(self, request: httpx.Request, follow_redirects: bool, stream: bool):
+    async def _infinite_request(self, request: httpx.Request, follow_redirects: bool):
         while True:
             try:
                 response = await self.client.send(request, follow_redirects=follow_redirects)
