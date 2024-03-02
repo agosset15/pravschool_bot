@@ -10,13 +10,13 @@ from netschoolapi import errors
 DEFAULT_REQUESTS_TIMEOUT = 5
 
 
-class Requester(Protocol):
-
-    def __call__(self, request: httpx.Request, follow_redirects=False) -> Awaitable:
-        pass
-
-    async def __aenter__(self, request: httpx.Request, follow_redirects=False) -> Awaitable:
-        pass
+# class Requester(Protocol):
+#
+#     def __call__(self, request: httpx.Request, follow_redirects=False) -> Awaitable:
+#         pass
+#
+#     async def __aenter__(self, request: httpx.Request, follow_redirects=False) -> Awaitable:
+#         pass
 
 
 
@@ -29,7 +29,7 @@ class AsyncClientWrapper:
             default_requests_timeout = DEFAULT_REQUESTS_TIMEOUT
         self._default_requests_timeout = default_requests_timeout
 
-    def make_requester(self, requests_timeout: Optional[int], stream=False) -> Requester:
+    def make_requester(self, requests_timeout: Optional[int], stream=False):
         # noinspection PyTypeChecker
         return functools.partial(self.request, requests_timeout, stream=stream)
 
