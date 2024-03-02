@@ -12,7 +12,7 @@ DEFAULT_REQUESTS_TIMEOUT = 5
 
 class Requester(Protocol):
 
-    def __call__(self, request: httpx.Request, follow_redirects=False, stream=False) -> Awaitable[request]:
+    def __call__(self, request: httpx.Request, follow_redirects=False, stream=False) -> Awaitable:
         pass
 
 
