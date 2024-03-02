@@ -394,17 +394,13 @@ class NetSchoolAPI:
                             'data':{"H":"queuehub","M":"StartTask","A":[task_id],"I":0}}))
                 else:
                     chunk = json.loads(chunk.replace('data: ', ''))
-                    try:
-                        if chunk and chunk['M'] and chunk['M'][0]['M'] == 'complete':
+                    if chunk:
+                        if chunk['M'] and chunk['M'][0]['M'] == 'complete':
                             await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
                                 "POST", "signalr/abort", params=query))
                             file = await self._wrapped_client.request(requests_timeout,
                                                                       self._wrapped_client.client.build_request(
                                                                           "GET", f"files/{chunk['M'][0]['A'][0]['Data']}"))
-                        else:
-                            return "Error:\nif chunk and chunk['M'] and chunk['M'][0]['M'] == 'complete':"
-                    except ValueError:
-                        return "Error:\nif chunk and chunk['M'] and chunk['M'][0]['M'] == 'complete':"
         return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
