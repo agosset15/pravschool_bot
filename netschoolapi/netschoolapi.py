@@ -401,7 +401,7 @@ class NetSchoolAPI:
                             file = await self._wrapped_client.request(requests_timeout,
                                                                       self._wrapped_client.client.build_request(
                                                                           "GET", f"files/{chunk['M'][0]['A'][0]['Data']}"))
-        return file.text
+                            return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
         response = await self._request_with_optional_relogin(
