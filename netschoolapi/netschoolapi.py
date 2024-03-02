@@ -377,9 +377,9 @@ class NetSchoolAPI:
         query = {'transport': 'serverSentEvents', 'clientProtocol': '1.5', 'at': self._access_token,
                  'connectionToken': connect_token, 'connectionData': '[{"name":"queuehub"}]', 'tid': try_id,
                  '_': self._version, }
-        requester = self._wrapped_client.make_requester(requests_timeout, True)
-        async with requester(self._wrapped_client.client.build_request('GET', 'signalr/connect', timeout=20,
-                                                                       params=query)) as r:
+
+        async with self._wrapped_client.client.stream('GET', 'signalr/connect', timeout=20,
+                                                                       params=query) as r:
             async for chunk in r.aiter_text():
                 if 'initialized' in chunk:
                     await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(

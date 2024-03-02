@@ -28,23 +28,23 @@ class AsyncClientWrapper:
     async def __aenter__(self) -> 'AsyncClientWrapper':
         return self
 
-    def make_requester(self, requests_timeout: Optional[int], stream=False):
+    def make_requester(self, requests_timeout: Optional[int]):
         # noinspection PyTypeChecker
-        return functools.partial(self.request, requests_timeout, stream=stream)
+        return functools.partial(self.request, requests_timeout)
 
     async def request(
             self, requests_timeout: Optional[int], request: httpx.Request,
-            follow_redirects=False, stream=False):
+            follow_redirects=False):
         if requests_timeout is None:
             requests_timeout = self._default_requests_timeout
         try:
             if requests_timeout == 0:
                 return await self._infinite_request(
-                    request, follow_redirects, stream
+                    request, follow_redirects
                 )
             else:
                 return await asyncio.wait_for(self._infinite_request(
-                    request, follow_redirects, stream
+                    request, follow_redirects
                 ), requests_timeout)
         except asyncio.TimeoutError:
             raise errors.NoResponseFromServer from None
@@ -52,7 +52,7 @@ class AsyncClientWrapper:
     async def _infinite_request(self, request: httpx.Request, follow_redirects: bool, stream: bool):
         while True:
             try:
-                response = await self.client.send(request, stream=stream, follow_redirects=follow_redirects)
+                response = await self.client.send(request, follow_redirects=follow_redirects)
             except httpx.ReadTimeout:
                 await asyncio.sleep(0.1)
             else:
