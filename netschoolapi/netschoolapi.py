@@ -15,7 +15,7 @@ from netschoolapi import errors, schemas
 
 __all__ = ['NetSchoolAPI']
 
-from netschoolapi.async_client_wrapper import AsyncClientWrapper, Requester
+from netschoolapi.async_client_wrapper import AsyncClientWrapper
 
 
 async def _die_on_bad_status(response: Response):
