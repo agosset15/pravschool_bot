@@ -1,5 +1,6 @@
 import ast
 import json
+import asyncio
 from datetime import date, timedelta, datetime
 from hashlib import md5
 from urllib import parse
@@ -30,6 +31,7 @@ class NetSchoolAPI:
                 base_url=f'{url}/webapi',
                 headers={'user-agent': 'NetSchoolAPI/5.0.3', 'referer': url},
                 event_hooks={'response': [_die_on_bad_status]},
+                verify=False
             ),
             default_requests_timeout=default_requests_timeout,
         )
@@ -49,6 +51,9 @@ class NetSchoolAPI:
 
     async def __aexit__(self, _exc_type, _exc_val, _exc_tb):
         await self.logout()
+
+    def __del__(self):
+        asyncio.run(self.logout())
 
     async def login(
             self, user_name: str, password: str,
@@ -132,8 +137,12 @@ class NetSchoolAPI:
                                                              self._wrapped_client.client.build_request(
                                                                  method="POST", url=f"reports/studenttotal/initfilters",
                                                                  json={"params": None,
-                                                                       "selectedData": [{"filterId": "SID", "filterValue": f"{student['studentId']}","filterText": f"{student['nickName']}"},
-                                                                                        {"filterId":"period","filterValue":"2023-11-27T00:00:00.000Z - 2024-03-17T00:00:00.000Z","filterText":"27.11.2023 - 17.03.2024"}]}))
+                                                                       "selectedData": [{"filterId": "SID",
+                                                                                         "filterValue": f"{student['studentId']}",
+                                                                                         "filterText": f"{student['nickName']}"},
+                                                                                        {"filterId": "period",
+                                                                                         "filterValue": "2023-11-27T00:00:00.000Z - 2024-03-17T00:00:00.000Z",
+                                                                                         "filterText": "27.11.2023 - 17.03.2024"}]}))
             resp = clid.json()
             self._students[0][i]['classId'] = resp[0]['items'][0]['value']
 
@@ -325,17 +334,20 @@ class NetSchoolAPI:
                                                              self._wrapped_client.client.build_request(
                                                                  method="GET", url=report_url), )
         response = response.json()
-        payload = {"pload": [],
-                   "pas": {"hash": ast.literal_eval(self._login_data[1])[0].decode()}}
+        payload = {"selectedData": [],
+                   "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
+                              {"name": "FULLSCHOOLNAME",
+                               "value": "Автономная некоммерческая организация - средняя общеобразовательная школа \"Димитриевская\" \n создано в @pravschool_bot"},
+                              {"name": "DATEFORMAT", "value": "d\u0001mm\u0001yy\u0001."}]}
         sid = None
         for item in response['filterSources'][0]['items']:
             if int(item['value']) == int(student_id):
                 sid = item['title']
-        payload['pload'].append({"filterId": "SID", "filterValue": f"{student_id}",
-                                 "filterText": f"{sid}"})
-        payload['pload'].append({"filterId": "period",
-                                 "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
-                                 "filterText": f"{' - '.join([datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y'), datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')])}"})
+        payload['selectedData'].append({"filterId": "SID", "filterValue": f"{student_id}",
+                                        "filterText": f"{sid}"})
+        payload['selectedData'].append({"filterId": "period",
+                                        "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
+                                        "filterText": f"{' - '.join([datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y'), datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')])}"})
         pclid = None
         for item in response['filterSources'][1]['items']:
             if int(item['value']) == int(class_id):
@@ -345,15 +357,54 @@ class NetSchoolAPI:
                                                              self._wrapped_client.client.build_request(
                                                                  method="POST", url=f"{report_url}/initfilters",
                                                                  json={"params": None,
-                                                                       "selectedData": payload['pload']}))
+                                                                       "selectedData": payload['selectedData']}))
             resp = resp.json()
             pclid = resp[0]['items'][0]['title']
-        payload['pload'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
-                                    "filterText": f"{pclid}"})
+        payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
+                                           "filterText": f"{pclid}"})
         pars = {'logi': self._login_data[0], 'uri': f"{report_url}/queue"}
-        await self.logout()
-        file = request('GET', 'http://127.0.0.1:3000/report',
-                       params=pars, json=payload, timeout=19116)
+        response = await self._request_with_optional_relogin(requests_timeout,
+                                                             self._wrapped_client.client.build_request(
+                                                                 "GET", "/signalr/negotiate",
+                                                                 params={
+                                                                     '_': self._version,
+                                                                     'at': self._access_token,
+                                                                     'clientProtocol': '1.5',
+                                                                     'connectionData': '[{"name":"queuehub"}]', }))
+        response = response.json()
+        connect_token = response['ConnectionToken']
+        try_id = response['ConnectionId'][0]
+        query = {'transport': 'serverSentEvents', 'clientProtocol': '1.5', 'at': self._access_token,
+                 'connectionToken': connect_token, 'connectionData': '[{"name":"queuehub"}]', 'tid': try_id,
+                 '_': self._version, }
+        requester = self._wrapped_client.make_requester(requests_timeout, True)
+        async with requester(self._wrapped_client.client.build_request('GET', 'signalr/connect', timeout=20,
+                                                                       params=query)) as r:
+            async for chunk in r.aiter_text():
+                if 'initialized' in chunk:
+                    await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
+                        "GET", "signalr/start", params=query))
+                    response = await self._wrapped_client.request(requests_timeout,
+                                                                  self._wrapped_client.client.build_request(
+                                                                      "POST", "reports/studenttotal/queue",
+                                                                      json=payload))
+                    task_id = response.json()['taskId']
+                    await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
+                        "POST", "signalr/send", params=query, data={
+                            'data':{"H":"queuehub","M":"StartTask","A":[task_id],"I":0}}))
+                else:
+                    chunk = json.loads(chunk.replace('data: ', ''))
+                    try:
+                        if chunk and chunk['M'] and chunk['M'][0]['M'] == 'complete':
+                            await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
+                                "POST", "signalr/abort", params=query))
+                            file = await self._wrapped_client.request(requests_timeout,
+                                                                      self._wrapped_client.client.build_request(
+                                                                          "GET", f"files/{chunk['M'][0]['A'][0]['Data']}"))
+                        else:
+                            return "Error:\nif chunk and chunk['M'] and chunk['M'][0]['M'] == 'complete':"
+                    except ValueError:
+                        return "Error:\nif chunk and chunk['M'] and chunk['M'][0]['M'] == 'complete':"
         return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
