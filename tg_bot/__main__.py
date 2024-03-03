@@ -13,13 +13,9 @@ from db import register_models
 from .config import bot
 from .handlers import common, states, callback, text, inline
 from .backend.notifications import send_user_ns_duty
-from .web_routes import (add_db_homework, send_message_handler, getdb_user,
-                         getdb_rasp, register_user, getdb_rasp_today,
-                         getdb_kab_rasp, getdb_rasp_random,
-                         getdb_homework,
-                         getdb_count,
-                         edit_db_class,
-                         edit_db_ns, getdb_comments, getdb_report)
+from .web_routes import (add_db_homework, send_message_handler, getdb_user, get_weekdays,
+                         getdb_rasp, register_user, getdb_rasp_today, getdb_kab_rasp, getdb_rasp_random,
+                         getdb_homework, getdb_count, edit_db_class, edit_db_ns, getdb_comments, getdb_report)
 
 WEBHOOK_HOST = 'https://tg.ag15.ru'
 WEBHOOK_PATH = '/webhook/pravschool'
@@ -55,6 +51,7 @@ def main():
     app.router.add_get("/demo/getDb/nsComments", getdb_comments)
     app.router.add_get("/demo/today", getdb_rasp_today)
     app.router.add_get("/demo/test", getdb_rasp_random)
+    app.router.add_get("/demo/weeks", get_weekdays)
 
     scheduler = AsyncIOScheduler()
 
