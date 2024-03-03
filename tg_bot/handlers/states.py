@@ -297,9 +297,11 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
         msg = "\n\n".join(message_text)
         if len(msg) > 4096:
             for x in range(0, len(msg), 4096):
-                await call.message.answer(msg[x:x + 4096], parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+                await call.message.answer(msg[x:x + 4096], parse_mode='HTML', reply_markup=kb.get_startkeyboard(),
+                                          disable_web_page_preview=True)
         else:
-            await call.message.answer(msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+            await call.message.answer(msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard(),
+                                      disable_web_page_preview=True)
         await call.message.answer("В настройках вы можете подписаться на ежедневные напоминания о "
                                   "просроченных заданиях", reply_markup=kb.uinb())
         await state.clear()
@@ -355,9 +357,11 @@ async def get_ns_child(call: CallbackQuery, state: FSMContext):
     msg = "\n\n".join(message_text)
     if len(msg) > 4096:
         for x in range(0, len(msg), 4096):
-            await call.message.answer(msg[x:x + 4096], parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+            await call.message.answer(msg[x:x + 4096], parse_mode='HTML', reply_markup=kb.get_startkeyboard(),
+                                      disable_web_page_preview=True)
     else:
-        await call.message.answer(msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard())
+        await call.message.answer(msg, parse_mode='HTML', reply_markup=kb.get_startkeyboard(),
+                                  disable_web_page_preview=True)
     await call.message.answer("В настройках вы можете подписаться на ежедневные напоминания о "
                               "просроченных заданиях", reply_markup=kb.uinb())
     await state.clear()
@@ -386,7 +390,7 @@ async def get_duty_child(call: CallbackQuery, state: FSMContext):
         return
     duty = await get_duty(user, chid)
     if duty:
-        await call.message.answer(duty, parse_mode="HTML")
+        await call.message.answer(duty, parse_mode="HTML", disable_web_page_preview=True)
     else:
         await call.message.answer("Ошибка!")
     await state.clear()

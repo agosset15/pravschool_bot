@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from json import JSONEncoder
 from aiogram.fsm.state import State, StatesGroup
-from aiogram import Bot, html
+from aiogram import Bot, html, types
 from netschoolapi import NetSchoolAPI
 from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
 
@@ -91,6 +91,12 @@ async def send_greeting(student: Student, text: str, morning: bool = False):
         await bot.send_message(student.id,"⚠️Вы не ввели свои данные. Введите их в меню настроек.")
     await bot.send_message(student.id, f"{get_duty(student)}")
 
+
+async def start_year(message: types.Message):
+    with open("ids.txt", "r", encoding='utf-8') as text_id:
+        photo_id = text_id.read()
+    photo_id = photo_id.strip("[]").split(',')[2].strip(" ''")
+    await message.answer_photo(photo_id, caption="Вот расписание на год", reply_markup=kb.uinb())
 
 # ```````````````````````````````````````````````STATES`````````````````````````````````````````````````````````
 
