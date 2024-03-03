@@ -17,7 +17,8 @@ from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromSe
 
 from db.methods.get import get_student_by_telegram_id, get_homework
 from db.methods.update import (edit_homework, edit_homework_upd_date, edit_student_login, edit_student_password,
-                               edit_student_clas, switch_student_teasher_true, switch_student_duty_notification)
+                               edit_student_clas, switch_student_teasher_true, switch_student_duty_notification,
+                               switch_student_ns, switch_student_parent)
 from db.methods.create import create_homework, create_student
 from ..config import MyEncoder, ns
 
@@ -108,9 +109,19 @@ async def edit_db_ns(request: Request):
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-    edit_student_login(usr.tgid, data['login'])
-    edit_student_password(usr.tgid, data['password'])
-    return json_response({"ok": True})
+    try:
+        p = await ns.login(data['login'], data['password'], 1)
+    except AuthError:
+        return json_response({"ok": False, "err": "Неверные данные для ЭЖ"}, status=401)
+    st = await ns.students()
+    await ns.logout()
+    await ns.logout()
+    edit_student_login(web_app_init_data.user.id, data['login'])
+    edit_student_password(web_app_init_data.user.id, f"{p}")
+    switch_student_ns(message.from_user.id)
+    if len(st[0]) > 1:
+        switch_student_parent(message.from_user.id)
+    return json_response({'ok': True})
 
 
 async def register_user(request: Request):
@@ -125,22 +136,42 @@ async def register_user(request: Request):
     try:
         usr = get_student_by_telegram_id(web_app_init_data.user.id)
         if usr is None:
+            try:
+                p = await ns.login(data['ns_uname'], data['ns_pass'], 1)
+            except AuthError:
+                return json_response({"ok": False, "err": "Неверные данные для ЭЖ"}, status=401)
+            st = await ns.students()
+            await ns.logout()
+            await ns.logout()
             create_student(web_app_init_data.user.id,
                            f"{web_app_init_data.user.first_name} {web_app_init_data.user.last_name}",
                            web_app_init_data.user.username, int(data['class']), "WebApp")
             edit_student_login(web_app_init_data.user.id, data['ns_uname'])
-            edit_student_password(web_app_init_data.user.id, data['ns_pass'])
+            edit_student_password(web_app_init_data.user.id, f"{p}")
+            switch_student_ns(message.from_user.id)
+            if len(st[0]) > 1:
+                switch_student_parent(message.from_user.id)
             if data['is_tchr'] == 'true':
                 switch_student_teasher_true(web_app_init_data.user.id)
             if data['is_noti'] == 'true':
                 switch_student_duty_notification(web_app_init_data.user.id)
             return json_response({'ok': True})
     except ValueError:
+        try:
+            p = await ns.login(data['ns_uname'], data['ns_pass'], 1)
+        except AuthError:
+            return json_response({"ok": False, "err": "Неверные данные для ЭЖ"}, status=401)
+        st = await ns.students()
+        await ns.logout()
+        await ns.logout()
         create_student(web_app_init_data.user.id,
                        f"{web_app_init_data.user.first_name} {web_app_init_data.user.last_name}",
                        web_app_init_data.user.username, int(data['class']), "WebApp")
         edit_student_login(web_app_init_data.user.id, data['ns_uname'])
-        edit_student_password(web_app_init_data.user.id, data['ns_pass'])
+        edit_student_password(web_app_init_data.user.id, f"{p}")
+        switch_student_ns(message.from_user.id)
+        if len(st[0]) > 1:
+            switch_student_parent(message.from_user.id)
         if data['is_tchr'] == 'true':
             switch_student_teasher_true(web_app_init_data.user.id)
         if data['is_noti'] == 'true':
