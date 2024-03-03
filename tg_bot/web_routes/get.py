@@ -313,7 +313,7 @@ async def get_weekdays(request: Request):
     if this.weekday() != 0:
         this = this - datetime.timedelta(days=this.weekday())
     end = this + datetime.timedelta(days=6)
-    return json_response({'weeks': weeks, 'start': this, 'end': end})
+    return json_response({'ok': True, 'weeks': weeks, 'start': this, 'end': end})
 
 
 async def get_diary(request: Request):
