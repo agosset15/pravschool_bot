@@ -45,7 +45,7 @@ async def getdb_user(request: Request):
             paswd = html.italic("Сохранен в зашифрованном виде")
         else:
             paswd = html.italic("Сохранен в незашифрованном виде. Рекомендуется его переписать.")
-    if data['children'] is True:
+    if data['children'] == 'true':
         try:
             await ns.login(usr.login, usr.password, 1)
             stt = await ns.students()
