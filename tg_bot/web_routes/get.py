@@ -230,10 +230,8 @@ async def getdb_report(request: Request):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     try:
         await ns.login(usr.login, usr.password, 1)
-        file = await ns.report("reports/studenttotal", data['clid'], data['sid'], requests_timeout=120)
+        file = await ns.report(data['uri'], data['clid'], data['sid'], requests_timeout=120)
         await ns.logout()
-        await ns.logout()
-
         await ns.logout()
         return json_response({"ok": True, "report": file})
     except AuthError:
@@ -294,3 +292,58 @@ async def getdb_rasp_random(request: Request):
         rasp = get_schedule(usr.clas, date)
     res = '\n'.join(ast.literal_eval(rasp))
     return json_response(body=str({"ok": True, "rasp": res, "tomorrow": f"{tomorrow}(ТЕСТ)"}).encode())
+
+
+async def get_weekdays(request: Request):
+    year = datetime.date.today().year if datetime.date.today().month >= 9 else datetime.date.today().year - 1
+    mon = datetime.date(year=year, month=9, day=1)
+    if mon.weekday() != 0:
+        mon = mon - datetime.timedelta(days=mon.weekday())
+    sun = mon + datetime.timedelta(days=6)
+    weeks = [[mon.strftime("%Y-%m-%d"), sun.strftime("%Y-%m-%d")]]
+    start = mon
+    while True:
+        mon = mon + datetime.timedelta(weeks=1)
+        sun = sun + datetime.timedelta(weeks=1)
+        weeks.append([mon.strftime("%Y-%m-%d"), sun.strftime("%Y-%m-%d")])
+        if sun >= datetime.date((start - datetime.timedelta(days=1)).year + 1,
+                                (start - datetime.timedelta(days=1)).month, (start - datetime.timedelta(days=1)).day):
+            break
+    this = datetime.date.today()
+    if this.weekday() != 0:
+        this = this - datetime.timedelta(days=this.weekday())
+    end = this + datetime.timedelta(days=6)
+    return json_response({'weeks': weeks, 'start': this, 'end': end})
+
+
+async def get_diary(request: Request):
+    bot: Bot = request.app["bot"]
+    data = request.query
+    if not (check_webapp_signature(bot.token, data["_auth"])):
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    try:
+        web_app_init_data = safe_parse_webapp_init_data(token=bot.token, init_data=data["_auth"])
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    try:
+        usr = get_student_by_telegram_id(web_app_init_data.user.id)
+        if usr is None:
+            return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    except ValueError:
+        return json_response({"ok": False, "err": "Unauthorized"}, status=401)
+    try:
+        await ns.login(usr.login, usr.password, 1)
+        diary = await ns.diary(datetime.datetime.strptime(data[['start']], "%Y-%m-%d"),
+                               datetime.datetime.strptime(data[['end']], "%Y-%m-%d"), student_id=data['student'])
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": True, "report": diary.__dict__})
+    except AuthError:
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": False, "err": "Internal Server Error"}, status=500)
+    except NoResponseFromServer:
+        await ns.logout()
+        await ns.logout()
+        return json_response({"ok": False, "err": "Сервер электронного журнала не отвечает"}, status=504)
+
