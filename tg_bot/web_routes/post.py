@@ -89,8 +89,7 @@ async def edit_db_class(request: Request):
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-
-    edit_student_clas(usr.id, int(data['class']))
+    edit_student_clas(usr.tgid, int(data['class']))
     return json_response({"ok": True})
 
 
@@ -109,8 +108,8 @@ async def edit_db_ns(request: Request):
             return json_response({"ok": False, "err": "Unauthorized"}, status=401)
     except ValueError:
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
-    edit_student_login(usr.id, data['login'])
-    edit_student_password(usr.id, data['password'])
+    edit_student_login(usr.tgid, data['login'])
+    edit_student_password(usr.tgid, data['password'])
     return json_response({"ok": True})
 
 
