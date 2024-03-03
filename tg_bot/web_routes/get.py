@@ -35,7 +35,6 @@ async def getdb_user(request: Request):
         return json_response({"ok": False, "err": "Unauthorized"}, status=401)
 
     classs = usr.clas
-    print(classs)
     class_list = [101, 102, 103, 111, 112, 113]
     list1 = {101: '10г', 102: "10е", 103: '10ф', 111: '11г', 112: '11е', 113: '11ф'}
     if classs in class_list:
