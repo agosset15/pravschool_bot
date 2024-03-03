@@ -118,9 +118,9 @@ async def edit_db_ns(request: Request):
     await ns.logout()
     edit_student_login(web_app_init_data.user.id, data['login'])
     edit_student_password(web_app_init_data.user.id, f"{p}")
-    switch_student_ns(message.from_user.id)
+    switch_student_ns(web_app_init_data.user.id)
     if len(st[0]) > 1:
-        switch_student_parent(message.from_user.id)
+        switch_student_parent(web_app_init_data.user.id)
     return json_response({'ok': True})
 
 
@@ -148,9 +148,9 @@ async def register_user(request: Request):
                            web_app_init_data.user.username, int(data['class']), "WebApp")
             edit_student_login(web_app_init_data.user.id, data['ns_uname'])
             edit_student_password(web_app_init_data.user.id, f"{p}")
-            switch_student_ns(message.from_user.id)
+            switch_student_ns(web_app_init_data.user.id)
             if len(st[0]) > 1:
-                switch_student_parent(message.from_user.id)
+                switch_student_parent(web_app_init_data.user.id)
             if data['is_tchr'] == 'true':
                 switch_student_teasher_true(web_app_init_data.user.id)
             if data['is_noti'] == 'true':
@@ -169,9 +169,9 @@ async def register_user(request: Request):
                        web_app_init_data.user.username, int(data['class']), "WebApp")
         edit_student_login(web_app_init_data.user.id, data['ns_uname'])
         edit_student_password(web_app_init_data.user.id, f"{p}")
-        switch_student_ns(message.from_user.id)
+        switch_student_ns(web_app_init_data.user.id)
         if len(st[0]) > 1:
-            switch_student_parent(message.from_user.id)
+            switch_student_parent(web_app_init_data.user.id)
         if data['is_tchr'] == 'true':
             switch_student_teasher_true(web_app_init_data.user.id)
         if data['is_noti'] == 'true':
