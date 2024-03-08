@@ -258,7 +258,7 @@ async def getdb_rasp_today(request: Request):
     if tomorrow:
         date = datetime.date.today().weekday() + 2
     tomorrow = {True: "Завтра", False: "Сегодня"}[tomorrow]
-    days = ["понедельник", "вторник", "среда", "четверг", "пятница"]
+    days = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
     if date > 5:
         if date > 7:
             date = date - 7
