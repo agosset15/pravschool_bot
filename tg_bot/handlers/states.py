@@ -53,7 +53,7 @@ async def uch(message: Message, state: FSMContext):
     await state.clear()
     await message.answer("""Вы всегда сможете изменить свои данные в меню настроек в особом меню.""",
                          reply_markup=kb.get_startkeyboard())
-    await message.answer("Выберете день, на который вы хотите увидеть расписание\."
+    await message.answer("Выберите день, на который вы хотите увидеть расписание\."
                          "\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
                          "\n[Книга отзывов и предложений](tg://resolve?domain=agosset15bot)",
                          reply_markup=kb.uinb(), parse_mode="MarkdownV2")
