@@ -193,7 +193,8 @@ async def deluser_id(message: Message, state: FSMContext):
 async def add_ns_login(message: Message, state: FSMContext):
     await state.update_data(login=message.text)
     await message.answer(f"Теперь пришлите свой пароль."
-                         f"\nВсе пароли хранятся в боте в {html.underline('зашифрованном виде')}", parse_mode='HTML')
+                         f"\nВсе пароли хранятся в боте в {html.underline('зашифрованном виде')} и никуда не передаются.",
+                         parse_mode='HTML')
     await state.set_state(AddNS.password)
 
 
