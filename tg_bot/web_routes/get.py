@@ -263,13 +263,14 @@ async def getdb_rasp_today(request: Request):
         if date > 7:
             date = date - 7
         else:
-            return json_response(body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{tomorrow} {days[date-1]}"}).encode())
+            return json_response(
+                body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{tomorrow} {days[date - 1]}"}).encode())
     if usr.isTeacher is True:
         rasp = get_teacher_schedule(usr.clas, date)
     else:
         rasp = get_schedule(usr.clas, date)
     res = '\n'.join(ast.literal_eval(rasp))
-    return json_response(body=str({"ok": True, "rasp": res, "tomorrow": f"{tomorrow} {days[date-1]}"}).encode())
+    return json_response(body=str({"ok": True, "rasp": res, "tomorrow": f"{tomorrow} {days[date - 1]}"}).encode())
 
 
 async def getdb_rasp_random(request: Request):
@@ -338,7 +339,26 @@ async def get_diary(request: Request):
                                datetime.datetime.strptime(data[['end']], "%Y-%m-%d"), student_id=data['student'])
         await ns.logout()
         await ns.logout()
-        return json_response({"ok": True, "report": diary.__dict__})
+        diary = diary.__dict__
+        for k, v in diary.items():  # Diary
+            if isinstance(v, list):
+                for l1 in v:
+                    for k1, v1 in l1.items():  # Day
+                        if isinstance(v1, list):
+                            for l2 in v1:
+                                for k2, v2 in l2.items():  # Lesson
+                                    if isinstance(v2, list):
+                                        for l3 in v2:
+                                            for k3, v3 in l3.items():  # Assignment
+                                                if isinstance(v3, datetime.date):
+                                                    diary[k][k1][k2].update(k3, v3.strftime('%Ya%ma%d'))
+                                    if isinstance(v2, datetime.date):
+                                        diary[k][k1].update(k2, v2.strftime('%Ya%ma%d'))
+                        if isinstance(v1, datetime.date):
+                            diary[k].update(k1, v1.strftime('%Ya%ma%d'))
+            if isinstance(v, datetime.date):
+                diary.update(k, v.strftime('%Ya%ma%d'))
+        return json_response({"ok": True, "report": diary})
     except AuthError:
         await ns.logout()
         await ns.logout()
@@ -347,4 +367,3 @@ async def get_diary(request: Request):
         await ns.logout()
         await ns.logout()
         return json_response({"ok": False, "err": "Сервер электронного журнала не отвечает"}, status=504)
-

@@ -438,21 +438,9 @@ async def day_kabs_free(message: Message, state: FSMContext):
     dase = {'ПОНЕДЕЛЬНИК': 1, 'ВТОРНИК': 2, 'СРЕДА': 3,
             'ЧЕТВЕРГ': 4, 'ПЯТНИЦА': 5}
     day = dase[message.text] if message.text != "СЕГОДНЯ" else None
-    await message.answer("Выберите урок:", reply_markup=kb.kab_free_lessons(day))
-    await state.set_state(GetFreeKabs.lesson)
-
-
-@router.callback_query(GetFreeKabs.lesson)
-async def today_kab_free(call: CallbackQuery):
-    await call.message.delete()
-    lesson = int(call.data.split('_')[0])
-    if call.data.split('_')[1] == "today":
+    if day is None:
         day = time.localtime()
         day = day.tm_wday + 1
-    else:
-        day = int(call.data.split('_')[1])
-    dase = ['ПОНЕДЕЛЬНИК', 'ВТОРНИК', 'СРЕДА', 'ЧЕТВЕРГ', 'ПЯТНИЦА']
-    t_day = dase[day - 1]
     if day < 6:
         result = []
         kabs = {1: '103', 2: '104', 3: '105', 4: '107', 5: '110а', 6: '110б', 7: '122', 8: '123', 9: '127', 10: '130',
@@ -460,10 +448,13 @@ async def today_kab_free(call: CallbackQuery):
                 20: '115', 21: '201', 22: '204'}
         for kab in range(1, 23):
             value: list[str] = ast.literal_eval(get_kab_schedule(kab, day))
-            if value[lesson - 1][2:] == ' ':
-                result.append(kabs[kab])
-        res = '\n'.join(result)
-        await call.message.answer(f"{t_day}, на {day} уроке свободны:\n\n{res}", reply_markup=kb.get_startkeyboard())
-        await call.answer()
+            for lesson in range(1, 9):
+                les = []
+                if value[lesson - 1][2:] == ' ':
+                    les.append(kabs[kab])
+                a = '\n   '.join(les)
+                result.append(f"{html.bold(lesson)}:\n   {a}")
+        res = '\n\n'.join(result)
+        await message.answer(f"{message.text}, свободные кабинеты:\n\n{res}", reply_markup=kb.get_startkeyboard())
     else:
-        await call.message.answer("Сегодня выходной!", reply_markup=kb.get_startkeyboard())
+        await message.answer("Сегодня выходной!", reply_markup=kb.get_startkeyboard())
