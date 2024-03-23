@@ -75,8 +75,7 @@ async def take_kab(message: Message, state: FSMContext):
         value.append('\n'.join(ast.literal_eval(get_kab_schedule(usersmessage, i))))
     await message.answer(f"<b>Понедельник:</b>\n{value[0]}\n\n<b>Вторник:</b>\n{value[1]}"
                          f"\n\n<b>Среда:</b>\n{value[2]}\n\n<b>Четверг:</b>\n{value[3]}"
-                         f"\n\n<b>Пятница:</b>\n{value[4]}",
-                         reply_markup=kb.get_startkeyboard(), parse_mode='HTML')
+                         f"\n\n<b>Пятница:</b>\n{value[4]}", reply_markup=kb.inline_text_kb("Посмотреть время", 'add_time'), parse_mode='HTML')
     await state.clear()
 
 
@@ -288,7 +287,8 @@ async def get_ns_day(call: CallbackQuery, state: FSMContext):
                             message_text.append(
                                 f"⚠️ДОЛГ!\n{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
                         else:
-                            message_text.append(f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
+                            message_text.append(
+                                f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content}")
                     else:
                         message_text.append(
                             f"{html.bold(i.type)}({less.subject}) {html.link('·?·', link)}\n{i.content} -- {html.bold(i.mark)}")
@@ -444,9 +444,11 @@ async def day_kabs_free(message: Message, state: FSMContext):
         day = day.tm_wday + 1
     if day < 6:
         result = []
-        kabs = {1: '103', 2: '104', 3: '105', 4: '107', 5: '110а', 6: '110б', 7: '122', 8: '123', 9: '127', 10: '130',
-                11: '132', 12: '133', 13: '135', 14: '239', 15: '240', 16: '242', 17: '306', 18: 'Ул', 19: '105б',
-                20: '115', 21: '201', 22: '204'}
+        kabs = {1: "103", 2: "104", 3: "105", 4: "107", 5: "123", 6: "127", 7: "132", 8: "133",
+                9: "135", 10: "110а", 11: "110б", 12: "122", 13: "240", 14: "239", 15: "242", 16: "306", 17: "Ул",
+                18: "130", 19: "105б", 20: "115", 21: "116", 22: "201", 23: "204", 24: "Храм"}
+        times = ['08:40 - 09:25', '09:35 - 10:20', '10:30 - 11:15', '11:25 - 12:10', '12:25 - 13:10', '13:25 - 14:10',
+                 '14:25 - 15:10', '15:25 - 16:10']
         for lesson in range(1, 9):
             les = []
             for kab in range(1, 23):
@@ -454,7 +456,7 @@ async def day_kabs_free(message: Message, state: FSMContext):
                 if value[lesson - 1][2:] == ' ':
                     les.append(kabs[kab])
             a = '\n   '.join(les)
-            result.append(f"{html.bold(lesson)}:\n   {a}")
+            result.append(f"{html.bold(lesson)}({times[lesson-1]}):\n   {a}")
         res = '\n\n'.join(result)
         await message.answer(f"{message.text}, свободные кабинеты:\n\n{res}", reply_markup=kb.get_startkeyboard(),
                              parse_mode='HTML')
