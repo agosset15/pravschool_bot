@@ -32,7 +32,7 @@ class Schedule(Database.BASE):
     isKab = Column(Boolean)
     clas = Column(Integer)
     day = Column(Integer)
-    rasp = Column(String(255))
+    rasp = Column(String(300))
 
 
 class Homework(Database.BASE):
