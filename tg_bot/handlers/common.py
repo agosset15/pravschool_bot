@@ -31,6 +31,7 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     update_student_nonblocked(event.from_user.id)
 
 
+@router.message(NewUserFilter())
 @router.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
@@ -150,4 +151,3 @@ async def clb_usr(callback: CallbackQuery):
     else:
         await callback.message.answer(message, reply_markup=kb.sqlite_upd())
     await callback.answer()
-

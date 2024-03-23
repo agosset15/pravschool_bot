@@ -5,11 +5,12 @@ from dotenv import load_dotenv
 from json import JSONEncoder
 from aiogram.fsm.state import State, StatesGroup
 from aiogram import Bot, html, types
+from aiogram.filters import BaseFilter
 from netschoolapi import NetSchoolAPI
 from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
 
 from db import Student
-from db.methods.get import get_schedule
+from db.methods.get import get_schedule, get_student_by_telegram_id
 
 ns = NetSchoolAPI('http://d.pravschool.ru/')
 
@@ -95,6 +96,14 @@ async def start_year(message: types.Message):
         photo_id = text_id.read()
     photo_id = photo_id.strip("[]").split(',')[2].strip(" ''")
     await message.answer_photo(photo_id, caption="Вот расписание на год", reply_markup=kb.uinb())
+
+
+class NewUserFilter(BaseFilter):
+    def __call__(self, message: types.Message):
+        user = get_student_by_telegram_id(message.from_user.id)
+        if user is None:
+            return True
+        return False
 
 
 # ```````````````````````````````````````````````STATES`````````````````````````````````````````````````````````
