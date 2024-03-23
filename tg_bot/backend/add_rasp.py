@@ -40,9 +40,12 @@ class Exel:
                         text = f"{les1[q]}({clas1[q]})//{les2[q]}({clas2[q]})"
                         data.append(text)
         main_data = []
+        a = "\n"
         for w in range(0, len(data), 8):
-            main_data.append([f"1.{data[w]}", f"2.{data[w + 1]}", f"3.{data[w + 2]}", f"4.{data[w + 3]}",
-                              f"5.{data[w + 4]}", f"6.{data[w + 5]}", f"7.{data[w + 6]}", f"8.{data[w + 7]}"])
+            main_data.append([f"1.{data[w].replace(a, '')}", f"2.{data[w + 1].replace(a, '')}",
+                              f"3.{data[w + 2].replace(a, '')}", f"4.{data[w + 3].replace(a, '')}",
+                              f"5.{data[w + 4].replace(a, '')}", f"6.{data[w + 5].replace(a, '')}",
+                              f"7.{data[w + 6].replace(a, '')}", f"8.{data[w + 7].replace(a, '')}"])
 
         ids = []
         for i in range(1, 10):
@@ -87,9 +90,12 @@ class Exel:
                     text = f"{data1[q]}({data2[q]})"
                 data.append(text)
         main_data = []
+        a = "\n"
         for w in range(0, len(data), 8):
-            main_data.append([f"1.{data[w]}", f"2.{data[w + 1]}", f"3.{data[w + 2]}", f"4.{data[w + 3]}",
-                              f"5.{data[w + 4]}", f"6.{data[w + 5]}", f"7.{data[w + 6]}", f"8.{data[w + 7]}"])
+            main_data.append([f"1.{data[w].replace(a, '')}", f"2.{data[w + 1].replace(a, '')}",
+                              f"3.{data[w + 2].replace(a, '')}", f"4.{data[w + 3].replace(a, '')}",
+                              f"5.{data[w + 4].replace(a, '')}", f"6.{data[w + 5].replace(a, '')}",
+                              f"7.{data[w + 6].replace(a, '')}", f"8.{data[w + 7].replace(a, '')}"])
 
         ids = []
         for i in range(1, tchr_count + 1):
@@ -116,10 +122,13 @@ class Exel:
                     text = f"{data1[q]}"
                 data.append(text)
         main_data = []
+        a = "\n"
         for w in range(0, len(data), 10):
-            main_data.append([f"1.{data[w]}", f"2.{data[w + 1]}", f"3.{data[w + 2]}", f"4.{data[w + 3]}",
-                              f"5.{data[w + 4]}", f"6.{data[w + 5]}", f"7.{data[w + 6]}", f"8.{data[w + 7]}",
-                              f"9.{data[w + 8]}", f"10.{data[w + 9]}"])
+            main_data.append([f"1.{data[w].replace(a, '')}", f"2.{data[w + 1].replace(a, '')}",
+                              f"3.{data[w + 2].replace(a, '')}", f"4.{data[w + 3].replace(a, '')}",
+                              f"5.{data[w + 4].replace(a, '')}", f"6.{data[w + 5].replace(a, '')}",
+                              f"7.{data[w + 6].replace(a, '')}", f"8.{data[w + 7].replace(a, '')}",
+                              f"9.{data[w + 8].replace(a, '')}", f"10.{data[w + 9].replace(a, '')}"])
 
         ids = []
         for i in range(1, kab_count + 1):
