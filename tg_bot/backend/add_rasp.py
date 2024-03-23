@@ -106,7 +106,7 @@ class Exel:
         data = []
         for i in range(min_row, max_row + 1):
             data1 = []
-            for col in range(3, 43):
+            for col in range(3, 63):
                 value = sheet.cell(i, col).value
                 data1.append(value)
             for q in range(len(data1)):
@@ -116,16 +116,17 @@ class Exel:
                     text = f"{data1[q]}"
                 data.append(text)
         main_data = []
-        for w in range(0, len(data), 8):
+        for w in range(0, len(data), 10):
             main_data.append([f"1.{data[w]}", f"2.{data[w + 1]}", f"3.{data[w + 2]}", f"4.{data[w + 3]}",
-                              f"5.{data[w + 4]}", f"6.{data[w + 5]}", f"7.{data[w + 6]}", f"8.{data[w + 7]}"])
+                              f"5.{data[w + 4]}", f"6.{data[w + 5]}", f"7.{data[w + 6]}", f"8.{data[w + 7]}",
+                              f"9.{data[w + 8]}", f"10.{data[w + 9]}"])
 
         ids = []
         for i in range(1, kab_count + 1):
             for day in range(1, 6):
-                ids.append(f'{i}_{day}')
+                ids.append([i, day])
 
         for s in range(0, len(main_data)):
-            clas = ids[s].split('_')[0]
-            day = ids[s].split('_')[1]
+            clas = ids[s][0]
+            day = ids[s][1]
             create_schedule(int(clas), int(day), str(main_data[s]), True, True)
