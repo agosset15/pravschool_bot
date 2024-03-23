@@ -446,14 +446,14 @@ async def day_kabs_free(message: Message, state: FSMContext):
         kabs = {1: '103', 2: '104', 3: '105', 4: '107', 5: '110а', 6: '110б', 7: '122', 8: '123', 9: '127', 10: '130',
                 11: '132', 12: '133', 13: '135', 14: '239', 15: '240', 16: '242', 17: '306', 18: 'Ул', 19: '105б',
                 20: '115', 21: '201', 22: '204'}
-        for kab in range(1, 23):
-            value: list[str] = ast.literal_eval(get_kab_schedule(kab, day))
-            for lesson in range(1, 9):
-                les = []
+        for lesson in range(1, 9):
+            les = []
+            for kab in range(1, 23):
+                value: list[str] = ast.literal_eval(get_kab_schedule(kab, day))
                 if value[lesson - 1][2:] == ' ':
                     les.append(kabs[kab])
-                a = '\n   '.join(les)
-                result.append(f"{html.bold(lesson)}:\n   {a}")
+            a = '\n   '.join(les)
+            result.append(f"{html.bold(lesson)}:\n   {a}")
         res = '\n\n'.join(result)
         await message.answer(f"{message.text}, свободные кабинеты:\n\n{res}", reply_markup=kb.get_startkeyboard())
     else:
