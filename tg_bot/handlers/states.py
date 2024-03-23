@@ -87,7 +87,7 @@ async def getcount(message: Message, state: FSMContext):
     userbase = get_all_students()
     for z in userbase:
         try:
-            await bot.send_message(z.tgid, f"Внимание!\n{ad}")
+            await bot.send_message(z.tgid, f"{ad}", parse_mode="HTML")
         except TelegramBadRequest or TelegramForbiddenError or TelegramNotFound:
             update_student_blocked(z.tgid)
             pass
