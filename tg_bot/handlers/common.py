@@ -4,9 +4,9 @@ from aiogram.filters.chat_member_updated import ChatMemberUpdatedFilter, KICKED,
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from db.methods.create import create_student
-from db.methods.get import get_student_by_telegram_id, get_all_students
+from db.methods.get import get_all_students, get_student_by_telegram_id
 from db.methods.update import update_student_nonblocked, update_student_blocked
-from netschoolapi.errors import SchoolNotFoundError, NoResponseFromServer, AuthError
+from db.methods.delete import delete_student
 from ..backend.notifications import get_duty
 from ..keyboards import keyboards as kb
 from ..config import *
@@ -72,6 +72,20 @@ async def cmd_start(message: Message, state: FSMContext):
                 print("Новый пользователь!")
                 await bot.send_message(-1001845347264, f"{message.from_user.id} Новый пользователь!\n{code}")
     else:
+        if code == 'rereg':
+            delete_student(message.from_user.id)
+            await message.answer("Вы у меня впервые!")
+            if message.chat.type != 'private':
+                await message.answer("Регистрация возможна только в личном чате с ботом\n")
+            else:
+                create_student(message.from_user.id, message.from_user.full_name, message.from_user.username, 0, code)
+                await message.answer(
+                    "Здравствуйте!\n\nЯ буду показывать вам расписание уроков Свято-Димитриевской школы.",
+                    reply_markup=kb.clases())
+                await message.answer("Чтобы начать, выберете свой класс внизу экрана, "
+                                     "или нажмите 'Я-учитель👨‍🏫' для перехода к учительскому расписанию.",
+                                     reply_markup=kb.uchitel())
+                await state.set_state(ClassWait.clas)
         if usr.isTeacher is True:
             await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
             await message.answer(f"Вы учитель\.\nВыберете день, на который вы хотите увидеть расписание\."
