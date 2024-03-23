@@ -7,7 +7,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram import Bot, html, types
 from netschoolapi import NetSchoolAPI
 from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
-from backend import get_duty
+from .backend import get_duty
 
 from db import Student
 from db.methods.get import get_schedule
