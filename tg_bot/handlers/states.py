@@ -435,6 +435,7 @@ async def edit_homework_image(message: Message, state: FSMContext):
 
 @router.message(GetFreeKabs.day)
 async def day_kabs_free(message: Message, state: FSMContext):
+    await state.clear()
     dase = {'ПОНЕДЕЛЬНИК': 1, 'ВТОРНИК': 2, 'СРЕДА': 3,
             'ЧЕТВЕРГ': 4, 'ПЯТНИЦА': 5}
     day = dase[message.text] if message.text != "СЕГОДНЯ" else None
