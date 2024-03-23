@@ -123,7 +123,7 @@ class Exel:
 
         ids = []
         for i in range(1, kab_count + 1):
-            for day in range(1, 6):
+            for day in range(1, 7):
                 ids.append([i, day])
 
         for s in range(0, len(main_data)):
