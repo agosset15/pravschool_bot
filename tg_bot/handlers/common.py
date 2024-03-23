@@ -86,22 +86,23 @@ async def cmd_start(message: Message, state: FSMContext):
                                      "или нажмите 'Я-учитель👨‍🏫' для перехода к учительскому расписанию.",
                                      reply_markup=kb.uchitel())
                 await state.set_state(ClassWait.clas)
-        if usr.isTeacher is True:
-            await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
-            await message.answer(f"Вы учитель\.\nВыберете день, на который вы хотите увидеть расписание\."
-                                 f"\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
-                                 f"\n[Книга отзывов и предложений](tg://resolve?domain=agosset15bot)",
-                                 reply_markup=kb.uinb(), parse_mode="MarkdownV2")
         else:
-            clas = usr.clas
-            list_class = [101, 102, 103, 111, 112, 113]
-            if clas in list_class:
-                clas = int(clas / 10)
-            await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
-            await message.answer(f"Вы в {clas} классе\.\nВыберете день, на который вы хотите увидеть расписание\."
-                                 f"\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
-                                 f"\n[Книга отзывов и предложений](tg://resolve?domain=agosset15bot)",
-                                 reply_markup=kb.uinb(), parse_mode="MarkdownV2")
+            if usr.isTeacher is True:
+                await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
+                await message.answer(f"Вы учитель\.\nВыберете день, на который вы хотите увидеть расписание\."
+                                     f"\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
+                                     f"\n[Книга отзывов и предложений](tg://resolve?domain=agosset15bot)",
+                                     reply_markup=kb.uinb(), parse_mode="MarkdownV2")
+            else:
+                clas = usr.clas
+                list_class = [101, 102, 103, 111, 112, 113]
+                if clas in list_class:
+                    clas = int(clas / 10)
+                await message.answer("👨‍🏫", reply_markup=kb.get_startkeyboard())
+                await message.answer(f"Вы в {clas} классе\.\nВыберете день, на который вы хотите увидеть расписание\."
+                                     f"\nВы можете выбрать расписание на неделю в ОСОБОМ МЕНЮ\."
+                                     f"\n[Книга отзывов и предложений](tg://resolve?domain=agosset15bot)",
+                                     reply_markup=kb.uinb(), parse_mode="MarkdownV2")
     if message.from_user.id == 900645059:
         await message.answer("👑Ты в VIP-ке!", reply_markup=kb.vip_menu())
         print()
