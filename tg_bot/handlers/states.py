@@ -455,6 +455,7 @@ async def day_kabs_free(message: Message, state: FSMContext):
             a = '\n   '.join(les)
             result.append(f"{html.bold(lesson)}:\n   {a}")
         res = '\n\n'.join(result)
-        await message.answer(f"{message.text}, свободные кабинеты:\n\n{res}", reply_markup=kb.get_startkeyboard())
+        await message.answer(f"{message.text}, свободные кабинеты:\n\n{res}", reply_markup=kb.get_startkeyboard(),
+                             parse_mode='HTML')
     else:
         await message.answer("Сегодня выходной!", reply_markup=kb.get_startkeyboard())
