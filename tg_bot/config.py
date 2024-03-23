@@ -99,7 +99,7 @@ async def start_year(message: types.Message):
 
 
 class NewUserFilter(BaseFilter):
-    def __call__(self, message: types.Message):
+    async def __call__(self, message: types.Message):
         user = get_student_by_telegram_id(message.from_user.id)
         if user is None:
             return True
