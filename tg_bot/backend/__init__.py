@@ -1,1 +1,1 @@
-from notifications import get_duty
+from .notifications import get_duty
