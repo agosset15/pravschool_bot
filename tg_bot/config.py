@@ -7,11 +7,9 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram import Bot, html, types
 from netschoolapi import NetSchoolAPI
 from netschoolapi.errors import SchoolNotFoundError, AuthError, NoResponseFromServer
-from .backend import get_duty
 
 from db import Student
 from db.methods.get import get_schedule
-
 
 ns = NetSchoolAPI('http://d.pravschool.ru/')
 
@@ -58,7 +56,7 @@ async def send_greeting(student: Student, text: str, morning: bool = False):
             await ns.logout()
             await ns.logout()
             await ns.logout()
-            day = diary.schedule[dt.weekday()-1]
+            day = diary.schedule[dt.weekday() - 1]
         except SchoolNotFoundError or AuthError:
             await ns.logout()
             await bot.send_message(student.id, "Неверный логин/пароль от ЭЖ.")
@@ -88,8 +86,8 @@ async def send_greeting(student: Student, text: str, morning: bool = False):
         else:
             await bot.send_message(student.id, msg, parse_mode='HTML')
     else:
-        await bot.send_message(student.id,"⚠️Вы не ввели свои данные. Введите их в меню настроек.")
-    await bot.send_message(student.id, f"{get_duty(student)}")
+        await bot.send_message(student.id, "⚠️Вы не ввели свои данные. Введите их в меню настроек.")
+    # await bot.send_message(student.id, f"{get_duty(student)}")
 
 
 async def start_year(message: types.Message):
@@ -97,6 +95,7 @@ async def start_year(message: types.Message):
         photo_id = text_id.read()
     photo_id = photo_id.strip("[]").split(',')[2].strip(" ''")
     await message.answer_photo(photo_id, caption="Вот расписание на год", reply_markup=kb.uinb())
+
 
 # ```````````````````````````````````````````````STATES`````````````````````````````````````````````````````````
 
