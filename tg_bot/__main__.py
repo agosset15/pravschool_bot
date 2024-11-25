@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 import os
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -15,6 +15,7 @@ from tg_bot.handlers import common, states, callback, text, inline, service, adm
 from tg_bot.middlewares import DatabaseMiddleware
 from tg_bot.web import get, post
 from tg_bot.config import WEBHOOK_URL, WEBHOOK_PATH, WEBAPI_PORT, WEBAPI_HOST
+from tg_bot.utils.logging import setup as setup_logging
 
 
 class StartUpFactory:
@@ -22,15 +23,15 @@ class StartUpFactory:
         self.session = None
 
     async def bot(self, dispatcher: Dispatcher):
-        print('Запускаю БД...')
+        logger.info('Запускаю БД...')
         db = DefaultService(self.session)
         register_global_middlewares(dispatcher, db)
-        print('Запускаю бота...')
+        logger.info('Запускаю бота...')
         await bot.delete_webhook(drop_pending_updates=True)
         await bot.set_webhook(WEBHOOK_URL)
 
     async def server(self, app):
-        print('Запускаю БД...')
+        logger.info('Запускаю БД для web...')
         db_manager.init()
         self.session = db_manager.session
         app["db"] = DefaultService(self.session)
@@ -64,11 +65,11 @@ def main():
 
     scheduler = AsyncIOScheduler()
 
-    print('Регаю хендлеры...')
+    logger.info('Регаю хендлеры...')
     dp.include_routers(common.router, states.router, callback.router, text.router, inline.router, admin.router,
                        service.router)
 
-    print('Запускаю шедулер...')
+    logger.info('Запускаю шедулер...')
     scheduler.start()
     # scheduler.add_job(send_user_ns_duty, 'cron', hour=12)
 
@@ -77,11 +78,11 @@ def main():
         bot=bot,
     ).register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
-    print('Запускаю ВебСервер...')
+    logger.info('Запускаю ВебСервер...')
     run_app(app, host=WEBAPI_HOST, port=WEBAPI_PORT)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    setup_logging()
     os.environ["TZ"] = "Europe/Moscow"
     main()
