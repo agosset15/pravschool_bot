@@ -36,6 +36,7 @@ class StartUpFactory:
         self.session = db_manager.session
         app["db"] = DefaultService(self.session)
         yield
+        logger.info("Остановка...")
         await db_manager.close()
 
 
