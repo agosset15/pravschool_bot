@@ -1,5 +1,5 @@
 services:
-  site:
+  bot:
     image: pravschool_bot
     build:
       context: ./

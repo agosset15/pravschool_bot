@@ -46,7 +46,7 @@ async def parse_duty(bot_username: str, assignments: List[Assignment], ns: NetSc
         info = await ns.assignment_info(assignment.id, student_id=student_id)
         link = create_telegram_link(bot_username, 'journal', startapp=f"{info.id}a{ns.current_student}")
         message_text.append(f"{assignment.type} по предмету {info.subject.name} {html.link('·?·', link)}:\n{info.name}")
-    return f"Вот ваши долги на данное время:\n\n{'\n\n'.join(message_text)}"
+    return "Вот ваши долги на данное время:\n\n"+'\n\n'.join(message_text)
 
 
 async def get_ns_day(start: datetime, day: int, bot: Bot, ns: NetSchoolAPI,
