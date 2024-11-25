@@ -16,7 +16,6 @@ from tg_bot.config import days, times
 router = Router()
 
 
-# TODO: реализовать структуру Scene для states проходов
 @router.message(GradeWait.grade)
 async def grade_edit(message: Message, state: FSMContext, db: DefaultService, user: User):
     teacher = ("*teacher_" in message.text)
