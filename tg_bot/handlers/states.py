@@ -199,5 +199,5 @@ async def day_kabs_free(call: CallbackQuery, state: FSMContext, db: DefaultServi
     message_text = []
     for lesson_number, rooms in enumerate(day_free_rooms):
         message_text.append(f"{html.bold(lesson_number + 1)}({times[lesson_number]}):\n{', '.join(rooms)}")
-    await call.message.edit_caption(caption=f"{day}, свободные кабинеты:\n\n{'\n\n'.join(message_text)}",
+    await call.message.edit_caption(caption=f"{day}, свободные кабинеты:\n\n"+'\n\n'.join(message_text),
                                     reply_markup=main_kb())
