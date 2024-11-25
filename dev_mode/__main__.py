@@ -23,6 +23,7 @@ async def main() -> None:
     bot = Bot(token=BOT_TOKEN)
 
     # And the run events dispatching
+    await bot.delete_webhook(drop_pending_updates=False)
     await router.start_polling(bot)
 
 

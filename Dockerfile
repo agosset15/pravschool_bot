@@ -7,7 +7,6 @@ ENV PATH "/app/scripts:${PATH}"
 ENV TZ="Europe/Moscow"
 
 WORKDIR /app
-EXPOSE 80
 
 # Install Poetry
 RUN set +x \
