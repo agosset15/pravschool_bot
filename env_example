@@ -2,4 +2,5 @@
 
 # Токен бота, узнать можно у https://t.me/botfather
 BOT_TOKEN=123456789:abcdefghijklmnopqrstuvwxyz
-DB_ENGINE=sqlite://database.db
+DB_DRIVER=sqlite
+DB_HOST=database.db

@@ -1,15 +1,11 @@
-import ast
 import json
-import asyncio
 from datetime import date, timedelta, datetime
 from hashlib import md5
-from urllib import parse
 from io import BytesIO
 from typing import Optional, Dict, List, Union, Any
 
-import websockets
 import httpx
-from httpx import AsyncClient, Response, request
+from httpx import AsyncClient, Response
 
 from netschoolapi import errors, schemas
 
@@ -37,7 +33,7 @@ class NetSchoolAPI:
         )
 
         self._student_id = -1
-        self._students = []
+        self._students = []  # [{'studentId': int, 'nickName': str, 'className': None, 'classId': str(int), 'iupGrade': 0}]
         self._year_id = -1
         self._school_id = -1
         self._version = -1
@@ -52,13 +48,10 @@ class NetSchoolAPI:
     async def __aexit__(self, _exc_type, _exc_val, _exc_tb):
         await self.logout()
 
-    def __del__(self):
-        asyncio.run(self.logout())
-
     async def login(
-            self, user_name: str, password: str,
+            self, user_name: str, password: bytes | str,
             school_name_or_id: Union[int, str],
-            requests_timeout: int = None) -> List[str]:
+            requests_timeout: int = None, password_encode: bool = False) -> str:
         requester = self._wrapped_client.make_requester(requests_timeout)
         # Getting the `NSSESSIONID` cookie for `auth/getdata`
         await requester(self._wrapped_client.client.build_request(
@@ -72,10 +65,8 @@ class NetSchoolAPI:
         login_meta = response.json()
         salt = login_meta.pop('salt')
         self._version = login_meta["ver"]
-        if password[0] == '[':
-            passs = ast.literal_eval(password)
-            encoded_password = passs[0]
-        else:
+        encoded_password = password
+        if password_encode:
             encoded_password = md5(
                 password.encode('windows-1251')
             ).hexdigest().encode()
@@ -128,11 +119,11 @@ class NetSchoolAPI:
             method="GET", url='student/diary/init',
         ))
         diary_info = response.json()
-        self._students = [diary_info['students'], diary_info['currentStudentId']]
+        self._students = diary_info['students']
         student = diary_info['students'][diary_info['currentStudentId']]
         self._student_id = student['studentId']
 
-        for student, i in zip(self._students[0], range(len(self._students[0]))):
+        for i, student in enumerate(self._students):
             clid = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  method="POST", url=f"reports/studenttotal/initfilters",
@@ -144,7 +135,7 @@ class NetSchoolAPI:
                                                                                          "filterValue": "2023-11-27T00:00:00.000Z - 2024-03-17T00:00:00.000Z",
                                                                                          "filterText": "27.11.2023 - 17.03.2024"}]}))
             resp = clid.json()
-            self._students[0][i]['classId'] = resp[0]['items'][0]['value']
+            self._students[i]['classId'] = resp[0]['items'][0]['value']
 
         response = await requester(self._wrapped_client.client.build_request(
             method="GET", url='years/current'
@@ -160,8 +151,8 @@ class NetSchoolAPI:
             assignment['id']: assignment['name']
             for assignment in assignment_reference
         }
-        self._login_data = (user_name, f"{[encoded_password]}", school_name_or_id)
-        return [encoded_password]
+        self._login_data = (user_name, encoded_password, school_name_or_id)
+        return encoded_password
 
     async def _request_with_optional_relogin(
             self, requests_timeout: Optional[int], request: httpx.Request,
@@ -202,8 +193,8 @@ class NetSchoolAPI:
             start = monday
         if not end:
             end = start + timedelta(days=5)
-        if not student_id:
-            student_id = self._student_id
+        if student_id:
+            self._student_id = student_id
 
         response = await self._request_with_optional_relogin(
             requests_timeout,
@@ -211,7 +202,7 @@ class NetSchoolAPI:
                 method="GET",
                 url="student/diary",
                 params={
-                    'studentId': student_id,
+                    'studentId': self._student_id,
                     'yearId': self._year_id,
                     'weekStart': start.isoformat(),
                     'weekEnd': end.isoformat(),
@@ -235,8 +226,8 @@ class NetSchoolAPI:
             start = monday
         if not end:
             end = start + timedelta(days=5)
-        if not student_id:
-            student_id = self._student_id
+        if student_id:
+            self._student_id = student_id
 
         response = await self._request_with_optional_relogin(
             requests_timeout,
@@ -244,7 +235,7 @@ class NetSchoolAPI:
                 method="GET",
                 url='student/diary/pastMandatory',
                 params={
-                    'studentId': student_id,
+                    'studentId': self._student_id,
                     'yearId': self._year_id,
                     'weekStart': start.isoformat(),
                     'weekEnd': end.isoformat(),
@@ -276,6 +267,7 @@ class NetSchoolAPI:
             )
         )
         assignments_schema = schemas.AssignmentInfoSchema()
+        assignments_schema.context['assignment_types'] = self._assignment_types
         assignments = assignments_schema.load(response.json())
         return assignments  # type: ignore
 
@@ -326,10 +318,11 @@ class NetSchoolAPI:
                             method="GET", url=f"attachments/{attachment_id}"))
                 ).content)
 
-    async def report(self, report_url: str, class_id: int, student_id: Optional[int] = None,
+    async def report(self, report_url: str, student_id: Optional[int] = None,
                      requests_timeout: int = None):
         if not student_id:
             student_id = self._student_id
+        class_id = next((x['classId'] for x in self._students if x['studentId'] == student_id), None)
         response = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  method="GET", url=report_url), )
@@ -337,7 +330,7 @@ class NetSchoolAPI:
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
-                               "value": "Автономная некоммерческая организация - средняя общеобразовательная школа \"Димитриевская\" \n создано в @pravschool_bot"},
+                               "value": "АНО СОШ \"Димитриевская\" \n создано в @pravschool_bot"},
                               {"name": "DATEFORMAT", "value": "d\u0001mm\u0001yy\u0001."}]}
         sid = None
         for item in response['filterSources'][0]['items']:
@@ -479,5 +472,14 @@ class NetSchoolAPI:
                          )
                      ).content)
 
-    async def students(self) -> List[Any]:
-        return self._students
+    @property
+    def students(self) -> List[Any]:
+        return self._students if self._students != [] else None
+
+    @property
+    def current_student(self):
+        return self._student_id if self._student_id != -1 else None
+
+    @property
+    def is_logged(self) -> bool:
+        return self._login_data != ()

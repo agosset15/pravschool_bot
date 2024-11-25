@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from marshmallow import EXCLUDE, Schema, pre_load
 from marshmallow_dataclass import class_schema
 
-__all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School']
+__all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School', 'Day']
 
 
 class NetSchoolAPISchema(Schema):
@@ -21,6 +21,10 @@ class Attachment(NetSchoolAPISchema):
     description: str = field(metadata=dict(
         allow_none=True, missing='', required=False
     ))
+
+    @property
+    def json(self):
+        return {'id': self.id, 'name': self.name, 'description': self.description}
 
 
 @dataclass
@@ -44,13 +48,15 @@ class Assignment(NetSchoolAPISchema):
     id: int
     comment: str
     type: str
+    subject: str = field(metadata=dict(data_key='subjectName', allow_none=True, missing='', required=False))
     content: str = field(metadata=dict(data_key='assignmentName'))
     mark: int = field(metadata=dict(allow_none=True, data_key='mark'))
     is_duty: bool = field(metadata=dict(data_key='dutyMark'))
     deadline: datetime.date = field(metadata=dict(data_key='dueDate'))
     lesson_id: int = field(metadata=dict(data_key='classMeetingId'))
 
-    def to_json(self):
+    @property
+    def json(self):
         return {'id': self.id, 'comment': self.comment, '_type': self.type, 'content': self.content, 'mark': self.mark,
                 'is_duty': self.is_duty, 'deadline': self.deadline.strftime('%d/%m'), 'lesson_id': self.lesson_id}
 
@@ -74,22 +80,47 @@ class Teacher(NetSchoolAPISchema):
 
 
 @dataclass
-class SubjectGroup(NetSchoolAPISchema):
+class Subject(NetSchoolAPISchema):
     id: int
     name: str
+    grade: str
+
+    @pre_load
+    def unwrap_subject(self, subject: Dict[str, Any], **_) -> Dict[str, str]:
+        name = subject.pop('name', '').split('/')
+        if len(name) > 1:
+            subject.update({'grade': name.pop(0), 'name': name.pop(0)})
+        else:
+            subject.update({'name': name[0]})
+        return subject
 
 
 @dataclass
 class AssignmentInfo(NetSchoolAPISchema):
     id: int
+    type: str = field(metadata=dict(allow_none=True))
     name: str = field(metadata=dict(data_key='assignmentName'))
-    subjectGroup: SubjectGroup
+    subject: Subject = field(metadata=dict(data_key='subjectGroup', default_factory=dict))
     teachers: List[Teacher]
     weight: int = field(metadata=dict(data_key='weight'))
     date: datetime.date = field(metadata=dict(data_key='date'))
     description: str = field(metadata=dict(data_key='description', missing='', allow_none=True, required=False))
     attachments: List[Attachment] = field(
         metadata=dict(data_key='attachments', default_factory=list))
+
+    @property
+    def json(self):
+        return {'id': self.id, 'name': self.name, 'subject': self.subject.name,
+                'teachers': [x.name for x in self.teachers], 'weight': self.weight, 'description': self.description,
+                'attachments': [x.json for x in self.attachments]}
+
+    @pre_load
+    def unwrap_type(self, assignment_info: Dict[str, Any], **_) -> Dict[str, Any]:
+        if "typeId" in assignment_info.keys():
+            assignment_info["type"] = self.context["assignment_types"][assignment_info.pop("typeId")]
+        else:
+            assignment_info["type"] = None
+        return assignment_info
 
 
 @dataclass

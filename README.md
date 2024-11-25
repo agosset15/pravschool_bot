@@ -20,9 +20,10 @@
 ## Технологии
 
 * [aiogram](https://github.com/aiogram/aiogram) — работа с Telegram Bot API;
-* [sqlite3](https://docs.python.org/3/library/sqlite3.html) — перманентное хранение данных;
+* [MySQL](https://www.mysql.com/) — перманентное хранение данных;
+* [Redis](https://redis.io/) - временное хранение сессий и состояний;
 * [aiohttp](https://aiohttp.org/) — веб-сервер для веб-приложения;
-* [sqlalchemy](https://sqlalche.me/)
+* [sqlalchemy](https://sqlalche.me/) - "прослойка" между базой данных и ботом
 
 ## Установка
 
