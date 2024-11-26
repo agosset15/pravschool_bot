@@ -25,7 +25,7 @@ RUN poetry install -n --only main --no-root
 
 ADD . /app/
 RUN poetry install -n --only-root
-RUN alembic upgrade head
 
 # run app
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
 CMD ["python", "-m", "tg_bot"]
