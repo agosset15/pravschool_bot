@@ -4,7 +4,19 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    secrets:
+      - bot_token
+      - db_pass
+      - redis_pass
     env_file:
       - .env
     ports:
       - "8087:80"
+
+secrets:
+  bot_token:
+    file: secrets/token.txt
+  db_pass:
+    file: secrets/db.txt
+  redis_pass:
+    file: secrets/redis.txt

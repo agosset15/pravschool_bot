@@ -1,49 +1,55 @@
+import os
 import secrets
 from tg_bot.utils.redis import BaseRedis
 
-from envparse import env
 from pathlib import Path, PurePath
 from typing import Final
+
+
+def get_secret(key, default):
+    value = os.getenv(key, default=default)
+    if os.path.isfile(value):
+        with open(value) as f:
+            return f.read()
+    return value
 
 
 ROOT_DIR: Final[Path] = Path(__file__).parent.parent
 BOT_DIR: Final[PurePath] = PurePath(ROOT_DIR / "tg_bot")
 
-env.read_envfile(ROOT_DIR/".env")
+BOT_TOKEN = get_secret("BOT_TOKEN", "")
+DEBUG = os.getenv("DEBUG")
+ADMIN_ID = int(os.getenv("ADMIN_ID", default=900645059))
 
-BOT_TOKEN = env.str("BOT_TOKEN")
-DEBUG = env.bool("DEBUG")
-ADMIN_ID = env.int("ADMIN_ID", default=900645059)
-
-DOMAIN = env.str("DOMAIN", default="example.com")
+DOMAIN = os.getenv("DOMAIN", default="example.com")
 SECRET_KEY = secrets.token_urlsafe(48)
-WEBHOOK_BASE_PATH = env.str("WEBHOOK_BASE_PATH", default="/webhook")
+WEBHOOK_BASE_PATH = os.getenv("WEBHOOK_BASE_PATH", default="/webhook")
 WEBHOOK_PATH = f"{WEBHOOK_BASE_PATH}/{SECRET_KEY}"
 WEBHOOK_URL = f"https://{DOMAIN}{WEBHOOK_PATH}"
-WEBAPI_PORT = env.int("WEBAPI_PORT", default=8080)
-WEBAPI_HOST = env.str("WEBAPI_HOST", default="localhost")
+WEBAPI_PORT = int(os.getenv("WEBAPI_PORT", default=8080))
+WEBAPI_HOST = os.getenv("WEBAPI_HOST", default="localhost")
 
 
-REDIS_HOST = env.str("REDIS_HOST", default="localhost")
-REDIS_USERNAME = env.str("REDIS_USERNAME", default="default")
-REDIS_PORT = env.int("REDIS_PORT", default=6379)
-REDIS_PASSWORD = env.str("REDIS_PASSWORD")
-REDIS_DB_FSM = env.str("REDIS_DB_FSM", default="0")
-REDIS_DB_JOBSTORE = env.str("REDIS_DB_JOBSTORE", default="1")
-REDIS_DB_CACHE = env.str("REDIS_DB_CACHE", default='3')
+REDIS_HOST = os.getenv("REDIS_HOST", default="localhost")
+REDIS_USERNAME = os.getenv("REDIS_USERNAME", default="default")
+REDIS_PORT = os.getenv("REDIS_PORT", default=6379)
+REDIS_PASSWORD = get_secret("REDIS_PASSWORD", "nOtSaFePaSsWoRd")
+REDIS_DB_FSM = os.getenv("REDIS_DB_FSM", default="0")
+REDIS_DB_JOBSTORE = os.getenv("REDIS_DB_JOBSTORE", default="1")
+REDIS_DB_CACHE = os.getenv("REDIS_DB_CACHE", default=3)
 REDIS_FSM_URI = f"redis://{REDIS_USERNAME}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB_FSM}"
 cache = BaseRedis(REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, REDIS_DB_CACHE, REDIS_USERNAME)
 
-DB_HOST = env.str("DB_HOST", default="localhost")
-DB_PORT = env.int("DB_PORT", default=5432)
-DB_PASSWORD = env.str("DB_PASSWORD", default="")
-DB_USER = env.str("DB_USER", default="aiogram")
-DB_NAME = env.str("DB_NAME", default="aiogram")
-DB_DRIVER = env.str('DB_DRIVER')
+DB_HOST = os.getenv("DB_HOST", default="localhost")
+DB_PORT = os.getenv("DB_PORT", default=5432)
+DB_PASSWORD = get_secret("DB_PASSWORD", default="")
+DB_USER = os.getenv("DB_USER", default="aiogram")
+DB_NAME = os.getenv("DB_NAME", default="aiogram")
+DB_DRIVER = os.getenv('DB_DRIVER')
 DB_URI = f"{DB_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-NS_URL = env.str("NS_URL")
-LOG_CHAT = env.int("LOG_CHAT")
+NS_URL = os.getenv("NS_URL")
+LOG_CHAT = os.getenv("LOG_CHAT")
 
 # TODO: избавиться от `grades`
 grades = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10г", "10е", "10ф", "11г", "11е", "11ф"]

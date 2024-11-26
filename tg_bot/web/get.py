@@ -1,6 +1,5 @@
 from datetime import date, datetime, timedelta
 import random
-from loguru import logger
 
 from aiogram import html
 from aiohttp.web import HTTPUnauthorized, HTTPExpectationFailed, HTTPGatewayTimeout, Application
@@ -101,7 +100,6 @@ async def rooms_init(request: Request):
 
 
 async def getdb_rasp_today(request: Request):
-    logger.info("schedule TODAY access")
     db: DefaultService = request.app['db']
     user = await db.get_one(User, User.chat_id == int(request.query['tgid']))
     if user is None:
