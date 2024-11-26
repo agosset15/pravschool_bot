@@ -3,8 +3,8 @@ from aiogram import Router, F, html
 from aiogram.types import CallbackQuery, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
 
-from tg_bot.keyboards import main_kb, settings_kb, inline_kb, remove_kb, days_kb, homework_lessons_kb, switch_inline_kb
-from tg_bot.keyboards.common import grades
+from tg_bot.keyboards import (main_kb, settings_kb, inline_kb, remove_kb, days_kb, homework_lessons_kb, switch_inline_kb,
+                              reply_kb)
 from tg_bot.states.user import GradeWait, GetFreeRooms, RoomWait, NSLoginCredentialsWait
 from tg_bot.models import DefaultService, User, Schedule, Lesson
 from tg_bot.config import times, cache, ADMIN_ID
@@ -28,8 +28,10 @@ async def call_settings(call: CallbackQuery):
 
 
 @router.callback_query(F.data == "change_class")
-async def call_change_class(call: CallbackQuery, state: FSMContext):
-    await call.message.answer("Выберете класс, в котором учитесь", reply_markup=grades())
+async def call_change_class(call: CallbackQuery, state: FSMContext, db: DefaultService):
+    grades = await db.get_all(Schedule, Schedule.entity == 0)
+    await call.message.answer("Выберете класс, в котором учитесь",
+                              reply_markup=reply_kb(*[grade.grade for grade in grades], placeholder="Выберите класс"))
     await call.message.answer("Или нажмите на кнопку ниже, если вы учитель",
                               reply_markup=switch_inline_kb("Я учитель", "#teacher "))
     await state.set_state(GradeWait.grade)

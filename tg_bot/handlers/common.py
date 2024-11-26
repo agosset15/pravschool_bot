@@ -4,9 +4,9 @@ from aiogram.types import Message
 from aiogram.filters import Command, CommandStart
 
 from tg_bot.filters.user import NewUserFilter
-from tg_bot.models import DefaultService, User
+from tg_bot.models import DefaultService, User, Schedule
 from tg_bot.templates import main_text
-from tg_bot.config import LOG_CHAT
+from tg_bot.config import LOG_CHAT, ADMIN_ID
 from tg_bot.keyboards import main_kb, start_kb, admin_main_kb, settings_kb, inline_kb
 from tg_bot.states.user import NSChild
 from tg_bot.utils.ns import get_duty, NSError, NoResponseFromServer, get_ns_object
@@ -14,14 +14,14 @@ from tg_bot.utils.register import extract_unique_code, register
 
 router = Router()
 
-grades_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10б", "10г", "10ф", "11б", "11с", "11ф"]
-
 
 @router.message(NewUserFilter())
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext, db: DefaultService, user: User, bot: Bot):
     await state.clear()
     code = extract_unique_code(message.text)
+    grades = await db.get_all(Schedule, Schedule.entity == 0)
+    grades_list = [x.grade for x in grades]
     if user is None:
         if code and code.split('_')[0] in grades_list:
             code_rs = code.split('_')
@@ -36,12 +36,19 @@ async def cmd_start(message: Message, state: FSMContext, db: DefaultService, use
         else:
             return await register(message, state, bot, db, code)
     else:
+        if user.schedule is None:
+            if user.grade in grades_list:
+                grade = await db.get_one(Schedule, Schedule.entity == 0, Schedule.grade == user.grade)
+                await db.update(User, User.id == user.id, schedule=grade.id)
+            else:
+                return await message.answer("Бот был обновлен. Выберите пожалуйста свой класс заново.",
+                                            reply_markup=settings_kb())
         await message.answer("👨‍🏫", reply_markup=start_kb())
         if user.is_teacher is True:
             await message.answer(main_text(user), reply_markup=main_kb())
         else:
             await message.answer(main_text(user), reply_markup=main_kb())
-    if message.from_user.id == 900645059:
+    if message.from_user.id == ADMIN_ID:
         await message.answer("👑Ты в VIP-ке!", reply_markup=admin_main_kb())
 
 

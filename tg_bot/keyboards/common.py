@@ -38,13 +38,6 @@ def start(extra_text: str = None) -> ReplyKeyboardMarkup:
     return kb.as_markup(resize_keyboard=True, input_field_placeholder="Нажмите на кнопку ниже")
 
 
-def grades():
-    kb = ReplyKeyboardBuilder()
-    for i in grades_list:
-        kb.button(text=i)
-    return kb.as_markup(resize_keyboard=True, input_field_placeholder="Выберите класс")
-
-
 def settings():
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text="Изменить класс", callback_data="change_class")
