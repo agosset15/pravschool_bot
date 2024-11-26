@@ -29,6 +29,7 @@ class StartUpFactory:
         logger.info('Запускаю бота...')
         await bot.delete_webhook(drop_pending_updates=True)
         await bot.set_webhook(WEBHOOK_URL)
+        logger.info(f"Registered webhook on: {WEBHOOK_URL}")
 
     async def server(self, app):
         logger.info('Запускаю БД для web...')

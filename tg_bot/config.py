@@ -21,7 +21,7 @@ WEBHOOK_BASE_PATH = env.str("WEBHOOK_BASE_PATH", default="/webhook")
 WEBHOOK_PATH = f"{WEBHOOK_BASE_PATH}/{SECRET_KEY}"
 WEBHOOK_URL = f"https://{DOMAIN}{WEBHOOK_PATH}"
 WEBAPI_PORT = env.int("WEBAPI_PORT", default=8080)
-WEBAPI_HOST = env.str("WEBAPI_HOST", default="127.0.0.1")
+WEBAPI_HOST = env.str("WEBAPI_HOST", default="localhost")
 
 
 REDIS_HOST = env.str("REDIS_HOST", default="localhost")
