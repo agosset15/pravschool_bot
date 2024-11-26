@@ -17,8 +17,8 @@ class ExcelParser:
                                                grade=sheet.cell(min_row-1, min_column+(2*grade)).value)
             for day in range(5):
                 day_id = await self.db.create(Day, schedule_id=schedule_id, name=days[day])
-                for lesson in range(1, 8+1):
-                    row = min_row + 2*(lesson-1) + day * 8
+                for lesson in range(8):
+                    row = min_row + 2 * lesson + day * 8*2
                     column = min_column + 2 * grade
                     lesson1 = sheet.cell(row, column).value
                     room1 = sheet.cell(row, column+1).value
@@ -26,13 +26,13 @@ class ExcelParser:
                     room2 = sheet.cell(row+1, column+1).value
                     if lesson2 is None and room2:
                         if room1:
-                            await self.db.create(Lesson, day_id=day_id, number=lesson, name=lesson1, room=str(room1))
-                        await self.db.create(Lesson, day_id=day_id, number=lesson, name=lesson1, room=str(room2))
+                            await self.db.create(Lesson, day_id=day_id, number=(lesson+1), name=lesson1, room=str(room1))
+                        await self.db.create(Lesson, day_id=day_id, number=(lesson+1), name=lesson1, room=str(room2))
                     elif lesson2:
-                        await self.db.create(Lesson, day_id=day_id, number=lesson, name=lesson1, room=str(room1))
-                        await self.db.create(Lesson, day_id=day_id, number=lesson, name=lesson2, room=str(room2))
+                        await self.db.create(Lesson, day_id=day_id, number=(lesson+1), name=lesson1, room=str(room1))
+                        await self.db.create(Lesson, day_id=day_id, number=(lesson+1), name=lesson2, room=str(room2))
                     else:
-                        await self.db.create(Lesson, day_id=day_id, number=lesson, name=None, room=None)
+                        await self.db.create(Lesson, day_id=day_id, number=(lesson+1), name=None, room=None)
 
     async def teachers(self, count: int, min_row: int, min_column: int):
         sheet = self.sheets[1]
@@ -43,7 +43,7 @@ class ExcelParser:
                 day_id = await self.db.create(Day, schedule_id=schedule_id, name=days[day])
                 for lesson in range(1, 8+1):
                     row = min_row + 2 * teacher
-                    column = min_column + 2*(lesson-1) + day * 8
+                    column = min_column + 2*(lesson-1) + day * 8*2
                     grade = sheet.cell(row, column).value
                     group = sheet.cell(row, column + 1).value
                     room2 = sheet.cell(row+1, column+1).value
