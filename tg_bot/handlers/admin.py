@@ -36,20 +36,20 @@ async def call_ad(call: CallbackQuery, state: FSMContext):
 @router.message(Advert.text)
 async def advert_text(message: Message, state: FSMContext, db: DefaultService, bot: Bot):
     await state.clear()
-    users: List[User] = await db.get_all(User, User.blocked is False)
+    users: List[User] = await db.get_all(User, User.blocked == False)
     for user in users:
         try:
             await bot.send_message(user.chat_id, message.text)
             await asyncio.sleep(0.2)
         except (TelegramBadRequest, TelegramForbiddenError, TelegramNotFound):
-            await db.update(User, User.id == user.id, dnd=True)
-            pass
+            await db.update(User, User.id == user.id, blocked=True)
+            continue
     await message.answer("Готово!")
 
 
 @router.message(Command("add_admin"))
 async def admin_pswd_set(message: Message, db: DefaultService):
-    await db.update(User, User.chat_id == int(message.text.strip('/add_admin')), isAdmin=True)
+    await db.update(User, User.chat_id == int(message.text.strip('/add_admin ')), isAdmin=True)
     await message.answer("Done!")
 
 

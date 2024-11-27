@@ -40,7 +40,7 @@ async def call_change_class(call: CallbackQuery, state: FSMContext, db: DefaultS
 
 @router.callback_query(F.data == "info")
 async def call_info(call: CallbackQuery, db: DefaultService):
-    count = await db.count(User, User.blocked is False)
+    count = await db.count(User, User.blocked == False)
     admin = await db.get_one(User, User.chat_id == ADMIN_ID)
     await call.message.answer(f"Всего пользователей: {count}\n"
                               f"Для связи с администратором: {admin.mention}\n"
