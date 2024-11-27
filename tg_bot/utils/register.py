@@ -17,7 +17,7 @@ async def register(message: Message, state: FSMContext, bot: Bot, db: DefaultSer
     grades = await db.get_all(Schedule, Schedule.entity == 0)
     await message.answer(
         "Здравствуйте!\n\nЯ буду показывать вам расписание уроков Свято-Димитриевской школы.",
-        reply_markup=reply_kb(*[grade.grade for grade in grades], placeholder="Выберите класс"))
+        reply_markup=reply_kb(*[grade.grade for grade in grades], placeholder="Выберите класс", adjust=7))
     await message.answer("Чтобы начать, выберете свой класс внизу экрана, "
                          "или нажмите на кнопку ниже, если вы учитель.",
                          reply_markup=switch_inline_kb("Я учитель", "#teacher "))

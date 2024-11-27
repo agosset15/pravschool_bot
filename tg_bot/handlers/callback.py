@@ -31,7 +31,8 @@ async def call_settings(call: CallbackQuery):
 async def call_change_class(call: CallbackQuery, state: FSMContext, db: DefaultService):
     grades = await db.get_all(Schedule, Schedule.entity == 0)
     await call.message.answer("Выберете класс, в котором учитесь",
-                              reply_markup=reply_kb(*[grade.grade for grade in grades], placeholder="Выберите класс"))
+                              reply_markup=reply_kb(*[grade.grade for grade in grades],
+                                                    placeholder="Выберите класс", adjust=7))
     await call.message.answer("Или нажмите на кнопку ниже, если вы учитель",
                               reply_markup=switch_inline_kb("Я учитель", "#teacher "))
     await state.set_state(GradeWait.grade)

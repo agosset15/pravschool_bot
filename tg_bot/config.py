@@ -6,7 +6,7 @@ from pathlib import Path, PurePath
 from typing import Final
 
 
-def get_secret(key, default):
+def get_secret(key, default=None):
     value = os.getenv(key, default=default)
     if os.path.isfile(value):
         with open(value) as f:
@@ -17,7 +17,7 @@ def get_secret(key, default):
 ROOT_DIR: Final[Path] = Path(__file__).parent.parent
 BOT_DIR: Final[PurePath] = PurePath(ROOT_DIR / "tg_bot")
 
-BOT_TOKEN = get_secret("BOT_TOKEN", "")
+BOT_TOKEN = get_secret("BOT_TOKEN")
 DEBUG = os.getenv("DEBUG")
 ADMIN_ID = int(os.getenv("ADMIN_ID", default=900645059))
 
@@ -52,7 +52,7 @@ NS_URL = os.getenv("NS_URL")
 LOG_CHAT = os.getenv("LOG_CHAT")
 
 # TODO: избавиться от `grades`
-grades = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10г", "10е", "10ф", "11г", "11е", "11ф"]
+grades = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10и", "10м", "10о", "11о", "11м", "11и"]
 days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница"]
 times = ['08:40 - 09:25', '09:35 - 10:20', '10:30 - 11:15', '11:25 - 12:10', '12:25 - 13:10', '13:25 - 14:10',
              '14:25 - 15:10', '15:20 - 16:05', '16:15-17:00', 'после 17:00']
