@@ -162,10 +162,8 @@ class NetSchoolAPI:
                 requests_timeout, request, follow_redirects
             )
         except httpx.HTTPStatusError as http_status_error:
-            if (
-                    http_status_error.response.status_code
-                    == httpx.codes.UNAUTHORIZED
-            ):
+            if (http_status_error.response.status_code == httpx.codes.UNAUTHORIZED or
+                    http_status_error.response.status_code == httpx.codes.INTERNAL_SERVER_ERROR):
                 if self._login_data:
                     await self.login(*self._login_data)
                     return await self._request_with_optional_relogin(
@@ -318,43 +316,83 @@ class NetSchoolAPI:
                             method="GET", url=f"attachments/{attachment_id}"))
                 ).content)
 
+    async def init_reports(self, requests_timeout: int = None):
+        async def parse_filters(report_id: str) -> list[dict[str, str | list[dict[str, str]]]]:
+            filters = (await self._request_with_optional_relogin(requests_timeout,
+                                                                 self._wrapped_client.client.build_request(
+                                                                     method="GET",
+                                                                     url="reports/" + report_id.casefold()),
+                                                                 )).json()
+            filters = filters["filterSources"]
+            report_filters = []
+            for filter_ in filters:
+                if filter_["filterId"] != "period":
+                    report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"],
+                                           "items": filter_["items"]})
+                else:
+                    report_filters.append({"id": "period", "default": filter_["defaultValue"],
+                                           "default_range": filter_["defaultRange"], "range": filter_["range"]})
+            return report_filters
+
+        response = await self._request_with_optional_relogin(requests_timeout,
+                                                             self._wrapped_client.client.build_request(
+                                                                 method="GET", url="reports"), )
+        response = response.json()
+        general_reports = []
+        for report in response[0]["reports"]:
+            general_reports.append({"id": report["id"], "path": report["id"].casefold(), "title": report["title"],
+                                    "filters": await parse_filters(report["id"])})
+        common_reports = []
+        for report in response[1]["reports"]:
+            common_reports.append({"id": report["id"], "path": report["id"].casefold(), "title": report["title"],
+                                   "filters": await parse_filters(report["id"])})
+
+        return {"general_title": response[0]["title"], "general": general_reports, "common_title": response[1]["title"],
+                "common": common_reports}
+
     async def report(self, report_url: str, student_id: Optional[int] = None,
+                     filters: list[dict[str, str]] = None,
                      requests_timeout: int = None):
         if not student_id:
             student_id = self._student_id
         class_id = next((x['classId'] for x in self._students if x['studentId'] == student_id), None)
-        response = await self._request_with_optional_relogin(requests_timeout,
-                                                             self._wrapped_client.client.build_request(
-                                                                 method="GET", url=report_url), )
-        response = response.json()
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
                                "value": "АНО СОШ \"Димитриевская\" \n создано в @pravschool_bot"},
                               {"name": "DATEFORMAT", "value": "d\u0001mm\u0001yy\u0001."}]}
-        sid = None
-        for item in response['filterSources'][0]['items']:
-            if int(item['value']) == int(student_id):
-                sid = item['title']
-        payload['selectedData'].append({"filterId": "SID", "filterValue": f"{student_id}",
-                                        "filterText": f"{sid}"})
-        payload['selectedData'].append({"filterId": "period",
-                                        "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
-                                        "filterText": f"{datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}"})
-        pclid = None
-        for item in response['filterSources'][1]['items']:
-            if int(item['value']) == int(class_id):
-                pclid = item['title']
-        if not pclid:
-            resp = await self._request_with_optional_relogin(requests_timeout,
-                                                             self._wrapped_client.client.build_request(
-                                                                 method="POST", url=f"{report_url}/initfilters",
-                                                                 json={"params": None,
-                                                                       "selectedData": payload['selectedData']}))
-            resp = resp.json()
-            pclid = resp[0]['items'][0]['title']
-        payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
-                                           "filterText": f"{pclid}"})
+        if not filters:
+            response = await self._request_with_optional_relogin(requests_timeout,
+                                                                 self._wrapped_client.client.build_request(
+                                                                     method="GET", url=report_url), )
+            response = response.json()
+            sid = None
+            for item in response['filterSources'][0]['items']:
+                if int(item['value']) == int(student_id):
+                    sid = item['title']
+            payload['selectedData'].append({"filterId": "SID", "filterValue": f"{student_id}",
+                                            "filterText": f"{sid}"})
+            payload['selectedData'].append({"filterId": "period",
+                                            "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
+                                            "filterText": f"{datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}"})
+            pclid = None
+            for item in response['filterSources'][1]['items']:
+                if int(item['value']) == int(class_id):
+                    pclid = item['title']
+            if not pclid:
+                resp = await self._request_with_optional_relogin(requests_timeout,
+                                                                 self._wrapped_client.client.build_request(
+                                                                     method="POST", url=f"{report_url}/initfilters",
+                                                                     json={"params": None,
+                                                                           "selectedData": payload['selectedData']}))
+                resp = resp.json()
+                pclid = resp[0]['items'][0]['title']
+            payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
+                                               "filterText": f"{pclid}"})
+        else:
+            for filter_ in filters:
+                payload['selectedData'].append({"filterId": filter_['id'], "filterValue": filter_['value'],
+                                                "filterText": filter_['text']})
         response = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  "GET", "/signalr/negotiate",
@@ -382,16 +420,18 @@ class NetSchoolAPI:
                     task_id = response.json()['taskId']
                     await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
                         "POST", "signalr/send", params=query, data={
-                            'data':{"H":"queuehub","M":"StartTask","A":[task_id],"I":0}}))
+                            'data': {"H": "queuehub", "M": "StartTask", "A": [task_id], "I": 0}}))
                 else:
                     chunk = json.loads(chunk.replace('data: ', ''))
                     if chunk:
                         if chunk['M'] and chunk['M'][0]['M'] == 'complete':
-                            await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
-                                "POST", "signalr/abort", params=query))
+                            await self._wrapped_client.request(requests_timeout,
+                                                               self._wrapped_client.client.build_request(
+                                                                   "POST", "signalr/abort", params=query))
                             file = await self._wrapped_client.request(requests_timeout,
                                                                       self._wrapped_client.client.build_request(
-                                                                          "GET", f"files/{chunk['M'][0]['A'][0]['Data']}"))
+                                                                          "GET",
+                                                                          f"files/{chunk['M'][0]['A'][0]['Data']}"))
                             return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:

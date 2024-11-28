@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta
 import random
+import json
 
 from aiogram import html
 from aiohttp.web import HTTPUnauthorized, HTTPExpectationFailed, HTTPGatewayTimeout, Application
@@ -18,7 +19,7 @@ async def getdb_user(request: Request):
     ns = await get_ns_object(user)
     return json_response(
         {'ok': True, 'user': {'name': user.name, 'grade': user.grade, 'id': user.id,
-                              'is_teacher': user.is_teacher, 'is_ns': user.is_ns, 'ntf': user.duty_notification,
+                              'is_teacher': user.is_teacher, 'is_ns': user.is_ns,
                               'is_admin': user.is_admin, 'is_parent': user.is_parent, 'pass': password,
                               'login': user.login, 'children': ns.students}})
 
@@ -68,7 +69,7 @@ async def getdb_comments(request: Request):
         assignment = next((item for item in lesson.assignments if item.id == data[1]), None)
         info = await ns.assignment_info(assignment.id, int(request.match_info['student_id']))
     except AuthError as e:
-        raise HTTPExpectationFailed(reason=' '.join(e.__notes__))
+        raise HTTPExpectationFailed(reason=str(e))
     except NoResponseFromServer:
         raise HTTPGatewayTimeout(reason="Сервер электронного журнала не отвечает")
     return json_response({'ok': True, 'assignment': assignment.json, 'details': info.json})
@@ -78,10 +79,12 @@ async def getdb_report(request: Request):
     user, db = await validate_request(request)
     ns = await get_ns_object(user)
     try:
-        report = await ns.report(request.query['uri'], int(request.match_info['student_id']), requests_timeout=120)
+        filters = json.loads(request.query['filters']) if 'filters' in request.query.keys() else None
+        report = await ns.report(request.query['uri'], int(request.match_info['student_id']),
+                                 filters, requests_timeout=120)
         return json_response({"ok": True, "report": report})
     except AuthError as e:
-        raise HTTPExpectationFailed(reason=' '.join(e.__notes__))
+        raise HTTPExpectationFailed(reason=str(e))
     except NoResponseFromServer:
         raise HTTPGatewayTimeout(reason="Сервер электронного журнала не отвечает")
 
@@ -99,6 +102,13 @@ async def rooms_init(request: Request):
     return json_response({"ok": True, "rooms": ids})
 
 
+async def report_init(request: Request):
+    user, db = await validate_request(request)
+    ns = await get_ns_object(user)
+    response = await ns.init_reports()
+    return json_response({"ok": True, "reports": response})
+
+
 async def getdb_rasp_today(request: Request):
     db: DefaultService = request.app['db']
     user = await db.get_one(User, User.chat_id == int(request.query['tgid']))
@@ -112,12 +122,12 @@ async def getdb_rasp_today(request: Request):
         day = "Завтра"
     if weekday > 5:
         return json_response(
-                body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{day} "
-                                                                       f"{(days+['Суббота', 'Воскресенье'])[weekday]}"}
-                         ).encode())
+            body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{day} "
+                                                                   f"{(days + ['Суббота', 'Воскресенье'])[weekday]}"}
+                     ).encode())
     schedule = await db.get_one(Schedule, Schedule.id == user.schedule)
     return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].text, "tomorrow": f"{day} "
-                                                                       f"{(days+['Суббота', 'Воскресенье'])[weekday]}"}
+                                                                                                f"{(days + ['Суббота', 'Воскресенье'])[weekday]}"}
                                   ).encode())
 
 
@@ -131,11 +141,11 @@ async def getdb_rasp_random(request: Request):
     if weekday > 5:
         return json_response(
             body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{day} "
-                                                f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
+                                                                   f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
                      ).encode())
     schedule = await db.get_one(Schedule, Schedule.id == user.schedule)
     return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].text, "tomorrow": f"{day} "
-                                                f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
+                                                                                                f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
                                   ).encode())
 
 
@@ -189,7 +199,7 @@ async def get_diary(request: Request):
                 diary.update({k: v.strftime('%Ya%ma%d')})
         return json_response({"ok": True, "dairy": diary})
     except AuthError as e:
-        raise HTTPExpectationFailed(reason=' '.join(e.__notes__))
+        raise HTTPExpectationFailed(reason=str(e))
     except NoResponseFromServer:
         raise HTTPGatewayTimeout(reason="Сервер электронного журнала не отвечает")
 
@@ -206,7 +216,8 @@ def register(app: Application):
 
     app.router.add_get("/homework/{day_id}", getdb_homework)
 
-    app.router.add_get("/ns/report/{student_id}", getdb_report)  # TODO: Написать init для ns
+    app.router.add_get("/ns/report/{student_id}", getdb_report)
+    app.router.add_get("/ns/report/init", report_init)
     app.router.add_get("/ns/comment/{student_id}", getdb_comments)
     app.router.add_get('/ns/weeks', get_weekdays)
     app.router.add_get('/ns/dairy/{student_id}', get_diary)
