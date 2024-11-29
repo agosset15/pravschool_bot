@@ -6,14 +6,14 @@ from aiogram.utils.web_app import check_webapp_signature, safe_parse_webapp_init
 
 from tg_bot.models import DefaultService, User
 from tg_bot.utils.ns import update_ns_object, encode_ns_password, get_ns_object, AuthError, NoResponseFromServer
-from tg_bot.config import ADMIN_ID
+from tg_bot.config import ADMIN_ID, DEBUG
 
 
 async def validate_request(request: Request, register: bool = False) -> tuple[User, DefaultService]:
     bot: Bot = request.app["bot"]
     db: DefaultService = request.app['db']
     data = request.query if request.method == 'GET' else await request.post()
-    if 'tgid' in data.keys() and data['tgid'] == ADMIN_ID:
+    if DEBUG and data['tgid'] == ADMIN_ID:
         user = await db.get_one(User, User.chat_id == ADMIN_ID)
         return user, db
     if not (check_webapp_signature(bot.token, data["_auth"])):
