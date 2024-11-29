@@ -120,7 +120,7 @@ async def getdb_rasp_today(request: Request):
     if now > datetime(now.year, now.month, now.day) + timedelta(hours=14):
         weekday = (now + timedelta(days=1)).weekday()
         day = "Завтра"
-    if weekday > 5:
+    if weekday > 4:
         return json_response(
             body=str({"ok": True, "rasp": "Выходной!", "tomorrow": f"{day} "
                                                                    f"{(days + ['Суббота', 'Воскресенье'])[weekday]}"}
