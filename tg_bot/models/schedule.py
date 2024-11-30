@@ -34,7 +34,10 @@ class Day(Base):
         return lessons
 
     @property
-    def text(self, separator: str = '\n'):
+    def text(self):
+        return '\n'.join(self.lessons_text)
+
+    def separated_text(self, separator: str = '\n'):
         return separator.join(self.lessons_text)
 
 
