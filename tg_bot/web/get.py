@@ -47,7 +47,7 @@ async def getdb_homework(request: Request):
 
 async def room_schedule(request: Request):
     user, db = await validate_request(request)
-    schedule = await db.get_one(Schedule, Schedule.id == int(request.match_info['kab']))
+    schedule = await db.get_one(Schedule, Schedule.id == int(request.match_info['room_id']))
     values = [f"<b>{day.name}</b>:<br />{day.separated_text('<br />')}" for day in schedule.days]
     return json_response({'ok': True, 'rasp': '<br /><br />'.join(values)})
 
