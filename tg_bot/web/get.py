@@ -27,7 +27,7 @@ async def getdb_user(request: Request):
 async def getdb_rasp(request: Request):
     user, db = await validate_request(request)
     day = await db.get_one(Day, Day.id == int(request.match_info['day_id']))
-    return json_response({'ok': True, 'schedule': day.text})
+    return json_response({'ok': True, 'schedule': day.text('<br>')})
 
 
 async def getdb_homework(request: Request):
@@ -41,7 +41,7 @@ async def getdb_homework(request: Request):
             homework.append(f"<b>{lesson.name}</b> - {lesson.homework.homework}(Добавлено {lesson.homework.updated_at})"
                             + f"<a href='#' onclick='send_homework_photo({lesson.homework.id})>Получить фотографию</a>"
                             if lesson.homework.image else '')  # TODO реализовать соответствующую функцию в js
-    text = ''.join(homework)
+    text = '<br>'.join(homework)
     return json_response({'ok': True, 'hw': text})
 
 
@@ -126,7 +126,7 @@ async def getdb_rasp_today(request: Request):
                                                                    f"{(days + ['Суббота', 'Воскресенье'])[weekday]}"}
                      ).encode())
     schedule = await db.get_one(Schedule, Schedule.id == user.schedule)
-    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].text, "tomorrow": f"{day} "
+    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].text('<br>'), "tomorrow": f"{day} "
                                                                                                 f"{(days + ['Суббота', 'Воскресенье'])[weekday]}"}
                                   ).encode())
 
@@ -144,7 +144,7 @@ async def getdb_rasp_random(request: Request):
                                                                    f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
                      ).encode())
     schedule = await db.get_one(Schedule, Schedule.id == user.schedule)
-    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].text, "tomorrow": f"{day} "
+    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].text('<br>'), "tomorrow": f"{day} "
                                                                                                 f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
                                   ).encode())
 
