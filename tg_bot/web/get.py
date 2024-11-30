@@ -27,7 +27,7 @@ async def getdb_user(request: Request):
 async def getdb_rasp(request: Request):
     user, db = await validate_request(request)
     day = await db.get_one(Day, Day.id == int(request.match_info['day_id']))
-    return json_response({'ok': True, 'schedule': day.separated_text('<br>')})
+    return json_response({'ok': True, 'schedule': day.separated_text('<br />')})
 
 
 async def getdb_homework(request: Request):
@@ -36,20 +36,20 @@ async def getdb_homework(request: Request):
     homework = []
     for lesson in day.lessons:
         if lesson.homework is None:
-            homework.append(f"<b>{lesson.name}</b> - Нет<br>")
+            homework.append(f"<b>{lesson.name}</b> - Нет<br />")
         else:
             homework.append(f"<b>{lesson.name}</b> - {lesson.homework.homework}(Добавлено {lesson.homework.updated_at})"
                             + f"<a href='#' onclick='send_homework_photo({lesson.homework.id})>Получить фотографию</a>"
                             if lesson.homework.image else '')  # TODO реализовать соответствующую функцию в js
-    text = '<br>'.join(homework)
+    text = '<br />'.join(homework)
     return json_response({'ok': True, 'hw': text})
 
 
 async def room_schedule(request: Request):
     user, db = await validate_request(request)
     schedule = await db.get_one(Schedule, Schedule.id == int(request.match_info['kab']))
-    values = [f"<b>{day.name}</b>:<br>{day.separated_text('<br>')}" for day in schedule.days]
-    return json_response({'ok': True, 'rasp': '<br><br>'.join(values)})
+    values = [f"<b>{day.name}</b>:<br />{day.separated_text('<br />')}" for day in schedule.days]
+    return json_response({'ok': True, 'rasp': '<br /><br />'.join(values)})
 
 
 async def getdb_count(request: Request):
@@ -126,7 +126,7 @@ async def getdb_rasp_today(request: Request):
                                                                    f"{(days + ['Суббота', 'Воскресенье'])[weekday]}"}
                      ).encode())
     schedule = await db.get_one(Schedule, Schedule.id == user.schedule)
-    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].separated_text('<br>'), "tomorrow": f"{day} "
+    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].separated_text('<br />'), "tomorrow": f"{day} "
                                                                                                 f"{(days + ['Суббота', 'Воскресенье'])[weekday]}"}
                                   ).encode())
 
@@ -144,7 +144,7 @@ async def getdb_rasp_random(request: Request):
                                                                    f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
                      ).encode())
     schedule = await db.get_one(Schedule, Schedule.id == user.schedule)
-    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].separated_text('<br>'), "tomorrow": f"{day} "
+    return json_response(body=str({"ok": True, "rasp": schedule.days[weekday].separated_text('<br />'), "tomorrow": f"{day} "
                                                                                                 f"{(days + ['Суббота', 'Воскресенье'])[weekday]}(ТЕСТ)"}
                                   ).encode())
 
