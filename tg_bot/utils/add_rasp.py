@@ -63,7 +63,7 @@ class ExcelParser:
                 day_id = await self.db.create(Day, schedule_id=schedule_id, name=(days+['Суббота'])[day])
                 for lesson in range(1, 10 + 1):
                     row = min_row + room
-                    column = min_column + (lesson - 1) + day * 8
+                    column = min_column + (lesson - 1) + day * 10
                     grade = sheet.cell(row, column).value
                     await self.db.create(Lesson, day_id=day_id, number=lesson, name=grade,
                                          room=str(sheet.cell(min_row+room, min_column-1).value))
