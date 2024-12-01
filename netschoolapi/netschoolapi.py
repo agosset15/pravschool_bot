@@ -3,7 +3,6 @@ from datetime import date, timedelta, datetime
 from hashlib import md5
 from io import BytesIO
 from typing import Optional, Dict, List, Union, Any
-from loguru import logger
 
 import httpx
 from httpx import AsyncClient, Response
@@ -366,11 +365,7 @@ class NetSchoolAPI:
             student_id = next((x['value'] for x in filters if x['id'] == 'SID'), None)
         if not student_id:
             student_id = self._student_id
-        student = None
-        for s in self._students:
-            if s['studentId'] == student_id:
-                student = s
-        logger.info(f"{student_id, self._students}")
+        student = next((x for x in self._students if x['studentId'] == int(student_id)), None)
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
@@ -394,7 +389,8 @@ class NetSchoolAPI:
             for filter_ in filters:
                 payload['selectedData'].append({"filterId": filter_['id'], "filterValue": filter_['value'],
                                                 "filterText": filter_['text']})
-        payload['selectedData'].append({"filterId": "PCLID", "filterValue": f"{student['classId']}", "filterText": f"{student['className']}"})
+        payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{student['classId']}",
+                                           "filterText": f"{student['className']}"})
         response = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  "GET", "/signalr/negotiate",
