@@ -39,7 +39,7 @@ async def getdb_homework(request: Request):
             homework.append(f"<b>{lesson.name}</b> - Нет<br />")
         else:
             homework.append(f"<b>{lesson.name}</b> - {lesson.homework.homework}(Добавлено {lesson.homework.updated_at})"
-                            + f"<a href='#' onclick='send_homework_photo({lesson.homework.id})>Получить фотографию</a>"
+                            + f" <i>Получить фотографию пока можно только в боте</i>"
                             if lesson.homework.image else '')  # TODO реализовать соответствующую функцию в js
     text = '<br />'.join(homework)
     return json_response({'ok': True, 'hw': text})
