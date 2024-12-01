@@ -1,7 +1,6 @@
 from datetime import date, datetime, timedelta
 import random
 import json
-from loguru import logger
 
 from aiogram import html
 from aiohttp.web import HTTPUnauthorized, HTTPExpectationFailed, HTTPGatewayTimeout, Application
@@ -82,7 +81,6 @@ async def getdb_report(request: Request):
     ns = await get_ns_object(user)
     try:
         filters = json.loads(request.query['filters']) if 'filters' in request.query.keys() else None
-        logger.info(f"Got filters: {filters}", filters)
         report = await ns.report(request.query['uri'],
                                  (int(request.query['student_id']) if 'student_id' in request.query.keys() else None),
                                  filters, requests_timeout=120)
