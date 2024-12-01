@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 import random
 import json
+from loguru import logger
 
 from aiogram import html
 from aiohttp.web import HTTPUnauthorized, HTTPExpectationFailed, HTTPGatewayTimeout, Application
@@ -81,7 +82,9 @@ async def getdb_report(request: Request):
     ns = await get_ns_object(user)
     try:
         filters = json.loads(request.query['filters']) if 'filters' in request.query.keys() else None
-        report = await ns.report(request.query['uri'], int(request.match_info['student_id']),
+        logger.info(f"Got filters: {filters}", filters)
+        report = await ns.report(request.query['uri'],
+                                 (int(request.query['student_id']) if 'student_id' in request.query.keys() else None),
                                  filters, requests_timeout=120)
         return json_response({"ok": True, "report": report})
     except AuthError as e:
@@ -220,7 +223,7 @@ def register(app: Application):
 
     app.router.add_get("/homework/{day_id}", getdb_homework)
 
-    app.router.add_get("/ns/report/{student_id}", getdb_report)
+    app.router.add_get("/ns/report", getdb_report)
     app.router.add_get("/ns/report/init", report_init)
     app.router.add_get("/ns/comment/{student_id}", getdb_comments)
     app.router.add_get('/ns/weeks', get_weekdays)
