@@ -22,7 +22,7 @@ async def clb_usr(call: CallbackQuery, db: DefaultService):
     users: List[User] = await db.get_all(User)
     message = "<b>Пользователи:</b>\n"
     for i in range(0, len(users), 120):
-        await call.message.answer(message+'\n'.join([user.text for user in users[i:i+120]]))
+        await call.message.answer(message + '\n'.join([user.text for user in users[i:i + 120]]))
     await call.answer()
 
 
@@ -129,8 +129,8 @@ async def del_user(message: Message, db: DefaultService):
 async def call_edit_homework(call: CallbackQuery, state: FSMContext, user: User, db: DefaultService):
     weekday = int(call.data.split('_')[0])
     day = (await db.get_one(Schedule, Schedule.id == user.schedule)).days[weekday]
-    await call.message.answer("Выберете предмет", reply_markup=homework_lessons_kb(day.lessons, weekday,
-                                                                                   user.is_admin, edit=True))
+    await call.message.edit_text("Выберете предмет", reply_markup=homework_lessons_kb(day.lessons, weekday,
+                                                                                      user.is_admin, edit=True))
     await state.set_state(EditHomework.lesson)
     await state.update_data(day=day)
     await call.answer()
@@ -139,8 +139,8 @@ async def call_edit_homework(call: CallbackQuery, state: FSMContext, user: User,
 @router.callback_query(EditHomework.lesson)
 async def edit_homework_lesson(call: CallbackQuery, state: FSMContext):
     await state.update_data(lesson=call.data)
-    await call.message.answer("Отправьте текст задания",
-                              reply_markup=reply_kb("Не добавлять", placeholder="Отправьте домашнее задание"))
+    await call.message.edit_text("Отправьте текст задания",
+                                 reply_markup=reply_kb("Не добавлять", placeholder="Отправьте домашнее задание"))
     await state.set_state(EditHomework.homework)
 
 
@@ -162,7 +162,7 @@ async def edit_homework_image(message: Message, state: FSMContext, db: DefaultSe
         image = message.photo[-1].file_id
     data = await state.get_data()
     await state.clear()
-    homework = await db.get_one(Homework, Homework.lesson_id==data['lesson'])
+    homework = await db.get_one(Homework, Homework.lesson_id == data['lesson'])
     if homework:
         await db.update(Homework, Homework.id == homework.id, homework=data['homework'], image=image)
     else:

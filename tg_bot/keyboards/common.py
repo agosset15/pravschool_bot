@@ -82,7 +82,7 @@ def days(calls: list[str | int], extra_text: str = None):
 def homework_lessons(lessons: List[Lesson], weekday: int, is_admin: bool, edit: bool = False) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     for lesson in lessons:
-        kb.button(text=lesson.text, callback_data=f'hw_{lesson.id}' if not edit else lesson.id)
+        kb.button(text=lesson.text, callback_data=f'hw_{lesson.id}' if not edit else str(lesson.id))
     if is_admin and not edit:
         kb.button(text="Добавить ДЗ", callback_data=f'{weekday}_edit_homework')
     kb.button(text='Назад', callback_data="back")
