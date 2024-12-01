@@ -33,7 +33,7 @@ class NetSchoolAPI:
         )
 
         self._student_id = -1
-        self._students = []  # [{'studentId': int, 'nickName': str, 'className': None, 'classId': str(int), 'iupGrade': 0}]
+        self._students = []  # [{'studentId': int, 'nickName': str, 'className': str, 'classId': str(int), 'iupGrade': 0}]
         self._year_id = -1
         self._school_id = -1
         self._version = -1
@@ -130,12 +130,10 @@ class NetSchoolAPI:
                                                                  json={"params": None,
                                                                        "selectedData": [{"filterId": "SID",
                                                                                          "filterValue": f"{student['studentId']}",
-                                                                                         "filterText": f"{student['nickName']}"},
-                                                                                        {"filterId": "period",
-                                                                                         "filterValue": "2023-11-27T00:00:00.000Z - 2024-03-17T00:00:00.000Z",
-                                                                                         "filterText": "27.11.2023 - 17.03.2024"}]}))
+                                                                                         "filterText": f"{student['nickName']}"}]}))
             resp = clid.json()
             self._students[i]['classId'] = resp[0]['items'][0]['value']
+            self._students[i]['className'] = resp[0]['items'][0]['title']
 
         response = await requester(self._wrapped_client.client.build_request(
             method="GET", url='years/current'
@@ -324,11 +322,13 @@ class NetSchoolAPI:
                 method="GET", url="reports/" + report_id.casefold()),)).json()
             filters = filters["filterSources"]
             report_filters = []
+            special_filters = ("period", "StartDate", "EndDate", "PCLID")
+            exclude_filters = ("PCLID", )
             for filter_ in filters:
-                if filter_["filterId"] not in ("period", "StartDate", "EndDate") and filter_["defaultValue"] is not None:
+                if filter_["filterId"] not in special_filters and filter_["defaultValue"] is not None:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"],
                                            "items": filter_["items"]})
-                elif filter_["defaultValue"] is None:
+                elif filter_["defaultValue"] is None or filter_["filterId"] in exclude_filters:
                     pass
                 else:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"]})
@@ -356,9 +356,11 @@ class NetSchoolAPI:
     async def report(self, report_url: str, student_id: Optional[int] = None,
                      filters: list[dict[str, str]] = None,
                      requests_timeout: int = None):
+        if filters:
+            student_id = next((x['value'] for x in filters if x['id'] == 'SID'), None)
         if not student_id:
             student_id = self._student_id
-        class_id = next((x['classId'] for x in self._students if x['studentId'] == student_id), None)
+        class_id, class_name = next(((x['classId'], x['className']) for x in self._students if x['studentId'] == student_id), None)
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
@@ -378,20 +380,8 @@ class NetSchoolAPI:
             payload['selectedData'].append({"filterId": "period",
                                             "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
                                             "filterText": f"{datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}"})
-            pclid = None
-            for item in response['filterSources'][1]['items']:
-                if int(item['value']) == int(class_id):
-                    pclid = item['title']
-            if not pclid:
-                resp = await self._request_with_optional_relogin(requests_timeout,
-                                                                 self._wrapped_client.client.build_request(
-                                                                     method="POST", url=f"{report_url}/initfilters",
-                                                                     json={"params": None,
-                                                                           "selectedData": payload['selectedData']}))
-                resp = resp.json()
-                pclid = resp[0]['items'][0]['title']
             payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
-                                               "filterText": f"{pclid}"})
+                                               "filterText": f"{class_name}"})
         else:
             for filter_ in filters:
                 payload['selectedData'].append({"filterId": filter_['id'], "filterValue": filter_['value'],
