@@ -370,7 +370,7 @@ class NetSchoolAPI:
         for s in self._students:
             if s['studentId'] == student_id:
                 student = s
-        logger.log(student_id, student)
+        logger.info(f"{student_id, self._students}")
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
