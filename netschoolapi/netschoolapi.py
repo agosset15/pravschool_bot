@@ -325,9 +325,11 @@ class NetSchoolAPI:
             filters = filters["filterSources"]
             report_filters = []
             for filter_ in filters:
-                if filter_["filterId"] not in ("period", "StartDate", "EndDate"):
+                if filter_["filterId"] not in ("period", "StartDate", "EndDate") and filter_["defaultValue"] is not None:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"],
                                            "items": filter_["items"]})
+                elif filter_["defaultValue"] is None:
+                    pass
                 else:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"]})
             return report_filters
