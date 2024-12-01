@@ -375,7 +375,7 @@ class NetSchoolAPI:
         if not filters:
             response = await self._request_with_optional_relogin(requests_timeout,
                                                                  self._wrapped_client.client.build_request(
-                                                                     method="GET", url=report_url), )
+                                                                     method="GET", url=f"reports/{report_url}"), )
             response = response.json()
             sid = None
             for item in response['filterSources'][0]['items']:
