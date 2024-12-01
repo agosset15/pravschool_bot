@@ -389,8 +389,7 @@ class NetSchoolAPI:
             for filter_ in filters:
                 payload['selectedData'].append({"filterId": filter_['id'], "filterValue": filter_['value'],
                                                 "filterText": filter_['text']})
-        payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{student['classId']}",
-                                           "filterText": f"{student['className']}"})
+        payload['selectedData'].append({"filterId": "PCLID", "filterValue": f"{student['classId']}", "filterText": f"{student['className']}"})
         response = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  "GET", "/signalr/negotiate",
