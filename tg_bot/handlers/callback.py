@@ -103,7 +103,7 @@ async def call_homework(call: CallbackQuery):
 
 @router.callback_query(F.data.in_(['mon', 'tue', 'wed', 'thu', 'fri']))
 async def call_homework_day(call: CallbackQuery, user: User, db: DefaultService):
-    data = {'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5}
+    data = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4}
     weekday = data[call.data]
     text = f"Важно! Это ДЗ может быть устаревшим. Проверяйте дату добавления."
     if user.is_admin:
