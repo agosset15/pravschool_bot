@@ -18,7 +18,7 @@ ROOT_DIR: Final[Path] = Path(__file__).parent.parent
 BOT_DIR: Final[PurePath] = PurePath(ROOT_DIR / "tg_bot")
 
 BOT_TOKEN = get_secret("BOT_TOKEN")
-DEBUG = os.getenv("DEBUG")
+DEBUG = bool(int(os.getenv("DEBUG")))
 ADMIN_ID = int(os.getenv("ADMIN_ID", default=900645059))
 
 DOMAIN = os.getenv("DOMAIN", default="example.com")
