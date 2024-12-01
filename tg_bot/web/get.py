@@ -38,7 +38,8 @@ async def getdb_homework(request: Request):
         if lesson.homework is None:
             homework.append(f"<b>{lesson.name}</b> - Нет<br />")
         else:
-            homework.append(f"<b>{lesson.name}</b> - {lesson.homework.homework}(Добавлено {lesson.homework.updated_at})"
+            homework.append(f"<b>{lesson.name}</b> - {lesson.homework.homework}(Добавлено "
+                            f"{lesson.homework.updated_at.strftime('%d-%m-%Y, %H:%M')})"
                             + f" <i>Получить фотографию пока можно только в боте</i>"
                             if lesson.homework.image else '')  # TODO реализовать соответствующую функцию в js
     text = '<br />'.join(homework)
