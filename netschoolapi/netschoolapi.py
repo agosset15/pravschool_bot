@@ -365,7 +365,10 @@ class NetSchoolAPI:
             student_id = next((x['value'] for x in filters if x['id'] == 'SID'), None)
         if not student_id:
             student_id = self._student_id
-        student = next((x for x in self._students if x['studentId'] == student_id), None)
+        student = None
+        for s in self._students:
+            if s['studentId'] == student_id:
+                student = s
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
