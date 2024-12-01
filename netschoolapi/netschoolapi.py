@@ -3,6 +3,7 @@ from datetime import date, timedelta, datetime
 from hashlib import md5
 from io import BytesIO
 from typing import Optional, Dict, List, Union, Any
+from loguru import logger
 
 import httpx
 from httpx import AsyncClient, Response
@@ -405,7 +406,7 @@ class NetSchoolAPI:
         query = {'transport': 'serverSentEvents', 'clientProtocol': '1.5', 'at': self._access_token,
                  'connectionToken': connect_token, 'connectionData': '[{"name":"queuehub"}]', 'tid': try_id,
                  '_': self._version, }
-
+        logger.info(f"{payload}")
         async with self._wrapped_client.client.stream('GET', 'signalr/connect', timeout=20, params=query) as r:
             async for chunk in r.aiter_text():
                 if 'initialized' in chunk:
