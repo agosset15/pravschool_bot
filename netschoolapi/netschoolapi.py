@@ -330,6 +330,11 @@ class NetSchoolAPI:
                                            "items": filter_["items"]})
                 elif filter_["defaultValue"] is None or filter_["filterId"] in exclude_filters:
                     pass
+                elif filter_['filterId'] == 'period':
+                    report_filters.append({'id': filter_['filterId'],
+                                           'default': filter_['defaultValue'].replace('0000000', '000Z'),
+                                           'items': [{'title': f"{datetime.strptime(filter_['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(filter_['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}",
+                                                      'value': filter_['defaultValue'].replace('0000000', '000Z')}]})
                 else:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"]})
             return report_filters
@@ -360,7 +365,7 @@ class NetSchoolAPI:
             student_id = next((x['value'] for x in filters if x['id'] == 'SID'), None)
         if not student_id:
             student_id = self._student_id
-        class_id, class_name = next(((x['classId'], x['className']) for x in self._students if x['studentId'] == student_id), None)
+        student = next((x for x in self._students if x['studentId'] == student_id), None)
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
@@ -380,12 +385,12 @@ class NetSchoolAPI:
             payload['selectedData'].append({"filterId": "period",
                                             "filterValue": f"{response['filterSources'][2]['defaultValue'].replace('0000000', '000Z')}",
                                             "filterText": f"{datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(response['filterSources'][2]['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}"})
-            payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{class_id}",
-                                               "filterText": f"{class_name}"})
         else:
             for filter_ in filters:
                 payload['selectedData'].append({"filterId": filter_['id'], "filterValue": filter_['value'],
                                                 "filterText": filter_['text']})
+        payload['selectedData'].insert(1, {"filterId": "PCLID", "filterValue": f"{student['classId']}",
+                                           "filterText": f"{student['className']}"})
         response = await self._request_with_optional_relogin(requests_timeout,
                                                              self._wrapped_client.client.build_request(
                                                                  "GET", "/signalr/negotiate",
