@@ -3,6 +3,7 @@ from datetime import date, timedelta, datetime
 from hashlib import md5
 from io import BytesIO
 from typing import Optional, Dict, List, Union, Any
+from loguru import logger
 
 import httpx
 from httpx import AsyncClient, Response
@@ -369,6 +370,7 @@ class NetSchoolAPI:
         for s in self._students:
             if s['studentId'] == student_id:
                 student = s
+        logger.log(student_id, student)
         payload = {"selectedData": [],
                    "params": [{"name": "SCHOOLYEARID", "value": self._year_id}, {"name": "SERVERTIMEZONE", "value": 3},
                               {"name": "FULLSCHOOLNAME",
