@@ -317,12 +317,11 @@ class NetSchoolAPI:
                 ).content)
 
     async def init_reports(self, requests_timeout: int = None):
+        requester = self._wrapped_client.make_requester(requests_timeout)
+
         async def parse_filters(report_id: str) -> list[dict[str, str | list[dict[str, str]]]]:
-            filters = (await self._request_with_optional_relogin(requests_timeout,
-                                                                 self._wrapped_client.client.build_request(
-                                                                     method="GET",
-                                                                     url="reports/" + report_id.casefold()),
-                                                                 )).json()
+            filters = (await requester(self._wrapped_client.client.build_request(
+                method="GET", url="reports/" + report_id.casefold()),)).json()
             filters = filters["filterSources"]
             report_filters = []
             for filter_ in filters:
@@ -334,9 +333,12 @@ class NetSchoolAPI:
                                            "default_range": filter_["defaultRange"], "range": filter_["range"]})
             return report_filters
 
-        response = await self._request_with_optional_relogin(requests_timeout,
-                                                             self._wrapped_client.client.build_request(
-                                                                 method="GET", url="reports"), )
+        response = await requester(self._wrapped_client.client.build_request(method="GET", url="reports"), )
+        if response.status_code == 401:
+            await self.login(*self._login_data)
+            response = await requester(self._wrapped_client.client.build_request(method="GET", url="reports"), )
+            if response.status_code == 401:
+                raise errors.NetSchoolAPIError("Ошибка получения отчетов")
         response = response.json()
         general_reports = []
         for report in response[0]["reports"]:

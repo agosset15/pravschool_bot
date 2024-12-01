@@ -7,7 +7,7 @@ from aiohttp.web import HTTPUnauthorized, HTTPExpectationFailed, HTTPGatewayTime
 from aiohttp.web_request import Request
 from aiohttp.web_response import json_response
 
-from tg_bot.utils.ns import AuthError, NoResponseFromServer, get_ns_object
+from tg_bot.utils.ns import AuthError, NoResponseFromServer, get_ns_object, NetSchoolAPIError
 from tg_bot.utils.web import validate_request
 from tg_bot.models import DefaultService, Schedule, User, Day
 from tg_bot.config import days
@@ -106,7 +106,10 @@ async def rooms_init(request: Request):
 async def report_init(request: Request):
     user, db = await validate_request(request)
     ns = await get_ns_object(user)
-    response = await ns.init_reports()
+    try:
+        response = await ns.init_reports()
+    except NetSchoolAPIError as e:
+        return json_response({"ok": False, "error": str(e)})
     return json_response({"ok": True, "reports": response})
 
 

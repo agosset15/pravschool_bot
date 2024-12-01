@@ -5,7 +5,7 @@ from aiogram import html, Bot
 from aiogram.utils.link import create_telegram_link
 
 from netschoolapi import NetSchoolAPI
-from netschoolapi.errors import AuthError, NoResponseFromServer
+from netschoolapi.errors import AuthError, NoResponseFromServer, NetSchoolAPIError
 from netschoolapi.schemas import Day, Assignment
 from tg_bot.models import User
 from tg_bot.config import NS_URL, cache
