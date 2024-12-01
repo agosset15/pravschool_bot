@@ -118,7 +118,8 @@ async def call_get_hw_lesson(call: CallbackQuery, db: DefaultService):
     lesson = await db.get_one(Lesson, Lesson.id == lesson_id, joined=Lesson.homework)
     text = f"{lesson.name} - Нет"
     if lesson.homework:
-        text = f"{html.bold(lesson.name)}\n\n{lesson.homework.homework} (Добавлено <i>{lesson.homework.updated_at}</i>)"
+        text = (f"{html.bold(lesson.name)}\n\n{lesson.homework.homework} "
+                f"(Добавлено <i>{lesson.homework.updated_at.strftime('%d-%m-%Y, %H:%M')}</i>)")
         if lesson.homework.image:
             return await call.message.edit_media(InputMediaPhoto(media=lesson.homework.image, caption=text),
                                                  reply_markup=inline_kb(back='Назад'))
