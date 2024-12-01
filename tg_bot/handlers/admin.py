@@ -162,9 +162,9 @@ async def edit_homework_image(message: Message, state: FSMContext, db: DefaultSe
         image = message.photo[-1].file_id
     data = await state.get_data()
     await state.clear()
-    homework = await db.get_one(Homework, Homework.lesson_id == data['lesson'])
+    homework = await db.get_one(Homework, Homework.lesson_id == int(data['lesson']))
     if homework:
         await db.update(Homework, Homework.id == homework.id, homework=data['homework'], image=image)
     else:
-        await db.create(Homework, lesson_id=data['lesson'], homework=data['homework'], image=image)
+        await db.create(Homework, lesson_id=int(data['lesson']), homework=data['homework'], image=image)
     await message.answer("Домашнее задание успешно добавлено.", reply_markup=main_kb())
