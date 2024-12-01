@@ -139,7 +139,7 @@ async def call_edit_homework(call: CallbackQuery, state: FSMContext, user: User,
 @router.callback_query(EditHomework.lesson)
 async def edit_homework_lesson(call: CallbackQuery, state: FSMContext):
     await state.update_data(lesson=call.data)
-    await call.message.edit_text("Отправьте текст задания",
+    await call.message.answer("Отправьте текст задания",
                                  reply_markup=reply_kb("Не добавлять", placeholder="Отправьте домашнее задание"))
     await state.set_state(EditHomework.homework)
 
