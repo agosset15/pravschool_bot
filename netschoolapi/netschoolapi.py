@@ -325,12 +325,11 @@ class NetSchoolAPI:
             filters = filters["filterSources"]
             report_filters = []
             for filter_ in filters:
-                if filter_["filterId"] != "period":
+                if filter_["filterId"] not in ("period", "StartDate", "EndDate"):
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"],
                                            "items": filter_["items"]})
                 else:
-                    report_filters.append({"id": "period", "default": filter_["defaultValue"],
-                                           "default_range": filter_["defaultRange"], "range": filter_["range"]})
+                    report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"]})
             return report_filters
 
         response = await requester(self._wrapped_client.client.build_request(method="GET", url="reports"), )
