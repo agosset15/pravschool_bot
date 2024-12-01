@@ -413,9 +413,8 @@ class NetSchoolAPI:
                 if 'initialized' in chunk:
                     await requester(self._wrapped_client.client.build_request(
                         "GET", "signalr/start", params=query))
-                    logger.info(f"{payload}")
                     response = await requester(self._wrapped_client.client.build_request(
-                                                                      "POST", f"{report_url}/queue",
+                                                                      "POST", f"reports/{report_url}/queue",
                                                                       json=payload))
                     if response.status_code == 500:
                         logger.error(response.reason_phrase)
