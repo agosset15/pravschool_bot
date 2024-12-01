@@ -3,6 +3,7 @@ from datetime import date, timedelta, datetime
 from hashlib import md5
 from io import BytesIO
 from typing import Optional, Dict, List, Union, Any
+from loguru import logger
 
 import httpx
 from httpx import AsyncClient, Response
@@ -405,28 +406,30 @@ class NetSchoolAPI:
         query = {'transport': 'serverSentEvents', 'clientProtocol': '1.5', 'at': self._access_token,
                  'connectionToken': connect_token, 'connectionData': '[{"name":"queuehub"}]', 'tid': try_id,
                  '_': self._version, }
-        async with self._wrapped_client.client.stream('GET', 'signalr/connect', timeout=20, params=query) as r:
+
+        async with self._wrapped_client.client.stream('GET', 'signalr/connect', timeout=30, params=query) as r:
+            requester = self._wrapped_client.make_requester(requests_timeout)
             async for chunk in r.aiter_text():
                 if 'initialized' in chunk:
-                    await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
+                    await requester(self._wrapped_client.client.build_request(
                         "GET", "signalr/start", params=query))
-                    response = await self._wrapped_client.request(requests_timeout,
-                                                                  self._wrapped_client.client.build_request(
+                    logger.info(f"{payload}")
+                    response = await requester(self._wrapped_client.client.build_request(
                                                                       "POST", f"{report_url}/queue",
                                                                       json=payload))
+                    if response.status_code == 500:
+                        logger.error(response.reason_phrase)
                     task_id = response.json()['taskId']
-                    await self._wrapped_client.request(requests_timeout, self._wrapped_client.client.build_request(
+                    await requester(self._wrapped_client.client.build_request(
                         "POST", "signalr/send", params=query, data={
                             'data': {"H": "queuehub", "M": "StartTask", "A": [task_id], "I": 0}}))
                 else:
                     chunk = json.loads(chunk.replace('data: ', ''))
                     if chunk:
                         if chunk['M'] and chunk['M'][0]['M'] == 'complete':
-                            await self._wrapped_client.request(requests_timeout,
-                                                               self._wrapped_client.client.build_request(
+                            await requester(self._wrapped_client.client.build_request(
                                                                    "POST", "signalr/abort", params=query))
-                            file = await self._wrapped_client.request(requests_timeout,
-                                                                      self._wrapped_client.client.build_request(
+                            file = await requester(self._wrapped_client.client.build_request(
                                                                           "GET",
                                                                           f"files/{chunk['M'][0]['A'][0]['Data']}"))
                             return file.text
