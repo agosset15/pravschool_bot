@@ -137,12 +137,14 @@ async def day_handler(call: CallbackQuery, state: FSMContext, user: User, bot: B
         if len(ns.students) > 1:
             await state.set_state(NSChild.day)
             await state.update_data(day=day, start=data['start'])
+            await call.answer()
             return await call.message.answer(
                 f"Для ребенка {ns.students[0]['nickName']}:\n\nВ этот день ничего нет.\n\nВыберите ребенка:",
                 reply_markup=inline_kb(
                     **{str(i): child['nickName'] for i, child in enumerate(ns.students)}),
                 disable_web_page_preview=True)
         return await call.answer(str(e), show_alert=True)
+    await call.answer()
     if len(ns.students) > 1:
         await state.set_state(NSChild.day)
         await state.update_data(day=day, start=data['start'])
