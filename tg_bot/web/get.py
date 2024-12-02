@@ -54,7 +54,7 @@ async def room_schedule(request: Request):
 
 
 async def getdb_count(request: Request):
-    user, db = await validate_request(request)
+    db: DefaultService = request.app['db']
     return json_response({'ok': True, 'count': await db.count(User)})
 
 
