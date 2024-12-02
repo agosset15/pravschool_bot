@@ -340,11 +340,14 @@ class NetSchoolAPI:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"]})
             return report_filters
 
-        response = await requester(self._wrapped_client.client.build_request(method="GET", url="reports"), )
-        if response.status_code == 401:
-            await self.login(*self._login_data)
+        try:
             response = await requester(self._wrapped_client.client.build_request(method="GET", url="reports"), )
-            if response.status_code == 401:
+        except httpx.HTTPStatusError as error:
+            if error.response.status_code == 401:
+                await self.login(*self._login_data)
+            try:
+                response = await requester(self._wrapped_client.client.build_request(method="GET", url="reports"), )
+            except httpx.HTTPStatusError:
                 raise errors.NetSchoolAPIError("Ошибка получения отчетов")
         response = response.json()
         general_reports = []
