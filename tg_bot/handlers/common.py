@@ -1,6 +1,6 @@
-from aiogram import Router, Bot
+from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, CommandStart
 
 from tg_bot.filters.user import NewUserFilter
@@ -85,3 +85,10 @@ async def cmd_overdue(message: Message, state: FSMContext, user: User, bot: Bot)
                                     disable_web_page_preview=True)
     await state.clear()
     return await message.answer(duty, disable_web_page_preview=True)
+
+
+@router.callback_query(F.data == "back")
+async def call_back(call: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await call.message.edit_text("Вы вернулись в главное меню.", reply_markup=main_kb())
+    await call.answer()

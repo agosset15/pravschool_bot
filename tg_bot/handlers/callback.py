@@ -51,13 +51,6 @@ async def call_info(call: CallbackQuery, db: DefaultService):
     await call.answer()
 
 
-@router.callback_query(F.data == "back")
-async def call_back(call: CallbackQuery, state: FSMContext):
-    await state.clear()
-    await call.message.edit_text("Вы вернулись в главное меню.", reply_markup=main_kb())
-    await call.answer()
-
-
 @router.callback_query(F.data == "delete_me")
 async def call_delete(call: CallbackQuery, user: User, db: DefaultService):
     await db.delete(User, User.id == user.id)

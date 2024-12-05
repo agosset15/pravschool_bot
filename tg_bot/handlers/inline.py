@@ -23,7 +23,7 @@ async def room_find(query: InlineQuery, db: DefaultService):
     room = query.query[6:]
     logger.info(f"{query.query, room}")
     rooms = await db.get_all(Schedule, Schedule.entity == 2, Schedule.grade.icontains(room))
-    await query.answer(inline_schedule(rooms, 'room'))
+    await query.answer(inline_schedule(rooms, 'room'), cache_time=86400)
 
 
 @router.inline_query()
