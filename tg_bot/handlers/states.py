@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from aiogram import Router, F, html, Bot
 from aiogram.types import Message, CallbackQuery, InlineQuery
 from aiogram.fsm.context import FSMContext
-from loguru import logger
 
 from tg_bot.states import GradeWait, RoomWait, NSLoginCredentialsWait, GetNS, NSChild, GetFreeRooms
 from tg_bot.models import DefaultService, Schedule, User
@@ -43,14 +42,6 @@ async def grade_teacher(query: InlineQuery, db: DefaultService):
     name = query.query[9:]
     teachers = await db.get_all(Schedule, Schedule.entity == 1, Schedule.grade.icontains(name))
     await query.answer(inline_schedule(teachers, 'teacher'), is_personal=False, cache_time=86400)
-
-
-@router.inline_query(RoomWait.room, F.query.contains("#room"))
-async def room_find(query: InlineQuery, db: DefaultService):
-    room = query.query[6:]
-    logger.info(f"{query.query, room}")
-    rooms = await db.get_all(Schedule, Schedule.entity == 2, Schedule.grade.icontains(room))
-    await query.answer(inline_schedule(rooms, 'room'))
 
 
 @router.message(RoomWait.room, F.text.startswith("*room_"))

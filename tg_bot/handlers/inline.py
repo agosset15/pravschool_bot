@@ -1,9 +1,11 @@
 from aiogram import Router, F, Bot
 from aiogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent
+from loguru import logger
 
 from tg_bot.models import DefaultService, Schedule, User
-from tg_bot.keyboards.inline import inline_grades
+from tg_bot.keyboards.inline import inline_grades, inline_schedule
 from tg_bot.config import grades
+from tg_bot.states import RoomWait
 
 router = Router()
 
@@ -14,6 +16,14 @@ async def inline_clas(query: InlineQuery, db: DefaultService, bot: Bot):
     bot_username = (await bot.get_me()).username
     await query.answer(inline_grades(schedule, bot_username), cache_time=86400, is_personal=False,
                        switch_pm_text="Поговорить лично »»", switch_pm_parameter=f"{query.query}_inline")
+
+
+@router.inline_query(RoomWait.room, F.query.contains("#room"))
+async def room_find(query: InlineQuery, db: DefaultService):
+    room = query.query[6:]
+    logger.info(f"{query.query, room}")
+    rooms = await db.get_all(Schedule, Schedule.entity == 2, Schedule.grade.icontains(room))
+    await query.answer(inline_schedule(rooms, 'room'))
 
 
 @router.inline_query()
