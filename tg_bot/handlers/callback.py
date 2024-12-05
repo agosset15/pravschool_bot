@@ -128,7 +128,7 @@ async def call_get_hw_lesson(call: CallbackQuery, db: DefaultService):
 
 @router.callback_query(F.data == "kabs_free")
 async def get_kabs_free(call: CallbackQuery, state: FSMContext):
-    await call.message.edit_caption(caption="Выберите день:", reply_markup=days_kb(list(range(6)), extra_text='Суббота'))
+    await call.message.edit_text("Выберите день:", reply_markup=days_kb(list(range(6)), extra_text='Суббота'))
     await state.set_state(GetFreeRooms.day)
     await call.answer()
 
