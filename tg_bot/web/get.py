@@ -2,7 +2,6 @@ from datetime import date, datetime, timedelta
 import random
 import json
 
-from aiogram import html
 from aiohttp.web import HTTPUnauthorized, HTTPExpectationFailed, HTTPGatewayTimeout, Application
 from aiohttp.web_request import Request
 from aiohttp.web_response import json_response
@@ -15,13 +14,12 @@ from tg_bot.config import days
 
 async def getdb_user(request: Request):
     user, db = await validate_request(request)
-    password = html.italic("Сохранен в зашифрованном виде")
     ns = await get_ns_object(user)
     return json_response(
         {'ok': True, 'user': {'name': user.name, 'grade': user.grade, 'id': user.id,
                               'is_teacher': user.is_teacher, 'is_ns': user.is_ns,
-                              'is_admin': user.is_admin, 'is_parent': user.is_parent, 'pass': password,
-                              'login': user.login, 'children': ns.students}})
+                              'is_admin': user.is_admin, 'is_parent': user.is_parent,
+                              'pass': "Сохранен в зашифрованном виде", 'login': user.login, 'children': ns.students}})
 
 
 async def getdb_rasp(request: Request):
