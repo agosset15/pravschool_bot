@@ -1,7 +1,7 @@
 from loguru import logger
 import os
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+# from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from aiohttp.web import run_app, Application
 
@@ -65,14 +65,14 @@ def main():
     post.register(app)
     get.register(app)
 
-    scheduler = AsyncIOScheduler()
+    # scheduler = AsyncIOScheduler()
 
     logger.info('Регаю хендлеры...')
     dp.include_routers(common.router, states.router, callback.router, text.router, inline.router, admin.router,
                        service.router)
 
     logger.info('Запускаю шедулер...')
-    scheduler.start()
+    # scheduler.start()
     # scheduler.add_job(send_user_ns_duty, 'cron', hour=12)
 
     SimpleRequestHandler(
