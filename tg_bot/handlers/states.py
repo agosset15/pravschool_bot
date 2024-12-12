@@ -73,7 +73,7 @@ async def add_ns_login(message: Message, state: FSMContext, db: DefaultService, 
     except AuthError as e:
         await message.answer(str(e))
         return await state.set_state(NSLoginCredentialsWait.login)
-    await db.update(User, User.id == user.id, login=data['login'], password=encoded_password)
+    await db.update(User, User.id == user.id, login=data['login'], password=encoded_password, is_ns=True)
     if len(ns.students) > 1:
         await db.update(User, User.id == user.id, is_parent=True)
     await message.answer("Отлично, теперь вы можете настроить уведомления о просроченных заданиях, "
