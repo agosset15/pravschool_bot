@@ -15,8 +15,9 @@ async def inline_clas(query: InlineQuery, db: DefaultService, bot: Bot):
     schedule = await db.get_one(Schedule, Schedule.grade.contains(query.query), Schedule.entity == 0)
     bot_username = (await bot.get_me()).username
     logger.info("grades inline")
-    await query.answer(inline_grades(schedule, bot_username), cache_time=86400, is_personal=False,
+    await query.answer(inline_grades(schedule, bot_username), is_personal=False,
                        switch_pm_text="Поговорить лично »»", switch_pm_parameter=f"{query.query}_inline")
+    # cache_time=86400
 
 
 @router.inline_query(GradeWait.grade, F.query.startswith("#teacher"))
@@ -24,7 +25,7 @@ async def grade_teacher(query: InlineQuery, db: DefaultService):
     name = query.query[9:]
     logger.info(f"{query.query, name}")
     teachers = await db.get_all(Schedule, Schedule.entity == 1, Schedule.grade.icontains(name))
-    await query.answer(inline_schedule(teachers, 'teacher'), is_personal=False, cache_time=86400)
+    await query.answer(inline_schedule(teachers, 'teacher'), is_personal=False)  # cache_time=86400
 
 
 @router.inline_query(RoomWait.room, F.query.contains("#room"))
@@ -32,7 +33,7 @@ async def room_find(query: InlineQuery, db: DefaultService):
     room = query.query[6:]
     logger.info(f"{query.query, room}")
     rooms = await db.get_all(Schedule, Schedule.entity == 2, Schedule.grade.icontains(room))
-    await query.answer(inline_schedule(rooms, 'room'), cache_time=86400)
+    await query.answer(inline_schedule(rooms, 'room'))  # cache_time=86400
 
 
 @router.inline_query()
@@ -47,5 +48,6 @@ async def inline_day(query: InlineQuery, user: User, db: DefaultService, bot: Bo
                                   switch_pm_text="Регистрация »»")
     schedule = await db.get_one(Schedule, Schedule.id == user.schedule, Schedule.entity == 0)
     bot_username = (await bot.get_me()).username
-    await query.answer(inline_grades(schedule, bot_username), cache_time=86400, is_personal=True,
+    await query.answer(inline_grades(schedule, bot_username), is_personal=True,
                        switch_pm_text="Поговорить лично »»", switch_pm_parameter=f"{query.query}_inline")
+    # cache_time=86400
