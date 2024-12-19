@@ -1,5 +1,5 @@
 #!/bin/sh
 
-python alembic upgrade head
+python -m alembic upgrade head
 
 exec "$@"

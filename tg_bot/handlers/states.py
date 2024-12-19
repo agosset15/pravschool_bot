@@ -37,13 +37,6 @@ async def grade_edit(message: Message, state: FSMContext, db: DefaultService, us
     await message.answer(main_text(user), reply_markup=main_kb())
 
 
-@router.inline_query(GradeWait.grade, F.query.startswith("#teacher"))
-async def grade_teacher(query: InlineQuery, db: DefaultService):
-    name = query.query[9:]
-    teachers = await db.get_all(Schedule, Schedule.entity == 1, Schedule.grade.icontains(name))
-    await query.answer(inline_schedule(teachers, 'teacher'), is_personal=False, cache_time=86400)
-
-
 @router.message(RoomWait.room, F.text.startswith("*room_"))
 async def take_kab(message: Message, state: FSMContext, db: DefaultService):
     await message.delete()

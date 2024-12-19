@@ -5,7 +5,7 @@ from loguru import logger
 from tg_bot.models import DefaultService, Schedule, User
 from tg_bot.keyboards.inline import inline_grades, inline_schedule
 from tg_bot.config import grades
-from tg_bot.states import RoomWait
+from tg_bot.states import RoomWait, GradeWait
 
 router = Router()
 
@@ -17,6 +17,14 @@ async def inline_clas(query: InlineQuery, db: DefaultService, bot: Bot):
     logger.info("grades inline")
     await query.answer(inline_grades(schedule, bot_username), cache_time=86400, is_personal=False,
                        switch_pm_text="Поговорить лично »»", switch_pm_parameter=f"{query.query}_inline")
+
+
+@router.inline_query(GradeWait.grade, F.query.startswith("#teacher"))
+async def grade_teacher(query: InlineQuery, db: DefaultService):
+    name = query.query[9:]
+    logger.info(f"{query.query, name}")
+    teachers = await db.get_all(Schedule, Schedule.entity == 1, Schedule.grade.icontains(name))
+    await query.answer(inline_schedule(teachers, 'teacher'), is_personal=False, cache_time=86400)
 
 
 @router.inline_query(RoomWait.room, F.query.contains("#room"))
