@@ -14,6 +14,7 @@ router = Router()
 async def inline_clas(query: InlineQuery, db: DefaultService, bot: Bot):
     schedule = await db.get_one(Schedule, Schedule.grade.contains(query.query), Schedule.entity == 0)
     bot_username = (await bot.get_me()).username
+    logger.info("grades inline")
     await query.answer(inline_grades(schedule, bot_username), cache_time=86400, is_personal=False,
                        switch_pm_text="Поговорить лично »»", switch_pm_parameter=f"{query.query}_inline")
 
@@ -28,6 +29,7 @@ async def room_find(query: InlineQuery, db: DefaultService):
 
 @router.inline_query()
 async def inline_day(query: InlineQuery, user: User, db: DefaultService, bot: Bot):
+    logger.info(f"all_inline ")
     if user is None or user.grade == 0:
         buttons = [
             InlineQueryResultArticle(id="err", title="Вы не зарегистрированы!",
