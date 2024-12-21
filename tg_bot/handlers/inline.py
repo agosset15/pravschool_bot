@@ -4,7 +4,7 @@ from loguru import logger
 
 from tg_bot.models import DefaultService, Schedule, User
 from tg_bot.keyboards.inline import inline_grades, inline_schedule
-from tg_bot.config import grades
+from tg_bot.config import grades, ADMIN_ID
 from tg_bot.states import RoomWait, GradeWait
 
 router = Router()
@@ -12,6 +12,7 @@ router = Router()
 
 @router.inline_query(F.query.in_(grades + ['10', '11']))
 async def inline_clas(query: InlineQuery, db: DefaultService, bot: Bot):
+    await bot.send_message(ADMIN_ID, f"inline reached: {query.query}")
     schedule = await db.get_one(Schedule, Schedule.grade.contains(query.query), Schedule.entity == 0)
     bot_username = (await bot.get_me()).username
     logger.info("grades inline")
@@ -38,6 +39,7 @@ async def room_find(query: InlineQuery, db: DefaultService):
 @router.inline_query()
 async def inline_day(query: InlineQuery, user: User, db: DefaultService, bot: Bot):
     logger.info(f"all_inline ")
+    await bot.send_message(ADMIN_ID, f"inline reached: {query.query}")
     if user is None or user.grade == 0:
         buttons = [
             InlineQueryResultArticle(id="err", title="Вы не зарегистрированы!",
