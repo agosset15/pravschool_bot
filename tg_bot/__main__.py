@@ -28,7 +28,7 @@ class StartUpFactory:
         register_global_middlewares(dispatcher, db)
         logger.info('Запускаю бота...')
         await bot.delete_webhook(drop_pending_updates=True)
-        await bot.set_webhook(WEBHOOK_URL)
+        await bot.set_webhook(WEBHOOK_URL, allowed_updates=dispatcher.resolve_used_update_types())
         logger.info(f"Registered webhook on: {WEBHOOK_URL}")
 
     async def server(self, app):
