@@ -24,7 +24,6 @@ COPY pyproject.toml poetry.lock /app/
 RUN poetry install -n --only main --no-root
 
 ADD . /app/
-RUN poetry install -n --only-root
 
 # run app
 ENTRYPOINT ["sh", "/app/entrypoint.sh"]
