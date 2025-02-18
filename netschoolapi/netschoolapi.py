@@ -156,6 +156,8 @@ class NetSchoolAPI:
     async def _request_with_optional_relogin(
             self, requests_timeout: Optional[int], request: httpx.Request,
             follow_redirects=False):
+        if not requests_timeout:
+            requests_timeout = 120
         try:
             response = await self._wrapped_client.request(
                 requests_timeout, request, follow_redirects

@@ -86,7 +86,7 @@ async def get_ns_object(user: User) -> NetSchoolAPI:
         ns = NetSchoolAPI(NS_URL)
         await ns.login(user.login, user.password, 1, requests_timeout=120)
         ns_sessions.update({user.id: ns})
-    return ns_sessions.get(user.id, NetSchoolAPI(NS_URL))
+    return ns_sessions.get(user.id)
 
 
 async def update_ns_object(user: User, ns: NetSchoolAPI):
