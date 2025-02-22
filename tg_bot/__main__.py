@@ -1,6 +1,10 @@
 from loguru import logger
 import os
 
+import sentry_sdk
+from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+from sentry_sdk.integrations.loguru import LoguruIntegration
+
 # from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from aiohttp.web import run_app, Application
@@ -33,6 +37,10 @@ class StartUpFactory:
         logger.info(f"Registered webhook on: {WEBHOOK_URL}\n{info}")
 
     async def server(self, app):
+        sentry_sdk.init(
+            dsn="https://c880126fbd95469ba97907ab07828415@glitchtip.ag15.ru/1",
+            integrations=[AioHttpIntegration(), LoguruIntegration()]
+        )
         logger.info('Запускаю БД для web...')
         db_manager.init()
         self.session = db_manager.session
