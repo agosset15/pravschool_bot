@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye as production
+FROM python:3.12-slim-bullseye as production
 LABEL maintainer="agosset15 <ag15@ag15.ru>" \
       description="PravSchool Telegram Bot"
 
