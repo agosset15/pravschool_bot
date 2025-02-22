@@ -184,7 +184,7 @@ class School(NetSchoolAPISchema):
 
 
 with logger.catch():
-    AttachmentSchema = class_schema(Attachment)
+    AttachmentSchema = class_schema(Attachment, globalns={})
 DiarySchema = class_schema(Diary)
 AssignmentInfoSchema = class_schema(AssignmentInfo)
 AssignmentSchema = class_schema(Assignment)
