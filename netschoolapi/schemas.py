@@ -14,7 +14,7 @@ class NetSchoolAPISchema(Schema):
         unknown = EXCLUDE
 
 
-@dataclass
+@dataclass()
 class Attachment(NetSchoolAPISchema):
     id: int
     name: str = field(metadata=dict(data_key='originalFileName'))
@@ -27,14 +27,14 @@ class Attachment(NetSchoolAPISchema):
         return {'id': self.id, 'name': self.name, 'description': self.description}
 
 
-@dataclass
+@dataclass()
 class Author(NetSchoolAPISchema):
     id: int
     full_name: str = field(metadata=dict(data_key="fio"))
     nickname: str = field(metadata=dict(data_key="nickName"))
 
 
-@dataclass
+@dataclass()
 class Announcement(NetSchoolAPISchema):
     name: str
     author: Author
@@ -43,7 +43,7 @@ class Announcement(NetSchoolAPISchema):
     attachments: List[Attachment] = field(default_factory=list)
 
 
-@dataclass
+@dataclass()
 class Assignment(NetSchoolAPISchema):
     id: int
     comment: str
@@ -73,13 +73,13 @@ class Assignment(NetSchoolAPISchema):
         return assignment
 
 
-@dataclass
+@dataclass()
 class Teacher(NetSchoolAPISchema):
     id: int
     name: str
 
 
-@dataclass
+@dataclass()
 class Subject(NetSchoolAPISchema):
     id: int
     name: str
@@ -95,7 +95,7 @@ class Subject(NetSchoolAPISchema):
         return subject
 
 
-@dataclass
+@dataclass()
 class AssignmentInfo(NetSchoolAPISchema):
     id: int
     type: str = field(metadata=dict(allow_none=True))
@@ -123,7 +123,7 @@ class AssignmentInfo(NetSchoolAPISchema):
         return assignment_info
 
 
-@dataclass
+@dataclass()
 class Lesson(NetSchoolAPISchema):
     day: datetime.date
     lesson_id: int = field(metadata=dict(data_key='classmeetingId'))
@@ -137,27 +137,27 @@ class Lesson(NetSchoolAPISchema):
     assignments: List[Assignment] = field(default_factory=list)
 
 
-@dataclass
+@dataclass()
 class Day(NetSchoolAPISchema):
     lessons: List[Lesson]
     day: datetime.date = field(metadata=dict(data_key='date'))
 
 
-@dataclass
+@dataclass()
 class Diary(NetSchoolAPISchema):
     start: datetime.date = field(metadata=dict(data_key='weekStart'))
     end: datetime.date = field(metadata=dict(data_key='weekEnd'))
     schedule: List[Day] = field(metadata=dict(data_key='weekDays'))
 
 
-@dataclass
+@dataclass()
 class ShortSchool(NetSchoolAPISchema):
     name: str
     id: int
     address: str = field(metadata=dict(data_key="addressString"))
 
 
-@dataclass
+@dataclass()
 class School(NetSchoolAPISchema):
     name: str = field(metadata=dict(data_key='fullSchoolName'))
     about: str
