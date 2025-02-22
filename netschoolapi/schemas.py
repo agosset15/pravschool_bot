@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import field, dataclass
 import datetime
 from loguru import logger
