@@ -184,10 +184,10 @@ class School(NetSchoolAPISchema):
 
 
 with logger.catch():
-    AttachmentSchema = class_schema(Attachment, globalns={})
-DiarySchema = class_schema(Diary, globalns={})
-AssignmentInfoSchema = class_schema(AssignmentInfo, globalns={})
-AssignmentSchema = class_schema(Assignment, globalns={})
-ShortSchoolSchema = class_schema(ShortSchool, globalns={})
-SchoolSchema = class_schema(School, globalns={})
-AnnouncementSchema = class_schema(Announcement, globalns={})
+    AttachmentSchema = class_schema(Attachment, localns={})
+DiarySchema = class_schema(Diary, localns={})
+AssignmentInfoSchema = class_schema(AssignmentInfo, localns={})
+AssignmentSchema = class_schema(Assignment, localns={})
+ShortSchoolSchema = class_schema(ShortSchool, localns={})
+SchoolSchema = class_schema(School, localns={})
+AnnouncementSchema = class_schema(Announcement, localns={})
