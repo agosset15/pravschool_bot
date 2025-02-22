@@ -25,6 +25,7 @@ envparse = "^0.2.0"
 loguru = "^0.7.3"
 redis = "^5.2.1"
 sentry-sdk = "^2.22.0"
+pydantic = "^2.10.6"
 
 
 [build-system]
