@@ -1,5 +1,4 @@
-from __future__ import annotations
-from dataclasses import field, dataclass
+from dataclasses import field, dataclass, Field
 import datetime
 from loguru import logger
 from typing import Any, Dict, List
@@ -19,8 +18,8 @@ class NetSchoolAPISchema(Schema):
 @dataclass()
 class Attachment(NetSchoolAPISchema):
     id: int
-    name: str = field(metadata=dict(data_key='originalFileName'))
-    description: str = field(metadata=dict(
+    name: Field[str] = field(metadata=dict(data_key='originalFileName'))
+    description: Field[str] = field(metadata=dict(
         allow_none=True, missing='', required=False
     ))
 
@@ -32,16 +31,16 @@ class Attachment(NetSchoolAPISchema):
 @dataclass()
 class Author(NetSchoolAPISchema):
     id: int
-    full_name: str = field(metadata=dict(data_key="fio"))
-    nickname: str = field(metadata=dict(data_key="nickName"))
+    full_name: Field[str] = field(metadata=dict(data_key="fio"))
+    nickname: Field[str] = field(metadata=dict(data_key="nickName"))
 
 
 @dataclass()
 class Announcement(NetSchoolAPISchema):
     name: str
     author: Author
-    content: str = field(metadata=dict(data_key='description'))
-    post_date: datetime.datetime = field(metadata=dict(data_key='postDate'))
+    content: Field[str] = field(metadata=dict(data_key='description'))
+    post_date: Field[datetime.datetime] = field(metadata=dict(data_key='postDate'))
     attachments: List[Attachment] = field(default_factory=list)
 
 
