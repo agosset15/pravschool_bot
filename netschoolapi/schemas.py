@@ -17,7 +17,7 @@ class NetSchoolAPISchema(Schema):
 
 @dataclass()
 class Attachment(NetSchoolAPISchema):
-    id: int
+    id: Field[int] = field(metadata=dict(required=True))
     name: Field[str] = field(metadata=dict(data_key='originalFileName'))
     description: Field[str] = field(metadata=dict(
         allow_none=True, missing='', required=False
