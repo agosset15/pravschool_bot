@@ -1,6 +1,6 @@
 from dataclasses import field, dataclass, Field
-import datetime
 from loguru import logger
+import datetime
 from typing import Any, Dict, List
 
 from marshmallow import EXCLUDE, Schema, pre_load
@@ -15,11 +15,11 @@ class NetSchoolAPISchema(Schema):
         unknown = EXCLUDE
 
 
-@dataclass()
+@dataclass
 class Attachment(NetSchoolAPISchema):
-    id: Field[int] = field(metadata=dict(required=True))
-    name: Field[str] = field(metadata=dict(data_key='originalFileName'))
-    description: Field[str] = field(metadata=dict(
+    id: int
+    name: str = field(metadata=dict(data_key='originalFileName'))
+    description: str = field(metadata=dict(
         allow_none=True, missing='', required=False
     ))
 
@@ -28,19 +28,19 @@ class Attachment(NetSchoolAPISchema):
         return {'id': self.id, 'name': self.name, 'description': self.description}
 
 
-@dataclass()
+@dataclass
 class Author(NetSchoolAPISchema):
     id: int
-    full_name: Field[str] = field(metadata=dict(data_key="fio"))
-    nickname: Field[str] = field(metadata=dict(data_key="nickName"))
+    full_name: str = field(metadata=dict(data_key="fio"))
+    nickname: str = field(metadata=dict(data_key="nickName"))
 
 
-@dataclass()
+@dataclass
 class Announcement(NetSchoolAPISchema):
     name: str
     author: Author
-    content: Field[str] = field(metadata=dict(data_key='description'))
-    post_date: Field[datetime.datetime] = field(metadata=dict(data_key='postDate'))
+    content: str = field(metadata=dict(data_key='description'))
+    post_date: datetime.datetime = field(metadata=dict(data_key='postDate'))
     attachments: List[Attachment] = field(default_factory=list)
 
 
@@ -183,8 +183,7 @@ class School(NetSchoolAPISchema):
         return school
 
 
-with logger.catch():
-    AttachmentSchema = class_schema(Attachment)
+AttachmentSchema = class_schema(Attachment)
 DiarySchema = class_schema(Diary)
 AssignmentInfoSchema = class_schema(AssignmentInfo)
 AssignmentSchema = class_schema(Assignment)
