@@ -1,6 +1,5 @@
 from dataclasses import field, dataclass
 import datetime
-from loguru import logger
 from typing import Any, Dict, List
 
 from marshmallow import EXCLUDE, Schema, pre_load
@@ -183,11 +182,10 @@ class School(NetSchoolAPISchema):
         return school
 
 
-with logger.catch():
-    AttachmentSchema = class_schema(Attachment, globalns={})
-DiarySchema = class_schema(Diary)
-AssignmentInfoSchema = class_schema(AssignmentInfo)
-AssignmentSchema = class_schema(Assignment)
-ShortSchoolSchema = class_schema(ShortSchool)
-SchoolSchema = class_schema(School)
-AnnouncementSchema = class_schema(Announcement)
+AttachmentSchema = class_schema(Attachment, globalns={})
+DiarySchema = class_schema(Diary, globalns={})
+AssignmentInfoSchema = class_schema(AssignmentInfo, globalns={})
+AssignmentSchema = class_schema(Assignment, globalns={})
+ShortSchoolSchema = class_schema(ShortSchool, globalns={})
+SchoolSchema = class_schema(School, globalns={})
+AnnouncementSchema = class_schema(Announcement, globalns={})
