@@ -1,14 +1,13 @@
 import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo, ConfigDict
 
 __all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School', 'Day']
 
 
 class NetSchoolAPISchema(BaseModel):
-    # model_config = ConfigDict()
-    pass
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class Attachment(NetSchoolAPISchema):
@@ -33,11 +32,11 @@ class Announcement(NetSchoolAPISchema):
 
 class Assignment(NetSchoolAPISchema):
     id: int
-    comment: str
+    comment: Optional[str] = None
     type: str
-    subject: str | None = Field(alias='subjectName')
+    subject: str = Field(alias='subjectName', default='')
     content: str = Field(alias='assignmentName')
-    mark: int | None = Field(alias='mark')
+    mark: int = Field(alias='mark')
     is_duty: bool = Field(alias='dutyMark')
     deadline: datetime.date = Field(alias='dueDate')
     lesson_id: int = Field(alias='classMeetingId')
@@ -83,13 +82,13 @@ class Subject(NetSchoolAPISchema):
 
 class AssignmentInfo(NetSchoolAPISchema):
     id: int
-    type: str | None
+    type: Optional[str] = None
     name: str = Field(alias='assignmentName')
     subject: Subject = Field(alias='subjectGroup', default_factory=dict)
     teachers: List[Teacher]
     weight: int
     date: datetime.date
-    description: str | None
+    description: Optional[str] = None
     attachments: List[Attachment] = Field(default_factory=list)
 
     @field_serializer('teachers')
@@ -111,7 +110,7 @@ class Lesson(NetSchoolAPISchema):
     lesson_id: int = Field(alias='classmeetingId')
     start: datetime.time = Field(alias='startTime')
     end: datetime.time = Field(alias='endTime')
-    room: str | None
+    room: Optional[str] = None
     number: int
     subject: str = Field(alias='subjectName')
     assignments: List[Assignment] = Field(default_factory=list)
