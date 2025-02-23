@@ -3,10 +3,11 @@ from datetime import date, timedelta, datetime
 from hashlib import md5
 from io import BytesIO
 from typing import Optional, Dict, List, Union, Any
-from loguru import logger
 
 import httpx
 from httpx import AsyncClient, Response
+from loguru import logger
+from pydantic import TypeAdapter
 
 from netschoolapi import errors, schemas
 
@@ -34,7 +35,7 @@ class NetSchoolAPI:
         )
 
         self._student_id = -1
-        self._students = []  # [{'studentId': int, 'nickName': str, 'className': str, 'classId': str(int), 'iupGrade': 0}]
+        self._students = []  # [{'studentId':int, 'nickName':str, 'className':str, 'classId':str(int), 'iupGrade':0}]
         self._year_id = -1
         self._school_id = -1
         self._version = -1
@@ -208,10 +209,8 @@ class NetSchoolAPI:
                 },
             )
         )
-        diary_schema = schemas.DiarySchema()
-        diary_schema.context['assignment_types'] = self._assignment_types
-        diary = diary_schema.load(response.json())
-        return diary  # type: ignore
+        diary = schemas.Diary.model_validate(response.json(), context={'assignment_types': self._assignment_types})
+        return diary
 
     async def overdue(
             self,
@@ -241,10 +240,10 @@ class NetSchoolAPI:
                 },
             )
         )
-        assignments_schema = schemas.AssignmentSchema()
-        assignments_schema.context['assignment_types'] = self._assignment_types
-        assignments = assignments_schema.load(response.json(), many=True)
-        return assignments  # type: ignore
+        assignments_schema = TypeAdapter(list[schemas.Assignment])
+        assignments = assignments_schema.validate_python(response.json(), context={'assignment_types':
+                                                                                       self._assignment_types})
+        return assignments
 
     async def assignment_info(
             self,
@@ -265,10 +264,9 @@ class NetSchoolAPI:
                 },
             )
         )
-        assignments_schema = schemas.AssignmentInfoSchema()
-        assignments_schema.context['assignment_types'] = self._assignment_types
-        assignments = assignments_schema.load(response.json())
-        return assignments  # type: ignore
+        assignment = schemas.AssignmentInfo.model_validate(response.json(), context={'assignment_types':
+                                                                                         self._assignment_types})
+        return assignment
 
     async def announcements(
             self, take: Optional[int] = -1,
@@ -281,8 +279,9 @@ class NetSchoolAPI:
                 params={"take": take},
             )
         )
-        announcements = schemas.AnnouncementSchema().load(response.json(), many=True)
-        return announcements  # type: ignore
+        announcements_schema = TypeAdapter(list[schemas.Announcement])
+        announcements = announcements_schema.validate_python(response.json())
+        return announcements
 
     async def attachments(
             self, assignment_id: int, student_id: Optional[int] = None,
@@ -303,8 +302,9 @@ class NetSchoolAPI:
         if not response:
             return []
         attachments_json = response[0]['attachments']
-        attachments = schemas.AttachmentSchema().load(attachments_json, many=True)
-        return attachments  # type: ignore
+        attachments_schema = TypeAdapter(list[schemas.Attachment])
+        attachments = attachments_schema.validate_python(attachments_json)
+        return attachments
 
     async def download_attachment(
             self, attachment_id: int, assignment_id: int, student_id: Optional[int] = None,
@@ -322,11 +322,11 @@ class NetSchoolAPI:
 
         async def parse_filters(report_id: str) -> list[dict[str, str | list[dict[str, str]]]]:
             filters = (await requester(self._wrapped_client.client.build_request(
-                method="GET", url="reports/" + report_id.casefold()),)).json()
+                method="GET", url="reports/" + report_id.casefold()), )).json()
             filters = filters["filterSources"]
             report_filters = []
             special_filters = ("period", "StartDate", "EndDate", "PCLID")
-            exclude_filters = ("PCLID", )
+            exclude_filters = ("PCLID",)
             for filter_ in filters:
                 if filter_["filterId"] not in special_filters and filter_["defaultValue"] is not None:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"],
@@ -336,8 +336,9 @@ class NetSchoolAPI:
                 elif filter_['filterId'] == 'period':
                     report_filters.append({'id': filter_['filterId'],
                                            'default': filter_['defaultValue'].replace('0000000', '000Z'),
-                                           'items': [{'title': f"{datetime.strptime(filter_['defaultValue'].split('T')[0], '%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(filter_['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}",
-                                                      'value': filter_['defaultValue'].replace('0000000', '000Z')}]})
+                                           'items': [{
+                                               'title': f"{datetime.strptime(filter_['defaultValue'].split('T')[0],'%Y-%m-%d').strftime('%d.%m.%Y') + ' - ' + datetime.strptime(filter_['defaultValue'].split('T')[1].split(' - ')[1], '%Y-%m-%d').strftime('%d.%m.%Y')}",
+                                               'value': filter_['defaultValue'].replace('0000000', '000Z')}]})
                 else:
                     report_filters.append({"id": filter_["filterId"], "default": filter_["defaultValue"]})
             return report_filters
@@ -373,7 +374,8 @@ class NetSchoolAPI:
             student_id = self._student_id
         student = next((x for x in self._students if x['studentId'] == int(student_id)), None)
         payload = {"selectedData": [],
-                   "params": [{"name": "SCHOOLYEARID", "value": str(self._year_id)}, {"name": "SERVERTIMEZONE", "value": str(3)},
+                   "params": [{"name": "SCHOOLYEARID", "value": str(self._year_id)},
+                              {"name": "SERVERTIMEZONE", "value": str(3)},
                               {"name": "FULLSCHOOLNAME",
                                "value": "АНО СОШ \"Димитриевская\" \n создано в @pravschool_bot"},
                               {"name": "DATEFORMAT", "value": """d\\u0001mm\\u0001yy\\u0001."""}]}
@@ -419,8 +421,8 @@ class NetSchoolAPI:
                     await requester(self._wrapped_client.client.build_request(
                         "GET", "signalr/start", params=query))
                     response = await requester(self._wrapped_client.client.build_request(
-                                                                      "POST", f"reports/{report_url}/queue",
-                                                                      json=payload))
+                        "POST", f"reports/{report_url}/queue",
+                        json=payload))
                     if response.status_code == 500:
                         logger.error(response.reason_phrase)
                     task_id = response.json()['taskId']
@@ -432,10 +434,10 @@ class NetSchoolAPI:
                     if chunk:
                         if chunk['M'] and chunk['M'][0]['M'] == 'complete':
                             await requester(self._wrapped_client.client.build_request(
-                                                                   "POST", "signalr/abort", params=query))
+                                "POST", "signalr/abort", params=query))
                             file = await requester(self._wrapped_client.client.build_request(
-                                                                          "GET",
-                                                                          f"files/{chunk['M'][0]['A'][0]['Data']}"))
+                                "GET",
+                                f"files/{chunk['M'][0]['A'][0]['Data']}"))
                             return file.text
 
     async def school(self, requests_timeout: int = None) -> schemas.School:
@@ -446,8 +448,8 @@ class NetSchoolAPI:
                 url='schools/{0}/card'.format(self._school_id),
             )
         )
-        school = schemas.SchoolSchema().load(response.json())
-        return school  # type: ignore
+        school = schemas.School.model_validate(response.json())
+        return school
 
     async def logout(self, requests_timeout: int = None):
         try:
@@ -482,8 +484,9 @@ class NetSchoolAPI:
                 method="GET", url="schools/search",
             )
         )
-        schools = schemas.ShortSchoolSchema().load(resp.json(), many=True)
-        return schools  # type: ignore
+        schools_schema = TypeAdapter(list[schemas.ShortSchool])
+        schools = schools_schema.validate_python(resp.json())
+        return schools
 
     async def _get_school_id(
             self, school_name: str,
