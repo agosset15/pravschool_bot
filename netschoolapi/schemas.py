@@ -1,8 +1,8 @@
 import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Self
 from loguru import logger
 
-from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo, ConfigDict
+from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo, ConfigDict, computed_field
 
 __all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School', 'Day']
 
@@ -33,13 +33,15 @@ class Announcement(NetSchoolAPISchema):
 
 class Assignment(NetSchoolAPISchema):
     id: int
-    comment: Optional[str] = None
-    type_id: int = Field(alias="typeId")
+    wrapped_comment: Optional[dict[str, str]] = Field(default_factory=dict, alias='markComment', exclude=True)
+    comment: str = ""
+    type_id: int = Field(alias="typeId", exclude=True)
     type: Optional[str] = None
     subject: str = Field(alias='subjectName', default='')
     content: str = Field(alias='assignmentName')
-    mark: Optional[Any] = Field(default=None)
-    is_duty: Optional[bool] = Field(alias='dutyMark', default=None)
+    wrapped_mark: Optional[dict[str, int]] = Field(default_factory=dict, alias='mark', exclude=True)
+    mark: Optional[int] = None
+    is_duty: bool = Field(alias='dutyMark', default=False)
     deadline: datetime.date = Field(alias='dueDate')
     lesson_id: int = Field(alias='classMeetingId')
 
@@ -47,18 +49,18 @@ class Assignment(NetSchoolAPISchema):
     def serialize_deadline(self, deadline: datetime.date, _info):
         return deadline.strftime('%d/%m')
 
-    @classmethod
-    @model_validator(mode='before')
-    def unwrap_marks(cls, data: Dict[str, Any], info: ValidationInfo) -> Dict[str, str]:
-        mark = data.pop('mark', None)
-        if mark:
-            data.update(mark)
+    @model_validator(mode='after')
+    def unwrap_marks(self, info: ValidationInfo) -> Self:
+        if self.wrapped_mark:
+            self.mark = int(self.wrapped_mark['mark'])
+            self.is_duty = bool(self.wrapped_mark['dutyMark'])
         else:
-            data.update({'mark': None, 'dutyMark': False})
-        mark_comment = data.pop("markComment", None)
-        data["comment"] = mark_comment["name"] if mark_comment else ""
-        data["type"] = info.context["assignment_types"][data.pop("typeId")]
-        return data
+            self.mark = None
+            self.is_duty = False
+        if self.wrapped_comment:
+            self.comment = self.wrapped_comment["name"]
+        self.type = info.context["assignment_types"][self.type_id]
+        return self
 
 
 class Teacher(NetSchoolAPISchema):
@@ -84,6 +86,7 @@ class Subject(NetSchoolAPISchema):
 
 class AssignmentInfo(NetSchoolAPISchema):
     id: int
+    type_id: Optional[int] = Field(alias="typeId", exclude=True, default=None)
     type: Optional[str] = None
     name: str = Field(alias='assignmentName')
     subject: Subject = Field(alias='subjectGroup', default_factory=dict)
@@ -97,14 +100,11 @@ class AssignmentInfo(NetSchoolAPISchema):
     def serialize_teachers(self, teachers: List[Teacher], _info):
         return [x.name for x in teachers]
 
-    @classmethod
-    @model_validator(mode='before')
-    def unwrap_type(cls, assignment_info: Dict[str, Any], info: ValidationInfo) -> Dict[str, Any]:
-        if "typeId" in assignment_info.keys():
-            assignment_info["type"] = info.context["assignment_types"][assignment_info.pop("typeId")]
-        else:
-            assignment_info["type"] = None
-        return assignment_info
+    @model_validator(mode='after')
+    def unwrap_type(self, info: ValidationInfo) -> Self:
+        if self.type_id:
+            self.type = info.context["assignment_types"][self.type_id]
+        return self
 
 
 class Lesson(NetSchoolAPISchema):
@@ -151,7 +151,7 @@ class School(NetSchoolAPISchema):
 
     @classmethod
     @model_validator(mode='before')
-    def unwrap_nested_dicts(cls, school: Dict[str, Any]) -> Dict[str, str]:
+    def unwrap_nested_dicts(cls, school: Any) -> Any:
         school.update(school.pop('commonInfo'))
         school.update(school.pop('contactInfo'))
         school.update(school.pop('managementInfo'))
