@@ -8,7 +8,7 @@ __all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School', 'Day']
 
 
 class NetSchoolAPISchema(BaseModel):
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(validate_assignment=False)
 
 
 class Attachment(NetSchoolAPISchema):
