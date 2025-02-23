@@ -39,7 +39,7 @@ class Assignment(NetSchoolAPISchema):
     type: Optional[str] = None
     subject: str = Field(alias='subjectName', default='')
     content: str = Field(alias='assignmentName')
-    wrapped_mark: Optional[dict[str, int]] = Field(default_factory=dict, alias='mark', exclude=True)
+    wrapped_mark: Optional[dict[str, int | None]] = Field(default_factory=dict, alias='mark', exclude=True)
     mark: Optional[int] = None
     is_duty: bool = Field(alias='dutyMark', default=False)
     deadline: datetime.date = Field(alias='dueDate')
