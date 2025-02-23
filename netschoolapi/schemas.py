@@ -1,10 +1,8 @@
-from dataclasses import field, dataclass, Field
-from loguru import logger
+from dataclasses import field, dataclass
 import datetime
 from typing import Any, Dict, List
 
 from marshmallow import EXCLUDE, Schema, pre_load
-from marshmallow_dataclass import class_schema
 
 __all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School', 'Day']
 
@@ -183,10 +181,10 @@ class School(NetSchoolAPISchema):
         return school
 
 
-AttachmentSchema = class_schema(Attachment)
-DiarySchema = class_schema(Diary)
-AssignmentInfoSchema = class_schema(AssignmentInfo)
-AssignmentSchema = class_schema(Assignment)
-ShortSchoolSchema = class_schema(ShortSchool)
-SchoolSchema = class_schema(School)
-AnnouncementSchema = class_schema(Announcement)
+AttachmentSchema = Attachment
+DiarySchema = Diary
+AssignmentInfoSchema = AssignmentInfo
+AssignmentSchema = Assignment
+ShortSchoolSchema = ShortSchool
+SchoolSchema = School
+AnnouncementSchema = Announcement
