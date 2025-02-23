@@ -38,8 +38,8 @@ class Assignment(NetSchoolAPISchema):
     type: Optional[str] = None
     subject: str = Field(alias='subjectName', default='')
     content: str = Field(alias='assignmentName')
-    mark: Optional[int]
-    is_duty: Optional[bool] = Field(alias='dutyMark')
+    mark: Optional[int] = None
+    is_duty: Optional[bool] = Field(alias='dutyMark', default=None)
     deadline: datetime.date = Field(alias='dueDate')
     lesson_id: int = Field(alias='classMeetingId')
 
