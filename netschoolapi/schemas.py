@@ -38,8 +38,8 @@ class Assignment(NetSchoolAPISchema):
     type: Optional[str] = None
     subject: str = Field(alias='subjectName', default='')
     content: str = Field(alias='assignmentName')
-    mark: int = Field(alias='mark')
-    is_duty: bool = Field(alias='dutyMark')
+    mark: Optional[int]
+    is_duty: Optional[bool] = Field(alias='dutyMark')
     deadline: datetime.date = Field(alias='dueDate')
     lesson_id: int = Field(alias='classMeetingId')
 
@@ -50,7 +50,6 @@ class Assignment(NetSchoolAPISchema):
     @classmethod
     @model_validator(mode='before')
     def unwrap_marks(cls, data: Dict[str, Any], info: ValidationInfo) -> Dict[str, str]:
-        logger.info('assignment validation reached')
         mark = data.pop('mark', None)
         if mark:
             data.update(mark)
