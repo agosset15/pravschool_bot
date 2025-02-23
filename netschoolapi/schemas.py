@@ -39,8 +39,7 @@ class Assignment(NetSchoolAPISchema):
     type: Optional[str] = None
     subject: str = Field(alias='subjectName', default='')
     content: str = Field(alias='assignmentName')
-    wrapped_mark: Optional[dict[str, int | None]] = Field(default_factory=dict, alias='mark', exclude=True)
-    mark: Optional[int] = None
+    mark: Optional[Any] = None
     is_duty: bool = Field(alias='dutyMark', default=False)
     deadline: datetime.date = Field(alias='dueDate')
     lesson_id: int = Field(alias='classMeetingId')
@@ -51,9 +50,10 @@ class Assignment(NetSchoolAPISchema):
 
     @model_validator(mode='after')
     def unwrap_marks(self, info: ValidationInfo) -> Self:
-        if self.wrapped_mark:
-            self.mark = int(self.wrapped_mark['mark'])
-            self.is_duty = bool(self.wrapped_mark['dutyMark'])
+        if self.mark:
+            wrapped_mark = dict(**self.mark)
+            self.mark = int(wrapped_mark['mark'])
+            self.is_duty = bool(wrapped_mark['dutyMark'])
         else:
             self.mark = None
             self.is_duty = False
