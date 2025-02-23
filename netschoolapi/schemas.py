@@ -1,5 +1,6 @@
 import datetime
 from typing import Any, Dict, List, Optional
+from loguru import logger
 
 from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo, ConfigDict
 
@@ -33,7 +34,8 @@ class Announcement(NetSchoolAPISchema):
 class Assignment(NetSchoolAPISchema):
     id: int
     comment: Optional[str] = None
-    type: str
+    type_id: int = Field(alias="typeId")
+    type: Optional[str] = None
     subject: str = Field(alias='subjectName', default='')
     content: str = Field(alias='assignmentName')
     mark: int = Field(alias='mark')
@@ -48,6 +50,7 @@ class Assignment(NetSchoolAPISchema):
     @classmethod
     @model_validator(mode='before')
     def unwrap_marks(cls, data: Dict[str, Any], info: ValidationInfo) -> Dict[str, str]:
+        logger.info('assignment validation reached')
         mark = data.pop('mark', None)
         if mark:
             data.update(mark)
