@@ -71,7 +71,7 @@ async def getdb_comments(request: Request):
         raise HTTPExpectationFailed(reason=str(e))
     except NoResponseFromServer:
         raise HTTPGatewayTimeout(reason="Сервер электронного журнала не отвечает")
-    return json_response({'ok': True, 'assignment': assignment.model_dump_json(), 'details': info.model_dump_json()})
+    return json_response({'ok': True, 'assignment': assignment.model_dump(), 'details': info.model_dump()})
 
 
 async def getdb_report(request: Request):
