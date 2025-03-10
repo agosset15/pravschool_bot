@@ -72,15 +72,15 @@ class Subject(NetSchoolAPISchema):
     name: str
     grade: Optional[str] = None
 
-    @classmethod
-    @model_validator(mode='before')
-    def unwrap_subject(cls, data: Dict[str, Any]) -> Dict[str, str]:
-        name = data.pop('name', '').split('/')
+    @model_validator(mode='after')
+    def unwrap_subject(self) -> Self:
+        name = self.name.split('/')
         if len(name) > 1:
-            data.update({'grade': name.pop(0), 'name': name.pop(0)})
+            self.grade = name.pop(0)
+            self.name = name.pop(0)
         else:
-            data.update({'name': name[0]})
-        return data
+            self.name = name[0]
+        return self
 
 
 class AssignmentInfo(NetSchoolAPISchema):
