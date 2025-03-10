@@ -103,6 +103,10 @@ class AssignmentInfo(NetSchoolAPISchema):
     def serialize_date(self, date: datetime.date, _info):
         return date.strftime('%d/%m')
 
+    @field_serializer('subject')
+    def serialize_subject(self, subject: Subject, _info):
+        return subject.name
+
     @model_validator(mode='after')
     def unwrap_type(self, info: ValidationInfo) -> Self:
         if self.type_id:
