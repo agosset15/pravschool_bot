@@ -1,6 +1,5 @@
 import datetime
 from typing import Any, Dict, List, Optional, Self
-from loguru import logger
 
 from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo, ConfigDict, computed_field
 
@@ -52,8 +51,8 @@ class Assignment(NetSchoolAPISchema):
     def unwrap_marks(self, info: ValidationInfo) -> Self:
         if self.mark:
             wrapped_mark = dict(**self.mark)
-            self.mark = int(wrapped_mark['mark'])
-            self.is_duty = bool(wrapped_mark['dutyMark'])
+            self.mark = int(wrapped_mark['mark']) if wrapped_mark['mark'] else None
+            self.is_duty = bool(wrapped_mark['dutyMark']) if wrapped_mark['dutyMark'] else False
         else:
             self.mark = None
             self.is_duty = False
