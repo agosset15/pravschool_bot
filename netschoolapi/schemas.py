@@ -70,7 +70,7 @@ class Teacher(NetSchoolAPISchema):
 class Subject(NetSchoolAPISchema):
     id: int
     name: str
-    grade: str
+    grade: Optional[str] = None
 
     @classmethod
     @model_validator(mode='before')
