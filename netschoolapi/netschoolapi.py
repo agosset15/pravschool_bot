@@ -264,8 +264,8 @@ class NetSchoolAPI:
                 },
             )
         )
-        assignment = schemas.AssignmentInfo.model_validate(response.json(), context={'assignment_types':
-                                                                                         self._assignment_types})
+        r = response.json()
+        assignment = schemas.AssignmentInfo.model_validate(r, context={'assignment_types': self._assignment_types})
         return assignment
 
     async def announcements(
