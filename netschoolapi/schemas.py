@@ -1,7 +1,7 @@
 import datetime
 from typing import Any, Dict, List, Optional, Self
 
-from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo, ConfigDict, computed_field
+from pydantic import BaseModel, Field, field_serializer, model_validator, ValidationInfo, ConfigDict
 
 __all__ = ['Attachment', 'Announcement', 'Assignment', 'Diary', 'School', 'Day']
 
@@ -98,6 +98,10 @@ class AssignmentInfo(NetSchoolAPISchema):
     @field_serializer('teachers')
     def serialize_teachers(self, teachers: List[Teacher], _info):
         return [x.name for x in teachers]
+
+    @field_serializer('date')
+    def serialize_date(self, date: datetime.date, _info):
+        return date.strftime('%d/%m')
 
     @model_validator(mode='after')
     def unwrap_type(self, info: ValidationInfo) -> Self:
