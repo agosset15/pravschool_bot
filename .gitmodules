@@ -1,0 +1,3 @@
+[submodule "netschoolapi"]
+    path = "netschoolapi"
+    url = "https://github.com/agosset15/netschoolapi.git"]
