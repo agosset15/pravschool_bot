@@ -99,6 +99,83 @@ def upgrade() -> None:
         unique=False
     )
 
+    # schedule
+    op.create_table(
+        "schedules",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column(
+            "type",
+            sa.Enum("COMMON", "TEACHER", "ROOM", name="schedule_type"),
+            nullable=False
+        ),
+        sa.Column("grade", sa.String(length=50), nullable=False),
+        sa.PrimaryKeyConstraint("id")
+    )
+    op.create_index(op.f("ix_schedules_type"), "schedules", ["type"], unique=False)
+
+    op.create_table("schedules_extra",
+                    sa.Column("id", sa.Integer(), nullable=False),
+                    sa.Column("year_photo_id", sa.String(length=255), nullable=True),
+                    sa.PrimaryKeyConstraint("id")
+                    )
+
+    op.create_table(
+        "days",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("schedule_id", sa.Integer(), nullable=False),
+        sa.Column(
+            "name",
+            sa.Enum(
+                "MONDAY",
+                "TUESDAY",
+                "WEDNESDAY",
+                "THURSDAY",
+                "FRIDAY",
+                "SATURDAY",
+                "SUNDAY",
+                name="week_day"
+            ),
+            nullable=False
+        ),
+        sa.ForeignKeyConstraint(["schedule_id"], ["schedules.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id")
+    )
+    op.create_index(op.f("ix_days_schedule_id"), "days", ["schedule_id"], unique=False)
+
+    op.create_table("lessons",
+                    sa.Column("id", sa.Integer(), nullable=False),
+                    sa.Column("day_id", sa.Integer(), nullable=False),
+                    sa.Column("number", sa.Integer(), nullable=False),
+                    sa.Column("name", sa.String(length=255), nullable=True),
+                    sa.Column("room", sa.String(length=50), nullable=True),
+                    sa.ForeignKeyConstraint(["day_id"], ["days.id"], ondelete="CASCADE"),
+                    sa.PrimaryKeyConstraint("id")
+                    )
+    op.create_index(op.f("ix_lessons_day_id"), "lessons", ["day_id"], unique=False)
+
+    op.create_table(
+        "homeworks",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("lesson_id", sa.Integer(), nullable=False),
+        sa.Column("text", sa.String(length=255), nullable=False),
+        sa.Column("image", sa.String(length=255), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("timezone('UTC', now())"),
+            nullable=False
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("timezone('UTC', now())"),
+            nullable=False
+        ),
+        sa.ForeignKeyConstraint(["lesson_id"], ["lessons.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id")
+    )
+    op.create_index(op.f("ix_homeworks_lesson_id"), "homeworks", ["lesson_id"], unique=False)
+
     # user
     op.create_table(
         "users",
@@ -141,83 +218,6 @@ def upgrade() -> None:
     op.create_index(op.f("ix_users_role"), "users", ["role"], unique=False)
     op.create_index(op.f("ix_users_telegram_id"), "users", ["telegram_id"], unique=True)
     op.create_index(op.f("ix_users_username"), "users", ["username"], unique=True)
-
-    # schedule
-    op.create_table(
-        "schedules",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column(
-            "type",
-            sa.Enum("COMMON", "TEACHER", "ROOM", name="schedule_type"),
-            nullable=False
-        ),
-        sa.Column("grade", sa.String(length=50), nullable=False),
-        sa.PrimaryKeyConstraint("id")
-    )
-    op.create_index(op.f("ix_schedules_type"), "schedules", ["type"], unique=False)
-
-    op.create_table("schedules_extra",
-    sa.Column("id", sa.Integer(), nullable=False),
-    sa.Column("year_photo_id", sa.String(length=255), nullable=True),
-    sa.PrimaryKeyConstraint("id")
-    )
-
-    op.create_table(
-        "days",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("schedule_id", sa.Integer(), nullable=False),
-        sa.Column(
-            "name",
-            sa.Enum(
-                "MONDAY",
-                "TUESDAY",
-                "WEDNESDAY",
-                "THURSDAY",
-                "FRIDAY",
-                "SATURDAY",
-                "SUNDAY",
-                name="week_day"
-            ),
-            nullable=False
-        ),
-        sa.ForeignKeyConstraint(["schedule_id"], ["schedules.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id")
-    )
-    op.create_index(op.f("ix_days_schedule_id"), "days", ["schedule_id"], unique=False)
-
-    op.create_table("lessons",
-    sa.Column("id", sa.Integer(), nullable=False),
-    sa.Column("day_id", sa.Integer(), nullable=False),
-    sa.Column("number", sa.Integer(), nullable=False),
-    sa.Column("name", sa.String(length=255), nullable=True),
-    sa.Column("room", sa.String(length=50), nullable=True),
-    sa.ForeignKeyConstraint(["day_id"], ["days.id"], ondelete="CASCADE"),
-    sa.PrimaryKeyConstraint("id")
-    )
-    op.create_index(op.f("ix_lessons_day_id"), "lessons", ["day_id"], unique=False)
-
-    op.create_table(
-        "homeworks",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("lesson_id", sa.Integer(), nullable=False),
-        sa.Column("text", sa.String(length=255), nullable=False),
-        sa.Column("image", sa.String(length=255), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
-        ),
-        sa.ForeignKeyConstraint(["lesson_id"], ["lessons.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id")
-    )
-    op.create_index(op.f("ix_homeworks_lesson_id"), "homeworks", ["lesson_id"], unique=False)
     # ### end Alembic commands ###
 
 
