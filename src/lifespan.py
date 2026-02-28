@@ -12,7 +12,7 @@ from src.core.dto import MessagePayloadDto
 from src.core.enums import SystemNotificationType
 from src.services.notification import NotificationService
 from src.services.webhook import WebhookService
-from src.transport.http import TelegramWebhookEndpoint
+from src.transport.http.endpoints import TelegramWebhookEndpoint
 
 
 @asynccontextmanager

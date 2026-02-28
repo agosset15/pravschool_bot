@@ -33,7 +33,6 @@ from src.core.enums import (
     UserRole,
 )
 from src.core.types import AnyKeyboard
-from src.transport.telegram.states import Notification
 
 from .base import BaseService
 from .user import UserService
@@ -265,7 +264,7 @@ class NotificationService(BaseService):
 
     def _get_close_notification_button(self, locale: Locale) -> InlineKeyboardButton:
         text = self._get_translated_text(locale, "btn-common.notification-close")
-        return InlineKeyboardButton(text=text, callback_data=Notification.CLOSE.state)
+        return InlineKeyboardButton(text=text, callback_data="Notification:CLOSE")
 
     @staticmethod
     def _get_default_keyboard(button: InlineKeyboardButton) -> InlineKeyboardMarkup:
