@@ -71,3 +71,4 @@ err-not-registered =
     .description = Пожалуйста, зарегистрируйтесь, чтобы использовать inline-режим
 
 ntf-event-bot-startup = Бот запущен!
+ntf-event-bot-shutdown = Бот остановлен!
