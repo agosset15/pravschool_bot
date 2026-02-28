@@ -80,7 +80,11 @@ menu = Window(
     Row(
         SwitchInlineQueryChosenChatButton(
             text=I18nFormat("btn-menu.inline"),
-            query=Const("")
+            query=Const(""),
+            allow_channel_chats=True,
+            allow_user_chats=True,
+            allow_group_chats=True,
+            allow_bot_chats=True
         ),
         SwitchTo(
             text=I18nFormat("btn-menu.settings"),
