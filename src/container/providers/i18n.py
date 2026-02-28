@@ -5,13 +5,13 @@ from fluentogram.storage import FileStorage
 from loguru import logger
 
 from src.core.config import AppConfig
-from src.core.i18n import TranslatorHubImpl, TranslatorRunnerImpl
+from src.core.i18n import TranslatorHubImpl
 
 
 class I18nProvider(Provider):
     scope = Scope.APP
 
-    @provide(source=TranslatorHubImpl, provides=TranslatorHub)
+    @provide(provides=TranslatorHub)
     def get_translator_hub(
         self,
         config: AppConfig,
@@ -42,7 +42,7 @@ class I18nProvider(Provider):
             retort=retort,
         )
 
-    @provide(scope=Scope.REQUEST, source=TranslatorRunnerImpl, provides=TranslatorRunner)
+    @provide(scope=Scope.REQUEST, provides=TranslatorRunner)
     def get_translator(
         self,
         config: AppConfig,
