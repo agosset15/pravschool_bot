@@ -31,12 +31,10 @@ class ScheduleService(BaseService):
         retort: Retort,
         conversion_retort: ConversionRetort,
         #
-        session: AsyncSession,
         uow: UnitOfWork,
         i18n: TranslatorRunner
     ) -> None:
         super().__init__(config, bot, redis, retort, conversion_retort)
-        self.session = session
         self.uow = uow
         self.i18n = i18n
 
