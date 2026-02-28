@@ -15,8 +15,6 @@ from src.infrastructure.taskiq.broker import broker
 async def notify_payments_restored(
     waiting_user_ids: list[int],
     uow: FromDishka[UnitOfWork],
-    user_dao: FromDishka[UserDao],
-    notifier: FromDishka[Notifier],
 ) -> None:
     users = await user_dao.get_by_telegram_ids(waiting_user_ids)
 

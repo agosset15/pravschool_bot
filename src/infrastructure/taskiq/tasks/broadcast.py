@@ -17,12 +17,6 @@ from src.infrastructure.taskiq.broker import broker
 async def send_broadcast_task(
     broadcast: BroadcastDto,
     plan_id: Optional[int],
-    broadcast_dao: FromDishka[BroadcastDao],
-    get_broadcast_audience_users: FromDishka[GetBroadcastAudienceUsers],
-    initialize_broadcast_messages: FromDishka[InitializeBroadcastMessages],
-    update_broadcast_message_status: FromDishka[UpdateBroadcastMessageStatus],
-    finish_broadcast: FromDishka[FinishBroadcast],
-    notifier: FromDishka[Notifier],
 ) -> None:
     task_id = broadcast.task_id
 
@@ -129,7 +123,6 @@ async def send_broadcast_task(
 async def delete_broadcast_task(
     broadcast: BroadcastDto,
     bot: FromDishka[Bot],
-    bulk_update_broadcast_messages: FromDishka[BulkUpdateBroadcastMessages],
 ) -> tuple[int, int, int]:
     broadcast_id = cast(int, broadcast.id)
 
@@ -211,7 +204,7 @@ async def delete_broadcast_task(
     return total_messages, deleted_count, total_messages - deleted_count
 
 
-@broker.task(schedule=[{"cron": "0 0 */7 * *"}])
-@inject(patch_module=True)
-async def delete_broadcasts_task(clear_old_broadcasts: FromDishka[ClearOldBroadcasts]) -> None:
-    await clear_old_broadcasts.system()
+# @broker.task(schedule=[{"cron": "0 0 */7 * *"}])
+# @inject(patch_module=True)
+# async def delete_broadcasts_task() -> None:
+#     await clear_old_broadcasts.system()
