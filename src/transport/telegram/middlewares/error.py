@@ -66,7 +66,7 @@ class ErrorMiddleware(EventTypedMiddleware):
             payload=MessagePayloadDto(
                 i18n_key="event-error.general",
                 i18n_kwargs={
-                    "telegram_id": str(user.telegram_id) if user else False,
+                    "telegram_id": user.telegram_id if user else False,
                     "name": user.name if user else False,
                     "username": aiogram_user.username if aiogram_user and aiogram_user.username else False,  # noqa: E501
                 },
