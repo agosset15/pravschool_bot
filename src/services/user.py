@@ -1,4 +1,5 @@
-from typing import Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, cast
 
 from adaptix import Retort
 from adaptix.conversion import ConversionRetort
@@ -8,7 +9,6 @@ from aiogram.types import User as AiogramUser
 from loguru import logger
 from redis.asyncio import Redis
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import AppConfig
 from src.core.constants import TTL_5M, TTL_10M
@@ -38,11 +38,9 @@ class UserService(BaseService):
         retort: Retort,
         conversion_retort: ConversionRetort,
         #
-        session: AsyncSession,
         uow: UnitOfWork,
     ) -> None:
         super().__init__(config, bot, redis, retort, conversion_retort)
-        self.session = session
         self.uow = uow
 
         self._convert_to_dto = self.conversion_retort.get_converter(User, UserDto)
@@ -244,7 +242,9 @@ class UserService(BaseService):
             stmt = stmt.where(User.telegram_id.not_in(excluded_ids))
 
         stmt = stmt.order_by(User.updated_at.desc().nulls_last()).limit(10)
-        result = await self.session.execute(stmt)
+        async with self.uow:
+            session = cast(AsyncSession, self.uow.session)
+            result = await session.execute(stmt)
         db_users = result.scalars().all()
 
         logger.debug(f"Retrieved '{len(db_users)}' users with recent activity")
@@ -252,8 +252,9 @@ class UserService(BaseService):
 
     async def get_recent_registered_users(self, limit: int = 5) -> list[UserDto]:
         stmt = select(User).order_by(User.created_at.desc()).limit(limit)
-
-        result = await self.session.execute(stmt)
+        async with self.uow:
+            session = cast(AsyncSession, self.uow.session)
+            result = await session.execute(stmt)
         db_users = result.scalars().all()
 
         logger.debug(f"Retrieved '{len(db_users)}' recently registered users")
