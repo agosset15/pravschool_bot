@@ -5,6 +5,7 @@ from .bot import BotProvider
 from .config import ConfigProvider
 from .database import DatabaseProvider
 from .i18n import I18nProvider
+from .redis import RedisProvider
 from .retort import RetortProvider
 from .services import ServicesProvider
 
@@ -18,4 +19,5 @@ def get_providers() -> list[Provider]:
         I18nProvider(),
         RetortProvider(),
         ServicesProvider(),
+        RedisProvider(),
     ]
