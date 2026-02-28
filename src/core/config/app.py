@@ -58,12 +58,3 @@ class AppConfig(BaseConfig, env_prefix="APP_"):
             raise ValueError("APP_DOMAIN has invalid format")
 
         return field
-
-    @field_validator("crypt_key")
-    @classmethod
-    def validate_crypt_key(cls, field: SecretStr) -> SecretStr:
-
-        if not re.match(r"^[A-Za-z0-9+/=]{44}$", field.get_secret_value()):
-            raise ValueError("APP_CRYPT_KEY must be a valid 44-character Base64 string")
-
-        return field
