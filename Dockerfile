@@ -23,6 +23,7 @@ ENV PYTHONPATH=/opt/pravschool_bot
 COPY ./src ./src
 COPY ./assets ./assets
 COPY ./docker-entrypoint.sh ./docker-entrypoint.sh
+RUN mkdir "temp"
 
 RUN chmod +x ./docker-entrypoint.sh
 
