@@ -1,10 +1,37 @@
+x-build: &build
+  build:
+    context: .
+    dockerfile: Dockerfile
+
+x-common: &common
+  ulimits:
+    nofile:
+      soft: 1048576
+      hard: 1048576
+
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: 5
+
 services:
   bot:
     image: pravschool_bot
-    build:
-      context: ./
-      dockerfile: Dockerfile
+    <<: [*build, *common, *logging]
     env_file:
       - .env
     ports:
       - "8087:80"
+
+  taskiq-worker:
+    <<: [*build, *common, *logging]
+    hostname: taskiq-worker
+    env_file:
+      - .env
+
+    command: taskiq worker src.infrastructure.taskiq.worker:worker
+      --ack-type when_received --tasks-pattern src/infrastructure/taskiq/tasks/*.py -fsd
