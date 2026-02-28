@@ -68,10 +68,11 @@ class ScheduleService(BaseService):
 
         if db_schedule:
             logger.debug(f"Retrieved schedule '{schedule_id}'")
+            return self._convert_to_dto(db_schedule)
+
         else:
             logger.warning(f"Schedule '{schedule_id}' not found")
-
-        return self._convert_to_dto(db_schedule)
+            return None
 
     async def get_day(self, day_id: int) -> Optional[DayDto]:
         async with self.uow:

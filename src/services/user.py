@@ -73,10 +73,11 @@ class UserService(BaseService):
 
         if db_user:
             logger.debug(f"Retrieved user '{telegram_id}'")
+            return self._convert_to_dto(db_user)
+
         else:
             logger.warning(f"User '{telegram_id}' not found")
-
-        return self._convert_to_dto(db_user)
+            return None
 
     @invalidate_cache(key_builder=[USER_COUNT_PREFIX, USER_LIST_PREFIX])
     @invalidate_cache(key_builder=UserCacheKey)
