@@ -18,12 +18,11 @@ def setup_routers(router: Router) -> None:
         #
         netschool.dialog.router,
         #
-        homework.dialog.router,
+        # homework.dialog.router,
         #
         dashboard.dialog.router,
         #
-        dashboard.users.dialog.router,
-        dashboard.users.user.dialog.router,
+        dashboard.user.dialog.router,
     ]
 
     router.include_routers(*routers)
