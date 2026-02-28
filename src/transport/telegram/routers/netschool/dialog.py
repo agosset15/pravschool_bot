@@ -61,7 +61,7 @@ menu = Window(
     ),
     Start(
         I18nFormat("btn-goto.ns-credentials"),
-        id=NSCredentials.LOGIN.state,
+        id="login",
         state=NSCredentials.LOGIN,
         mode=StartMode.RESET_STACK,
         when=~F["is_ns"]

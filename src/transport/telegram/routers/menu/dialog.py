@@ -135,7 +135,7 @@ rooms_free = Window(
     Select(
         text=Format("{item[1]}"),
         item_id_getter=itemgetter(0),
-        id="day-select",
+        id="day_select",
         items="days",
         type_factory=int,
         on_click=on_free_rooms_day_selected
@@ -162,7 +162,7 @@ settings = Window(
         ),
         Start(
             I18nFormat("btn-settings.ns-credentials"),
-            id="ns-credentials",
+            id="ns_credentials",
             state=NSCredentials.LOGIN,
             mode=StartMode.RESET_STACK,
         ),
