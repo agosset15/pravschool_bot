@@ -64,8 +64,7 @@ class SchedulesExtraService(BaseService):
         assert schedules_extra.id
         async with self.uow:
             db_schedules_extra = await self.uow.schedules_extra.update(
-                schedules_extra.id,
-                **schedules_extra.changed_data
+                schedules_extra.id, **schedules_extra.changed_data
             )
 
-        return self._convert_to_dto(db_schedules_extra)  # ty:ignore[invalid-argument-type]
+        return self._convert_to_dto(db_schedules_extra)

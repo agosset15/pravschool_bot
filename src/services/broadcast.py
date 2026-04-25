@@ -72,7 +72,7 @@ class BroadcastService(BaseService):
         else:
             logger.warning(f"Broadcast '{task_id}' not found")
 
-        return self._convert_to_dto(db_broadcast)  # ty:ignore[invalid-argument-type]
+        return self._convert_to_dto(db_broadcast)
 
     async def get_all(self) -> list[BroadcastDto]:
         async with self.uow:
@@ -95,7 +95,7 @@ class BroadcastService(BaseService):
                 f"but broadcast was not found or update failed"
             )
 
-        return self._convert_to_dto(db_updated_broadcast)  # ty:ignore[invalid-argument-type]
+        return self._convert_to_dto(db_updated_broadcast)
 
     async def update_message(self, broadcast_id: int, message: BroadcastMessageDto) -> None:
         async with self.uow:
@@ -154,9 +154,9 @@ class BroadcastService(BaseService):
 
         if audience == BroadcastAudience.ADMINS:
             async with self.uow:
-                result = await self.uow.users.count(and_(
-                    is_not_block, User.role.is_(UserRole.ADMIN)
-                ))
+                result = await self.uow.users.count(
+                    and_(is_not_block, User.role.is_(UserRole.ADMIN))
+                )
             return result
 
         raise Exception(f"Unknown broadcast audience: {audience}")
@@ -169,9 +169,7 @@ class BroadcastService(BaseService):
         logger.debug(f"Retrieving users for audience '{audience}', plan_id: {plan_id}")
 
         is_not_block = User.is_blocked.is_(False)
-        convert_to_user_dto_list = self.conversion_retort.get_converter(
-            list[User], list[UserDto]
-        )
+        convert_to_user_dto_list = self.conversion_retort.get_converter(list[User], list[UserDto])
 
         if audience == BroadcastAudience.ALL:
             async with self.uow:
@@ -181,30 +179,28 @@ class BroadcastService(BaseService):
 
         if audience == BroadcastAudience.PARENTS:
             async with self.uow:
-                db_users = await self.uow.users.get_all(and_(
-                    is_not_block, User.is_parent.is_(True)
-                ))
+                db_users = await self.uow.users.get_all(
+                    and_(is_not_block, User.is_parent.is_(True))
+                )
             return convert_to_user_dto_list(db_users)
 
         if audience == BroadcastAudience.TEACHERS:
             async with self.uow:
-                db_users = await self.uow.users.get_all(and_(
-                    is_not_block, User.is_teacher.is_(True)
-                ))
+                db_users = await self.uow.users.get_all(
+                    and_(is_not_block, User.is_teacher.is_(True))
+                )
             return convert_to_user_dto_list(db_users)
 
         if audience == BroadcastAudience.NS:
             async with self.uow:
-                db_users = await self.uow.users.get_all(and_(
-                    is_not_block, User.is_ns.is_(True)
-                ))
+                db_users = await self.uow.users.get_all(and_(is_not_block, User.is_ns.is_(True)))
             return convert_to_user_dto_list(db_users)
 
         if audience == BroadcastAudience.ADMINS:
             async with self.uow:
-                db_users = await self.uow.users.get_all(and_(
-                    is_not_block, User.role.is_(UserRole.ADMIN)
-                ))
+                db_users = await self.uow.users.get_all(
+                    and_(is_not_block, User.role.is_(UserRole.ADMIN))
+                )
             return convert_to_user_dto_list(db_users)
 
         raise Exception(f"Unknown broadcast audience: {audience}")

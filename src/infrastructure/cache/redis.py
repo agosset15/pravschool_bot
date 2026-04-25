@@ -45,7 +45,7 @@ def provide_cache(  # noqa: C901
 
         @wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            self: Any = args[0]
+            self = cast(Any, args[0])
             retort: Retort = self.retort
             redis: Redis = self.redis
 
@@ -65,9 +65,9 @@ def provide_cache(  # noqa: C901
                             continue
             elif key_builder:
                 suffix = str(key_builder(*args, **kwargs))
-                key = f"cache:{prefix or func.__name__}:{suffix}"
+                key = f"cache:{prefix or cast(Any, func).__name__}:{suffix}"
             else:
-                key_parts = ["cache", prefix or func.__name__]
+                key_parts = ["cache", prefix or cast(Any, func).__name__]
                 key_parts.extend(map(str, args[1:]))
                 key_parts.extend(map(str, kwargs.values()))
                 key = ":".join(key_parts)
@@ -105,7 +105,7 @@ def invalidate_cache(  # noqa: C901
         @wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:  # noqa: C901
             result = await func(*args, **kwargs)
-            self: Any = args[0]
+            self = cast(Any, args[0])
             redis: Redis = self.redis
             retort: Retort = self.retort
 

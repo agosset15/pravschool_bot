@@ -1,6 +1,6 @@
 from aiogram import Router
 
-from . import dashboard, extra, homework, menu, netschool
+from . import dashboard, extra, menu, netschool
 
 
 def setup_routers(router: Router) -> None:
@@ -12,6 +12,9 @@ def setup_routers(router: Router) -> None:
         extra.inline.router,
         extra.netschool_input.router,
         extra.schedule_input.router,
+        extra.time.router,
+        #
+        dashboard.dialog.router,
         #
         menu.handlers.router,
         menu.dialog.router,
@@ -19,8 +22,6 @@ def setup_routers(router: Router) -> None:
         netschool.dialog.router,
         #
         # homework.dialog.router,
-        #
-        dashboard.dialog.router,
         #
         dashboard.user.dialog.router,
     ]

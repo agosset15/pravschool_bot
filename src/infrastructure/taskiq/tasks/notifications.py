@@ -1,5 +1,7 @@
 import asyncio
 import time
+from itertools import islice
+from typing import Generator, TypeVar
 
 from dishka.integrations.taskiq import FromDishka, inject
 from loguru import logger
@@ -8,6 +10,15 @@ from src.core.constants import BATCH_DELAY, BATCH_SIZE_20
 from src.core.dto import MessagePayloadDto
 from src.infrastructure.db import UnitOfWork
 from src.infrastructure.taskiq.broker import broker
+from src.services.notification import NotificationService
+
+_T = TypeVar("_T")
+
+
+def _chunked(iterable: list[_T], size: int) -> Generator[list[_T], None, None]:
+    it = iter(iterable)
+    while chunk := list(islice(it, size)):
+        yield chunk
 
 
 @broker.task
@@ -15,8 +26,10 @@ from src.infrastructure.taskiq.broker import broker
 async def notify_payments_restored(
     waiting_user_ids: list[int],
     uow: FromDishka[UnitOfWork],
+    notifier: FromDishka[NotificationService],
 ) -> None:
-    users = await user_dao.get_by_telegram_ids(waiting_user_ids)
+    async with uow:
+        users = await uow.users.get_by_ids(waiting_user_ids)
 
     if not users:
         logger.debug("No users found for access notification")
@@ -28,7 +41,7 @@ async def notify_payments_restored(
 
     logger.info(f"Starting access broadcast for '{total_users}' users")
 
-    for i, batch in enumerate(chunked(users, BATCH_SIZE_20), start=1):
+    for i, batch in enumerate(_chunked(users, BATCH_SIZE_20), start=1):
         batch_start = time.perf_counter()
 
         tasks = [

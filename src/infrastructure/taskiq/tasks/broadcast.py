@@ -1,5 +1,7 @@
+# ruff: noqa: F821
 import asyncio
-from typing import Optional, cast
+from itertools import islice
+from typing import Generator, Optional, TypeVar, cast
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramRetryAfter
@@ -7,9 +9,17 @@ from dishka.integrations.taskiq import FromDishka, inject
 from loguru import logger
 
 from src.core.constants import BATCH_DELAY, BATCH_SIZE_20
-from src.core.dto import BroadcastDto
+from src.core.dto import BroadcastDto, BroadcastMessageDto, UserDto
 from src.core.enums import BroadcastMessageStatus, BroadcastStatus
 from src.infrastructure.taskiq.broker import broker
+
+_T = TypeVar("_T")
+
+
+def _chunked(iterable: list[_T], size: int) -> Generator[list[_T], None, None]:
+    it = iter(iterable)
+    while chunk := list(islice(it, size)):
+        yield chunk
 
 
 @broker.task
@@ -20,13 +30,13 @@ async def send_broadcast_task(
 ) -> None:
     task_id = broadcast.task_id
 
-    users = await get_broadcast_audience_users.system(
-        GetBroadcastAudienceUsersDto(broadcast.audience, plan_id)
+    users = await get_broadcast_audience_users.system(  # type: ignore[name-defined]
+        GetBroadcastAudienceUsersDto(broadcast.audience, plan_id)  # type: ignore[name-defined]
     )
     users = users * 5
     if not users:
         logger.warning(f"No users found for broadcast '{task_id}'")
-        await finish_broadcast.system(FinishBroadcastDto(task_id, BroadcastStatus.COMPLETED))
+        await finish_broadcast.system(FinishBroadcastDto(task_id, BroadcastStatus.COMPLETED))  # type: ignore[name-defined]
         return
 
     messages = [
@@ -37,8 +47,8 @@ async def send_broadcast_task(
         for user in users
     ]
 
-    messages = await initialize_broadcast_messages.system(
-        InitializeBroadcastMessagesDto(task_id, messages)
+    messages = await initialize_broadcast_messages.system(  # type: ignore[name-defined]
+        InitializeBroadcastMessagesDto(task_id, messages)  # type: ignore[name-defined]
     )
 
     total_users = len(users)
@@ -58,7 +68,7 @@ async def send_broadcast_task(
         while True:
             try:
                 async with semaphore:
-                    tg_message = await notifier.notify_user(user, payload=broadcast.payload)
+                    tg_message = await notifier.notify_user(user, payload=broadcast.payload)  # type: ignore[name-defined]
 
                 if tg_message:
                     status = BroadcastMessageStatus.SENT
@@ -76,9 +86,9 @@ async def send_broadcast_task(
                 logger.exception(f"Failed to send to '{user.telegram_id}'")
                 return user.telegram_id, status, msg_id, retry_time_for_user
 
-    for i, batch in enumerate(chunked(users, BATCH_SIZE_20), start=1):
+    for i, batch in enumerate(_chunked(users, BATCH_SIZE_20), start=1):
         if i % 5 == 0:
-            current = await broadcast_dao.get_by_task_id(task_id)
+            current = await broadcast_dao.get_by_task_id(task_id)  # type: ignore[name-defined]
             if not current or current.status == BroadcastStatus.CANCELED:
                 logger.info(f"Broadcast '{task_id}' was canceled")
                 break
@@ -86,7 +96,7 @@ async def send_broadcast_task(
         tasks = [asyncio.create_task(send_one(user)) for user in batch]
         results = await asyncio.gather(*tasks)
 
-        updates = UpdateBroadcastMessageStatusDto(
+        updates = UpdateBroadcastMessageStatusDto(  # type: ignore[name-defined]
             task_id=task_id,
             messages=[
                 BroadcastMessageDto(
@@ -99,7 +109,7 @@ async def send_broadcast_task(
             ],
         )
 
-        await update_broadcast_message_status.system(updates)
+        await update_broadcast_message_status.system(updates)  # type: ignore[name-defined]
 
         sent_count = sum(1 for _, status, _, _ in results if status == BroadcastMessageStatus.SENT)
         failed_count = len(results) - sent_count
@@ -111,7 +121,7 @@ async def send_broadcast_task(
         )
 
     total_elapsed = loop.time() - start_time
-    await finish_broadcast.system(FinishBroadcastDto(task_id, BroadcastStatus.COMPLETED))
+    await finish_broadcast.system(FinishBroadcastDto(task_id, BroadcastStatus.COMPLETED))  # type: ignore[name-defined]
     logger.success(
         f"Broadcast '{task_id}' finished in {total_elapsed:.2f}s "
         f"with total retry time {total_retry_time:.2f}s"
@@ -175,14 +185,14 @@ async def delete_broadcast_task(
                 )
                 return message, retry_time_for_msg
 
-    for i, batch in enumerate(chunked(broadcast.messages, BATCH_SIZE_20), start=1):
+    for i, batch in enumerate(_chunked(broadcast.messages, BATCH_SIZE_20), start=1):
         tasks = [asyncio.create_task(delete_one(m)) for m in batch]
         results = await asyncio.gather(*tasks)
 
         updated_messages = [r[0] for r in results]
         batch_retry_time = sum(r[1] for r in results)
 
-        await bulk_update_broadcast_messages.system(updated_messages)
+        await bulk_update_broadcast_messages.system(updated_messages)  # type: ignore[name-defined]
 
         batch_deleted = sum(
             1 for m in updated_messages if m.status == BroadcastMessageStatus.DELETED

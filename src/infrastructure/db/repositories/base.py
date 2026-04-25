@@ -43,11 +43,12 @@ class BaseRepository:
         await self.session.delete(instance)
 
     async def _get_one(
-            self,
-            model: ModelType,
-            *conditions: ConditionType,
-            joined: Optional[ColumnAttribute] = None,
-            limit: Optional[int] = None) -> Optional[T]:
+        self,
+        model: ModelType,
+        *conditions: ConditionType,
+        joined: Optional[ColumnAttribute] = None,
+        limit: Optional[int] = None,
+    ) -> Optional[T]:
         stmt = select(model).where(*conditions)
         if joined:
             stmt = stmt.options(joinedload(joined))
@@ -60,15 +61,19 @@ class BaseRepository:
         self,
         model: ModelType,
         *conditions: ConditionType,
+        joined: Optional[ColumnAttribute] = None,
         order_by: Optional[OrderByArgument] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
     ) -> list[T]:
         query = select(model).where(*conditions)
 
+        if joined is not None:
+            query = query.options(joinedload(joined))
+
         if order_by is not None:
             if isinstance(order_by, (list, tuple)):
-                query = query.order_by(*order_by)  # type: ignore[invalid-argument-type]
+                query = query.order_by(*order_by)
             else:
                 query = query.order_by(order_by)
 

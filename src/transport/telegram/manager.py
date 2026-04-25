@@ -9,7 +9,7 @@ class MessageManager(MessageManagerProtocol):
     async def send_text(self, bot: Bot, new_message: NewMessage) -> Message:
         return await bot.send_message(
             new_message.chat.id,
-            text=new_message.text,  # type: ignore[arg-type]
+            text=new_message.text,
             message_thread_id=new_message.thread_id,
             business_connection_id=new_message.business_connection_id,
             reply_markup=new_message.reply_markup,
@@ -28,7 +28,7 @@ class MessageManager(MessageManagerProtocol):
 
         return await method(
             new_message.chat.id,
-            await self.get_media_source(new_message.media, bot),  # type: ignore[arg-type]
+            await self.get_media_source(new_message.media, bot),
             message_thread_id=new_message.thread_id,
             business_connection_id=new_message.business_connection_id,
             caption=new_message.text,
