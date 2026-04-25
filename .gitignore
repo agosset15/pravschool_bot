@@ -1,0 +1,39 @@
+# Project
+.idea/
+.vscode/
+.code-workspace
+data/*
+tests
+.history
+
+# Environment
+*.egg-info/
+*.egg
+.env.*
+!.env.example
+.venv/
+.env
+venv/
+.tests
+
+# Cache
+__pycache__/
+*.py[cod]
+.cache/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage/
+.DS_Store
+*.pyo
+*.pyd
+*.so
+
+# Build
+build/
+_build/
+dist/
+site/
+
+.coverage
+htmlcov/
