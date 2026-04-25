@@ -46,7 +46,7 @@ class ErrorMiddleware(EventTypedMiddleware):
             if not isinstance(event.exception, MenuRenderError):
                 await notification_service.notify_user(
                     TempUserDto.from_aiogram(aiogram_user),
-                    MessagePayloadDto(i18n_key="ntf-error.lost-context-restart")
+                    MessagePayloadDto(i18n_key="ntf-error.lost-context-restart"),
                 )
 
         if isinstance(
@@ -68,7 +68,9 @@ class ErrorMiddleware(EventTypedMiddleware):
                 i18n_kwargs={
                     "telegram_id": user.telegram_id if user else False,
                     "name": user.name if user else False,
-                    "username": aiogram_user.username if aiogram_user and aiogram_user.username else False,  # noqa: E501
+                    "username": aiogram_user.username
+                    if aiogram_user and aiogram_user.username
+                    else False,  # noqa: E501
                 },
                 reply_markup=reply_markup,
             ),

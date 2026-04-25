@@ -57,11 +57,13 @@ class UserDto(BaseDto, TrackableMixin, TimestampMixin):
 
     @property
     def text(self):
-        return " ".join([
-            self.mention,
-            self.grade,
-            html.italic(self.referral_code if self.referral_code else "")
-        ])
+        return " ".join(
+            [
+                self.mention,
+                self.grade,
+                html.italic(self.referral_code if self.referral_code else ""),
+            ]
+        )
 
     @property
     def age_days(self) -> Optional[int]:

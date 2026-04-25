@@ -4,8 +4,8 @@ from typing import List, Optional
 
 
 @dataclass(kw_only=True)
-class NetSchoolAPIDto:
-    ...
+class NetSchoolAPIDto: ...
+
 
 @dataclass(kw_only=True)
 class Attachment(NetSchoolAPIDto):
@@ -13,11 +13,13 @@ class Attachment(NetSchoolAPIDto):
     name: str  # alias: originalFileName
     description: str = ""
 
+
 @dataclass(kw_only=True)
 class Author(NetSchoolAPIDto):
     id: int
     full_name: str  # alias: fio
     nickname: str  # alias: nickName
+
 
 @dataclass(kw_only=True)
 class StudentDto:
@@ -26,6 +28,7 @@ class StudentDto:
     class_id: int
     name: str
 
+
 @dataclass(kw_only=True)
 class Announcement(NetSchoolAPIDto):
     name: str
@@ -33,6 +36,7 @@ class Announcement(NetSchoolAPIDto):
     content: str  # alias: description
     post_date: datetime  # alias: postDate
     attachments: List[Attachment] = field(default_factory=list)
+
 
 @dataclass(kw_only=True)
 class Assignment(NetSchoolAPIDto):
@@ -47,16 +51,19 @@ class Assignment(NetSchoolAPIDto):
     mark: Optional[int] = None  # В JSON приходит как dict, превращаем в int
     is_duty: bool = False  # alias: dutyMark
 
+
 @dataclass(kw_only=True)
 class Teacher(NetSchoolAPIDto):
     id: int
     name: str
+
 
 @dataclass(kw_only=True)
 class Subject(NetSchoolAPIDto):
     id: int
     name: str
     grade: Optional[str] = None
+
 
 @dataclass(kw_only=True)
 class AssignmentInfo(NetSchoolAPIDto):
@@ -71,6 +78,7 @@ class AssignmentInfo(NetSchoolAPIDto):
     description: Optional[str] = None
     attachments: List[Attachment] = field(default_factory=list)
 
+
 @dataclass(kw_only=True)
 class Lesson(NetSchoolAPIDto):
     id: int  # alias: classmeetingId
@@ -82,10 +90,12 @@ class Lesson(NetSchoolAPIDto):
     room: Optional[str] = None
     assignments: List[Assignment] = field(default_factory=list)
 
+
 @dataclass(kw_only=True)
 class Day(NetSchoolAPIDto):
     lessons: List[Lesson]
     day: date  # alias: date
+
 
 @dataclass(kw_only=True)
 class Diary(NetSchoolAPIDto):
@@ -93,11 +103,13 @@ class Diary(NetSchoolAPIDto):
     end: date  # alias: weekEnd
     schedule: List[Day]  # alias: weekDays
 
+
 @dataclass(kw_only=True)
 class ShortSchool(NetSchoolAPIDto):
     name: str
     id: int
     address: str  # alias: addressString
+
 
 @dataclass(kw_only=True)
 class School(NetSchoolAPIDto):

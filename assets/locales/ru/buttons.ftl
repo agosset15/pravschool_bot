@@ -45,9 +45,10 @@ btn-settings =
     .ns-credentials = Логин и пароль
     .notifications = Уведомления
     .become-admin = Стать администратором
+    .set_student = Ребенок по умолчанию
 
 btn-ns-week =
-    .webapp = 🗓️ Электронный журнал
+    .webapp = Электронный журнал
     .prev = ← Неделя
     .next = Неделя →
 

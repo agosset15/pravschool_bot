@@ -31,11 +31,8 @@ class ErrorMiddleware(TaskiqMiddleware):
             await notification_service.error_notify(
                 exception,
                 MessagePayloadDto(
-                    i18n_key="event-error.general",
-                    i18n_kwargs={
-                        "telegram_id": False
-                    }
-                )
+                    i18n_key="event-error.general", i18n_kwargs={"telegram_id": False}
+                ),
             )
         except Exception as e:
             logger.error(f"Failed to publish error event: {e}")

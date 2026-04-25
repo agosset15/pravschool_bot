@@ -20,7 +20,7 @@ async def on_add_schedule(
     config: FromDishka[AppConfig],
 ):
     document = cast(Document, message.document)
-    document_path = config.temp_file_path(document.file_id+".xlsx")
+    document_path = config.temp_file_path(document.file_id + ".xlsx")
     await bot.download(document, destination=document_path)
     await parse_schedule.kiq(document_path, message.text)  # ty:ignore[no-matching-overload]
 

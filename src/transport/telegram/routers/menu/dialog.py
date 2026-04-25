@@ -1,8 +1,10 @@
 from operator import itemgetter
 
+from aiogram import F
 from aiogram_dialog import Dialog, ShowMode, StartMode
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import (
+    Back,
     Button,
     Column,
     Row,
@@ -13,7 +15,6 @@ from aiogram_dialog.widgets.kbd import (
     SwitchTo,
 )
 from aiogram_dialog.widgets.text import Const, Format
-from magic_filter import F
 
 from src.core.enums import InlineQueryText
 from src.transport.telegram.states import (
@@ -26,7 +27,7 @@ from src.transport.telegram.states import (
 from src.transport.telegram.utils import I18nFormat, IgnoreUpdate
 from src.transport.telegram.window import Window
 
-from .getters import bot_info_getter, days_getter, menu_getter
+from .getters import bot_info_getter, days_getter, menu_getter, students_getter
 from .handlers import (
     on_become_admin,
     on_day_request,
@@ -36,6 +37,7 @@ from .handlers import (
     on_get_week,
     on_get_year,
     on_room_request,
+    on_set_student,
 )
 
 menu = Window(
@@ -53,19 +55,6 @@ menu = Window(
         ),
     ),
     Row(
-        SwitchTo(
-            text=I18nFormat("btn-menu.rooms"),
-            id="rooms",
-            state=MainMenu.ROOMS
-        ),
-        Start(
-            text=I18nFormat("btn-menu.netschool"),
-            id="netschool",
-            state=NetSchool.MAIN,
-            show_mode=ShowMode.EDIT,
-        ),
-    ),
-    Row(
         Button(
             text=I18nFormat("btn-menu.week"),
             id="week",
@@ -78,27 +67,36 @@ menu = Window(
         ),
     ),
     Row(
+        SwitchTo(text=I18nFormat("btn-menu.rooms"), id="rooms", state=MainMenu.ROOMS),
+        Start(
+            text=I18nFormat("btn-menu.netschool"),
+            id="netschool",
+            state=NetSchool.MAIN,
+            show_mode=ShowMode.EDIT,
+        ),
+    ),
+    Row(
         SwitchInlineQueryChosenChatButton(
             text=I18nFormat("btn-menu.inline"),
             query=Const(""),
             allow_channel_chats=True,
             allow_user_chats=True,
             allow_group_chats=True,
-            allow_bot_chats=True
+            allow_bot_chats=True,
         ),
         SwitchTo(
             text=I18nFormat("btn-menu.settings"),
             id="settings",
             state=MainMenu.SETTINGS,
-            show_mode=ShowMode.EDIT
-        )
+            show_mode=ShowMode.EDIT,
+        ),
     ),
     Row(
         Start(
             text=I18nFormat("btn-menu.admin"),
             id="admin",
             state=AdminDashboard.MAIN,
-            when=F["is_dev"]
+            when=F["is_dev"],
         )
     ),
     MessageInput(func=on_day_request),
@@ -136,13 +134,15 @@ rooms = Window(
 
 rooms_free = Window(
     I18nFormat("msg-rooms.select-day"),
-    Select(
-        text=Format("{item[1]}"),
-        item_id_getter=itemgetter(0),
-        id="day_select",
-        items="days",
-        type_factory=int,
-        on_click=on_free_rooms_day_selected
+    Column(
+        Select(
+            text=Format("{item[1]}"),
+            item_id_getter=itemgetter(0),
+            id="day_select",
+            items="days",
+            type_factory=int,
+            on_click=on_free_rooms_day_selected,
+        ),
     ),
     Row(
         SwitchTo(
@@ -152,7 +152,7 @@ rooms_free = Window(
         ),
     ),
     state=MainMenu.ROOMS_FREE,
-    getter=days_getter
+    getter=days_getter,
 )
 
 settings = Window(
@@ -169,6 +169,9 @@ settings = Window(
             id="ns_credentials",
             state=NSCredentials.LOGIN,
             mode=StartMode.RESET_STACK,
+        ),
+        SwitchTo(
+            I18nFormat("btn-settings.set_student"), id="set_student", state=MainMenu.SET_STUDENT
         ),
         # TODO: implement notifications
         # Button(
@@ -187,7 +190,28 @@ settings = Window(
         ),
     ),
     state=MainMenu.SETTINGS,
-    getter=bot_info_getter
+    getter=bot_info_getter,
+)
+
+set_student = Window(
+    I18nFormat("msg-select-student"),
+    Column(
+        Select(
+            I18nFormat(
+                "ns-student-select", name=F["item"].name, is_checked=F["item"].id == F["selected"]
+            ),
+            id="student",
+            type_factory=int,
+            item_id_getter=lambda s: s.id,
+            items="children",
+            on_click=on_set_student,
+        ),
+    ),
+    Back(
+        I18nFormat("btn-back.common"),
+    ),
+    state=MainMenu.SET_STUDENT,
+    getter=students_getter,
 )
 
 
@@ -196,4 +220,5 @@ router = Dialog(
     rooms,
     rooms_free,
     settings,
+    set_student,
 )

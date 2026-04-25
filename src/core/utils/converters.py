@@ -44,8 +44,10 @@ def days_to_datetime(value: int, year: int = 2099) -> datetime:
 
     return dt + timedelta(days=value)
 
+
 def dashes_to_dots_date(date: str) -> str:
     return datetime.strptime(date, "%Y-%m-%d").strftime("%d.%m.%Y")  # noqa: DTZ007
+
 
 def parse_referral_code(text: str) -> Optional[str]:
     parts = text.split()

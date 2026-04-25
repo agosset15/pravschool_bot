@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                 payload=MessagePayloadDto(
                     i18n_key="ntf-event-error-webhook",
                     i18n_kwargs={"error": webhook_info.last_error_message},
-                    delete_after=None
+                    delete_after=None,
                 ),
             )
 
@@ -67,10 +67,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     await notification_service.system_notify(
         ntf_type=SystemNotificationType.BOT_LIFECYCLE,
-        payload=MessagePayloadDto(
-            i18n_key="ntf-event-bot-startup",
-            delete_after=None
-        ),
+        payload=MessagePayloadDto(i18n_key="ntf-event-bot-startup", delete_after=None),
     )
 
     yield

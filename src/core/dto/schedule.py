@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
+from fluentogram import TranslatorRunner
+
 from src.core.constants import LESSON_TIMES  # noqa: F401
 from src.core.enums import ScheduleType, WeekDay
 
@@ -19,15 +21,14 @@ class ScheduleDto(BaseDto, TrackableMixin):
     grade: str
     days: list["DayDto"] = field(default_factory=list)
 
-    @property
-    def text(self) -> str:
-        return "\n\n".join([
-            f"<b>{day.name}</b>:\n" + day.text for day in self.days
-        ])
+    def text(self, i18n: TranslatorRunner) -> str:
+        return "\n\n".join([f"<b>{day.name.get_text(i18n)}</b>:\n" + day.text for day in self.days])
 
-    @property
-    def list_days(self) -> list[WeekDay]:
-        return [day.name for day in self.days]
+    def list_days(self, i18n: TranslatorRunner) -> list[WeekDay]:
+        return [day.name.get_text(i18n) for day in self.days]
+
+    def list_days_names(self) -> list[str]:
+        return [day.name.name.lower() for day in self.days]
 
 
 @dataclass(kw_only=True)
@@ -74,19 +75,19 @@ class LessonDto(BaseDto):
     number: int
     name: Optional[str]
     room: Optional[str]
-    homework: Optional["HomeworkDto"] = field(default_factory=list)
+    homework: Optional["HomeworkDto"] = None
 
     @property
     def text(self) -> str:
         if self.name:
-            return f"{self.number}. {self.name}"+(f"({self.room})" if self.room else "")
+            return f"{self.number}. {self.name}" + (f"({self.room})" if self.room else "")
         return f"{self.number}. "
 
     def text_split_room(self, room: Optional[str]) -> str:
         if self.room == room or self.room is None:
             return self.text
         if self.name:
-            return f"{self.number}. {self.name}"+(f"({self.room} / {room})" if self.room else "")
+            return f"{self.number}. {self.name}" + (f"({self.room} / {room})" if self.room else "")
         return f"{self.number}. "
 
 

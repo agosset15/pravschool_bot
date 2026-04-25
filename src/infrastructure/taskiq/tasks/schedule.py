@@ -25,19 +25,15 @@ async def parse_schedule(
     parser = ExcelParser(excel_file_path)
     try:
         await schedule_service.delete_all()
-        await schedule_service.create_recursive(
-            await parser.parse_all()
-        )
+
+        for schedule in parser.parse_all():
+            await schedule_service.create_recursive(schedule)
     except Exception as e:
         logger.error(f"Error parsing schedule: {e}")
-        await notification_service.system_notify(
-            MessagePayloadDto(
-                i18n_key="ntf-error.parsing",
-                i18n_kwargs={"error": str(e)}),
-            SystemNotificationType.ERROR
+        await notification_service.error_notify(
+            e, MessagePayloadDto(i18n_key="ntf-error.parsing", i18n_kwargs={"error": str(e)})
         )
         return
     await notification_service.system_notify(
-        MessagePayloadDto(i18n_key="ntf-success.parsing"),
-        SystemNotificationType.TASK_SUCCEED
+        MessagePayloadDto(i18n_key="ntf-success.parsing"), SystemNotificationType.TASK_SUCCEED
     )

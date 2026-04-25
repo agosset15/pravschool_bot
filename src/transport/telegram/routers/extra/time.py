@@ -12,12 +12,13 @@ from src.transport.telegram.keyboards import get_time_keyboard
 
 router = Router(name=__name__)
 
+
 @router.callback_query(F.data.startswith("get_time"), F.message.text)
 @inject
 async def get_time(
-        callback: CallbackQuery,
-        i18n: FromDishka[TranslatorRunner],
-        notification_service: FromDishka[NotificationService]
+    callback: CallbackQuery,
+    i18n: FromDishka[TranslatorRunner],
+    notification_service: FromDishka[NotificationService],
 ):
     await callback.answer(text=i18n.get("loading"))
     message = cast(Message, callback.message)
@@ -48,9 +49,12 @@ async def get_time(
             else:
                 lines[i + 2] = text.removesuffix(f" <i>[{LESSON_TIMES[i]}]</i>")
 
-    await notification_service.edit_user_notification(message, MessagePayloadDto(
-        i18n_key="simple-text",
-        i18n_kwargs={"text": "\n".join(lines)},
-        reply_markup=get_time_keyboard(display=not show, week=is_week),
-        delete_after=None
-    ))
+    await notification_service.edit_user_notification(
+        message,
+        MessagePayloadDto(
+            i18n_key="simple-text",
+            i18n_kwargs={"text": "\n".join(lines)},
+            reply_markup=get_time_keyboard(display=not show, week=is_week),
+            delete_after=None,
+        ),
+    )

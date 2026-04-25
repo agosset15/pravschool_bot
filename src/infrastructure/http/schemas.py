@@ -13,7 +13,7 @@ __all__ = [
     "Day",
     "AssignmentInfo",
     "ShortSchool",
-    "Student"
+    "Student",
 ]
 
 
@@ -23,40 +23,46 @@ class NetSchoolAPISchema(BaseModel):
 
 class Attachment(NetSchoolAPISchema):
     id: int
-    name: str = Field(alias="originalFileName")
-    description: str = Field(default="")
+    name: str = Field(validation_alias="originalFileName")
+    description: Optional[str] = None
 
 
 class Author(NetSchoolAPISchema):
     id: int
-    full_name: str = Field(alias="fio")
-    nickname: str = Field(alias="nickName")
+    full_name: str = Field(validation_alias="fio")
+    nickname: str = Field(validation_alias="nickName")
 
 
 class Announcement(NetSchoolAPISchema):
     name: str
     author: Author
-    content: str = Field(alias="description")
-    post_date: datetime.datetime = Field(alias="postDate")
+    content: str = Field(validation_alias="description")
+    post_date: datetime.datetime = Field(validation_alias="postDate")
     attachments: List[Attachment] = Field(default_factory=list)
 
 
 class Assignment(NetSchoolAPISchema):
     id: int
-    wrapped_comment: Optional[dict[str, str]] = Field(default_factory=dict, alias="markComment", exclude=True)
+    wrapped_comment: Optional[dict[str, str]] = Field(
+        default_factory=dict, validation_alias="markComment", exclude=True
+    )
     comment: str = ""
-    type_id: int = Field(alias="typeId", exclude=True)
+    type_id: int = Field(validation_alias="typeId", exclude=True)
     type: Optional[str] = None
-    subject: str = Field(alias="subjectName", default="")
-    content: str = Field(alias="assignmentName")
+    subject: str = Field(validation_alias="subjectName", default="")
+    content: str = Field(validation_alias="assignmentName")
     mark: Optional[Any] = None
-    is_duty: bool = Field(alias="dutyMark", default=False)
-    deadline: datetime.date = Field(alias="dueDate")
-    lesson_id: int = Field(alias="classMeetingId")
+    is_duty: bool = Field(validation_alias="dutyMark", default=False)
+    deadline: datetime.date = Field(validation_alias="dueDate")
+    lesson_id: int = Field(validation_alias="classMeetingId")
 
     @field_serializer("deadline")
-    def serialize_deadline(self, deadline: datetime.date, _info):
+    def serialize_deadline(self, deadline: datetime.date, _info) -> str:
         return deadline.strftime("%d/%m")
+
+    @field_serializer("mark")
+    def serialize_mark(self, mark: Optional[Any], _info) -> Optional[int]:
+        return int(mark) if mark else None
 
     @model_validator(mode="after")
     def unwrap_marks(self, info: ValidationInfo) -> Self:
@@ -96,26 +102,27 @@ class Subject(NetSchoolAPISchema):
 
 class AssignmentInfo(NetSchoolAPISchema):
     id: int
-    type_id: Optional[int] = Field(alias="typeId", exclude=True, default=None)
+    type_id: Optional[int] = Field(validation_alias="typeId", default=None)
     type: Optional[str] = None
-    name: str = Field(alias="assignmentName")
-    subject: Subject = Field(alias="subjectGroup", default_factory=dict)
+    name: str = Field(validation_alias="assignmentName")
+    subject: Subject = Field(validation_alias="subjectGroup", default_factory=dict)
     teachers: List[Teacher]
+    mark: Optional[str] = None
     weight: int
     date: datetime.date
     description: Optional[str] = None
     attachments: List[Attachment] = Field(default_factory=list)
 
     @field_serializer("teachers")
-    def serialize_teachers(self, teachers: List[Teacher], _info):
+    def serialize_teachers(self, teachers: List[Teacher], _info) -> list[str]:
         return [x.name for x in teachers]
 
     @field_serializer("date")
-    def serialize_date(self, date: datetime.date, _info):
+    def serialize_date(self, date: datetime.date, _info) -> str:
         return date.strftime("%d/%m")
 
     @field_serializer("subject")
-    def serialize_subject(self, subject: Subject, _info):
+    def serialize_subject(self, subject: Subject, _info) -> str:
         return subject.name
 
     @model_validator(mode="after")
@@ -127,47 +134,47 @@ class AssignmentInfo(NetSchoolAPISchema):
 
 class Lesson(NetSchoolAPISchema):
     day: datetime.date
-    lesson_id: int = Field(alias="classmeetingId")
-    start: datetime.time = Field(alias="startTime")
-    end: datetime.time = Field(alias="endTime")
+    id: int = Field(validation_alias="classmeetingId")
+    start: datetime.time = Field(validation_alias="startTime")
+    end: datetime.time = Field(validation_alias="endTime")
     room: Optional[str] = None
     number: int
-    subject: str = Field(alias="subjectName")
+    subject: str = Field(validation_alias="subjectName")
     assignments: List[Assignment] = Field(default_factory=list)
 
 
 class Day(NetSchoolAPISchema):
     lessons: List[Lesson]
-    day: datetime.date = Field(alias="date")
+    date: datetime.date
 
 
 class Diary(NetSchoolAPISchema):
-    start: datetime.date = Field(alias="weekStart")
-    end: datetime.date = Field(alias="weekEnd")
-    schedule: List[Day] = Field(alias="weekDays")
-    class_name: Optional[str] = Field(alias="className", default=None)
-    term_name: Optional[str] = Field(alias="termName", default=None)
+    start: datetime.date = Field(validation_alias="weekStart")
+    end: datetime.date = Field(validation_alias="weekEnd")
+    schedule: List[Day] = Field(validation_alias="weekDays")
+    class_name: Optional[str] = Field(validation_alias="className", default=None)
+    term_name: Optional[str] = Field(validation_alias="termName", default=None)
 
 
 class ShortSchool(NetSchoolAPISchema):
     name: str
     id: int
-    address: str = Field(alias="addressString")
+    address: str = Field(validation_alias="addressString")
 
 
 class School(NetSchoolAPISchema):
-    name: str = Field(alias="fullSchoolName")
+    name: str = Field(validation_alias="fullSchoolName")
     about: str
 
     address: str
     email: str
-    site: str = Field(alias="web")
-    phone: str = Field(alias="phones")
+    site: str = Field(validation_alias="web")
+    phone: str = Field(validation_alias="phones")
 
     director: str
-    AHC: str = Field(alias="principalAHC")
-    IT: str = Field(alias="principalIT")
-    UVR: str = Field(alias="principalUVR")
+    AHC: str = Field(validation_alias="principalAHC")
+    IT: str = Field(validation_alias="principalIT")
+    UVR: str = Field(validation_alias="principalUVR")
 
     @classmethod
     @model_validator(mode="before")
@@ -178,8 +185,9 @@ class School(NetSchoolAPISchema):
         school["address"] = school["juridicalAddress"] or school["postAddress"]
         return school
 
+
 class Student(NetSchoolAPISchema):
-    id: int = Field(alias="studentId")
-    name: str = Field(alias="nickName")
+    id: int
+    name: str
     class_name: Optional[str] = None
     class_id: Optional[int] = None

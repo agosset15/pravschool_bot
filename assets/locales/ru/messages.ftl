@@ -1,13 +1,11 @@
 msg-main-menu =
     👋 Привет, { $name }!
-    { $grade ->
-        [0] { $is_teacher ->
-            *[0] Вы не указали свой класс!
-            [1] Вы учитель.
-        }
-        *[HAS]Вы в { $grade } классе.
+    { $is_teacher ->
+        *[0] Вы в { $grade } классе.
+        [1] Вы учитель. { $grade }
     }
 
+    Выберите день из кнопок внизу, или
     Выберите действие:
 
 msg-netschool-menu =
@@ -16,7 +14,7 @@ msg-netschool-menu =
     Выберите день, или поменяте неделю:
 
 msg-netschool-day =
-    Для ученика { $student_name }:
+    Для ученика <b>{ $student_name }</b>:
 
     { $day_text }
 
@@ -27,13 +25,13 @@ msg-netschool-day =
 
 journal-assignment =
     { $is_duty ->
-        [true] ⚠️ДОЛГ!
-       *[other]
+        [1] ⚠️ДОЛГ!
+       *[0] { space }
     }
     <b>{ $subject }</b>({ $type }) <a href="{ $link }">{ journal-link-text }</a>
     { $content }{ $mark ->
-        [none] { empty }
-       *[other]  -- <b>{ $mark }</b>
+        [0] { empty }
+       *[HAS]  -- <b>{ $mark }</b>
     }
 
 journal-no-assignments = <b>{ $subject }</b>
@@ -46,7 +44,7 @@ journal-duty = { $assignment_type } по предмету { $subject } <a href="
 
 no-overdue-assignments = На данный момент просроченных заданий нет!
 
-msg-dashboard = Админ-панель
+msg-dashboard = <b>Админ-панель</b>
     Выберите действие:
 
 msg-add-schedule = Загрузите файл расписания (.xlsx)

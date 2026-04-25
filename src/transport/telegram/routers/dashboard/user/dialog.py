@@ -10,15 +10,9 @@ dashboard = Window(
     Button(I18nFormat("btn-user-dash.admin"), id="toggle_admin"),
     Button(I18nFormat("btn-user-dash.delete"), id="delete"),
     Button(I18nFormat("btn-user-dash.message"), id="ad"),
-    Start(
-        I18nFormat("btn-back.common"),
-        id="back",
-        state=AdminDashboard.MAIN
-    ),
+    Start(I18nFormat("btn-back.common"), id="back", state=AdminDashboard.MAIN),
     IgnoreUpdate(),
-    state=DashboardUser.MAIN
+    state=DashboardUser.MAIN,
 )
 
-router = Dialog(
-    dashboard
-)
+router = Dialog(dashboard)

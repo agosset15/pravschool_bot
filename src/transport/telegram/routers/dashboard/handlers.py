@@ -21,11 +21,12 @@ async def on_add_schedule(
     config: FromDishka[AppConfig],
 ):
     document = cast(Document, message.document)
-    document_path = config.temp_file_path(document.file_id+".xlsx")
+    document_path = config.temp_file_path(document.file_id + ".xlsx")
     await bot.download(document, destination=document_path)
     await parse_schedule.kiq(document_path, message.text)  # ty:ignore[no-matching-overload]
 
     await dialog_manager.switch_to(AdminDashboard.MAIN)
+
 
 @inject
 async def on_add_photo(
@@ -34,7 +35,7 @@ async def on_add_photo(
     dialog_manager: DialogManager,
     schedules_extra_service: FromDishka[SchedulesExtraService],
 ):
-    photo = cast(list[PhotoSize],message.photo)[-1]
+    photo = cast(list[PhotoSize], message.photo)[-1]
     schedules_extra = await schedules_extra_service.get()
     schedules_extra.year_photo_id = photo.file_id
     await schedules_extra_service.update(schedules_extra)

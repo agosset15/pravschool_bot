@@ -1,12 +1,12 @@
 import asyncio
 from datetime import date
-from typing import List, Optional, TypeVar, cast
+from itertools import chain
+from typing import List, Optional, TypeVar
 
 from adaptix import Retort
 from adaptix.conversion import ConversionRetort
 from aiogram import Bot
 from aiogram.types import BufferedInputFile
-from aiogram.utils.link import create_telegram_link
 from fluentogram import TranslatorRunner
 from redis.asyncio import Redis
 
@@ -14,7 +14,6 @@ from src.core.config import AppConfig
 from src.core.constants import TTL_7D, TTL_10M
 from src.core.dto import StudentDto, UserDto
 from src.core.exceptions import (
-    AssignmentNotFoundError,
     AuthError,
     DayNotFoundError,
     LessonNotFoundError,
@@ -22,10 +21,17 @@ from src.core.exceptions import (
 )
 from src.core.utils.crypto import encode_ns_password, get_ns_request_hash
 from src.infrastructure.cache import invalidate_cache, provide_cache
-from src.infrastructure.cache.keys import NetschoolResponseKey, UserCacheKey
+from src.infrastructure.cache.keys import NetschoolResponseKey, NetschoolStudentsKey, UserCacheKey
 from src.infrastructure.db import UnitOfWork
 from src.infrastructure.http import NetSchoolAPI
-from src.infrastructure.http.schemas import Assignment, Day, NetSchoolAPISchema, Student
+from src.infrastructure.http.schemas import (
+    Assignment,
+    AssignmentInfo,
+    Day,
+    Diary,
+    NetSchoolAPISchema,
+    Student,
+)
 from src.services.base import BaseService
 from src.services.bot import BotService
 
@@ -36,17 +42,17 @@ T = TypeVar("T", bound=NetSchoolAPISchema)
 
 class NetSchoolService(BaseService):
     def __init__(
-            self,
-            config: AppConfig,
-            bot: Bot,
-            redis: Redis,
-            retort: Retort,
-            conversion_retort: ConversionRetort,
-            #
-            uow: UnitOfWork,
-            api_factory: NetSchoolApiFactory,
-            i18n: TranslatorRunner,
-            bot_service: BotService,
+        self,
+        config: AppConfig,
+        bot: Bot,
+        redis: Redis,
+        retort: Retort,
+        conversion_retort: ConversionRetort,
+        #
+        uow: UnitOfWork,
+        api_factory: NetSchoolApiFactory,
+        i18n: TranslatorRunner,
+        bot_service: BotService,
     ):
         super().__init__(config, bot, redis, retort, conversion_retort)
         self.uow = uow
@@ -75,7 +81,7 @@ class NetSchoolService(BaseService):
             return False
         except NoResponseFromServerError:
             await asyncio.sleep(10)
-            return await self.register(user=user, raw_password=raw_password, retry=retry-1)
+            return await self.register(user=user, raw_password=raw_password, retry=retry - 1)
         user.is_ns = True
         user.default_child = api.current_student if api.current_student else 0
         if api.students and len(api.students) > 1:
@@ -85,12 +91,12 @@ class NetSchoolService(BaseService):
         return True
 
     def get_netschool_response_key(
-            self, user: UserDto, student_id: Optional[int], *args, **kwargs
+        self, user: UserDto, student_id: Optional[int], *args, **kwargs
     ) -> str:
         assert user.login
         if not student_id:
             student_id = user.default_child
-        args = tuple(*args, *kwargs.values())
+        args = tuple(chain(map(str, args), kwargs.values()))
         key = NetschoolResponseKey(user.login, student_id, get_ns_request_hash(args))
         return self.retort.dump(key)
 
@@ -120,25 +126,34 @@ class NetSchoolService(BaseService):
 
     @provide_cache(key_builder=get_netschool_response_key, ttl=TTL_10M)
     async def get_info(
-            self,
-            user: UserDto,
-            student_id: Optional[int],
-            day_date: date,
-            lesson_id: int,
-            assignment_id: int
-    ) -> tuple[dict, dict]:
+        self, user: UserDto, student_id: Optional[int], assignment_id: int
+    ) -> Optional[AssignmentInfo]:
         api = await self._get_api(user)
-        diary = await api.diary(start=day_date, student_id=student_id)
-        lesson = self._find_by_key("lesson_id", str(lesson_id), diary.schedule[0].lessons)
-        if lesson is None:
-            raise LessonNotFoundError()
-        assignment = self._find_by_key("id", str(assignment_id), lesson.assignments)
-        if assignment is None:
-            raise AssignmentNotFoundError()
-        info = await api.assignment_info(assignment_id, student_id)
+        assignment_info = await api.assignment_info(assignment_id, student_id)
 
         await self.api_factory.update_session_data(api)
-        return assignment.model_dump(), info.model_dump()
+        return assignment_info
+
+    @provide_cache(key_builder=get_netschool_response_key, ttl=TTL_10M)
+    async def find_assignment(
+        self,
+        user: UserDto,
+        student_id: Optional[int],
+        assignment_id: int,
+        lesson_date: date,
+        lesson_id: int,
+    ) -> Optional[Assignment]:
+        api = await self._get_api(user)
+        day = (await api.diary(start=lesson_date, student_id=student_id)).schedule[0]
+        if day is None:
+            raise DayNotFoundError("День не найден")
+        lesson = self._find_by_key("id", str(lesson_id), day.lessons)
+        if lesson is None:
+            raise LessonNotFoundError("Урок не найден")
+        assignment = self._find_by_key("id", str(assignment_id), lesson.assignments)
+
+        await self.api_factory.update_session_data(api)
+        return assignment
 
     @provide_cache(key_builder=get_netschool_response_key, ttl=TTL_10M)
     async def get_report_filters(self, user: UserDto, student_id: Optional[int]) -> dict:
@@ -149,11 +164,11 @@ class NetSchoolService(BaseService):
 
     @provide_cache(key_builder=get_netschool_response_key, ttl=TTL_10M)
     async def get_report(
-            self,
-            user: UserDto,
-            student_id: Optional[int],
-            report_id: str,
-            filters: Optional[list[dict[str, str]]]
+        self,
+        user: UserDto,
+        student_id: Optional[int],
+        report_id: str,
+        filters: Optional[dict[str, str]],
     ) -> str:
         api = await self._get_api(user)
         report = await api.report(report_id, student_id, filters, requests_timeout=120)
@@ -163,37 +178,32 @@ class NetSchoolService(BaseService):
 
     @provide_cache(key_builder=get_netschool_response_key, ttl=TTL_10M)
     async def get_diary(
-            self, user: UserDto, student_id: Optional[int], start: date, end: date
-    ) -> dict:
+        self, user: UserDto, student_id: Optional[int], start: date, end: date
+    ) -> Diary:
         api = await self._get_api(user)
         diary = await api.diary(start, end, student_id)
 
         await self.api_factory.update_session_data(api)
-        return diary.model_dump()
+        return diary
 
-    @provide_cache(key_builder=get_netschool_response_key, ttl=TTL_10M)
     async def get_attachment(
-            self, user: UserDto, student_id: Optional[int], assignment_id: int, attachment_id: int
+        self, user: UserDto, student_id: Optional[int], assignment_id: int, attachment_id: int
     ) -> tuple[BufferedInputFile, str]:
         api = await self._get_api(user)
         attachment = await api.download_attachment(attachment_id, assignment_id, student_id)
         info = await api.assignment_info(assignment_id, student_id)
-        attachment_info = self._find_by_key(
-            "id", str(attachment_id), info.attachments
-        )
+        attachment_info = self._find_by_key("id", str(attachment_id), info.attachments)
 
         await self.api_factory.update_session_data(api)
         return BufferedInputFile(
             attachment, attachment_info.name if attachment_info else self.i18n.get("without-name")
         ), f"<b>{info.subject.name}</b>\n{info.name}"
 
-    @provide_cache(key_builder=get_netschool_response_key, ttl=TTL_7D)
+    @provide_cache(key_builder=NetschoolStudentsKey, ttl=TTL_7D)
     async def get_students(self, user: UserDto) -> list[StudentDto]:
         api = await self._get_api(user)
         students = api.students
-        convert = self.conversion_retort.get_converter(
-            list[Student], list[StudentDto]
-        )
+        convert = self.conversion_retort.get_converter(list[Student], list[StudentDto])
         return convert(students)
 
     #
@@ -204,49 +214,42 @@ class NetSchoolService(BaseService):
         for lesson in day.lessons:
             if lesson.assignments:
                 for assignment in lesson.assignments:
-                    link = await self.bot_service.get_mini_app_url(
-                        "$".join([
-                            day.day.strftime("%Y$%m$%d"),
-                            str(lesson.lesson_id),
-                            str(assignment.id),
-                            str(student_id)
-                        ]))
-                    message_text.append(self.i18n.get(
-                        "journal-assignment",
-                        is_duty=assignment.is_duty,
-                        subject=lesson.subject,
-                        type=assignment.type,
-                        link=link,
-                        content=assignment.content,
-                        mark=assignment.mark
-                    ))
+                    link = await self.bot_service.get_mini_app_url(f"{assignment.id}-{student_id}")
+                    message_text.append(
+                        self.i18n.get(
+                            "journal-assignment",
+                            is_duty=assignment.is_duty,
+                            subject=lesson.subject,
+                            type=assignment.type,
+                            link=link,
+                            content=assignment.content,
+                            mark=assignment.mark,
+                        )
+                    )
             else:
                 message_text.append(self.i18n.get("journal-no-assignments", subject=lesson.subject))
         return "\n\n".join(message_text)
 
-    async def _parse_duty(
-            self, assignments: List[Assignment], student_id: int
-    ) -> str:
-        bot_username = cast(str, (await self.bot.get_me()).username)
+    async def _parse_duty(self, assignments: List[Assignment], student_id: int) -> str:
         assert self._api
 
         message_text = []
         for assignment in assignments:
             info = await self._api.assignment_info(assignment.id, student_id=student_id)
-            link = create_telegram_link(bot_username, "journal", startapp=f"{info.id}a{student_id}")
-            message_text.append(self.i18n.get(
-                "journal-duty",
-                assignment_type=info.type,
-                subject=info.subject,
-                link=link,
-                content=info.name
-            ))
-        return self.i18n.get("journal-overdue")+"\n\n"+"\n\n".join(message_text)
+            link = self.bot_service.get_mini_app_url(f"{info.id}-{student_id}")
+            message_text.append(
+                self.i18n.get(
+                    "journal-duty",
+                    assignment_type=info.type,
+                    subject=info.subject,
+                    link=link,
+                    content=info.name,
+                )
+            )
+        return self.i18n.get("journal-overdue") + "\n\n" + "\n\n".join(message_text)
 
     @staticmethod
-    def _find_by_key(
-            key_name: str, key: str, data: List[T]
-    ) -> Optional[T]:
+    def _find_by_key(key_name: str, key: str, data: List[T]) -> Optional[T]:
         for item in data:
             if str(item.__getattribute__(key_name)) == key:
                 return item

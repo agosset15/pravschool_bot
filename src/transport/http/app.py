@@ -13,10 +13,12 @@ from .endpoints import TelegramWebhookEndpoint, api
 def get_app(config: AppConfig, dispatcher: Dispatcher) -> FastAPI:
     app: FastAPI = FastAPI(
         lifespan=lifespan,
-        docs_url=None,
-        redoc_url=None,
-        openapi_url=None,
-        include_in_schema=False,
+        docs_url="/ag15debug/docs",
+        redoc_url="/ag15debug/redoc",
+        openapi_url="/ag15debug/openapi.json",
+        include_in_schema=True,
+        title="pravschool_bot API",
+        version="1.0.0",
     )
 
     app.add_middleware(
@@ -30,6 +32,7 @@ def get_app(config: AppConfig, dispatcher: Dispatcher) -> FastAPI:
     api_router = APIRouter(prefix=API_ENDPOINT)
     for router in api.routers:
         api_router.include_router(router)
+    app.include_router(api_router)
 
     telegram_webhook_endpoint = TelegramWebhookEndpoint(
         dispatcher=dispatcher,

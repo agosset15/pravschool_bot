@@ -7,6 +7,7 @@ _HTML_RE = re.compile(r"<[^>]*>")
 _URL_RE = re.compile(r"(?i)\b(?:https?://|www\.|tg://|t\.me/|telegram\.me/|joinchat/)\S+")
 _USER_NAME_PLACEHOLDER = "TempUser"
 
+
 def format_user_name(name: Optional[str]) -> str:
     if not name:
         return _USER_NAME_PLACEHOLDER

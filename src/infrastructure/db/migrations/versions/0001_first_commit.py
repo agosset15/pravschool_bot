@@ -20,26 +20,14 @@ def upgrade() -> None:
         sa.Column(
             "status",
             sa.Enum(
-                "PROCESSING",
-                "COMPLETED",
-                "CANCELED",
-                "DELETED",
-                "ERROR",
-                name="broadcast_status"
+                "PROCESSING", "COMPLETED", "CANCELED", "DELETED", "ERROR", name="broadcast_status"
             ),
-            nullable=False
+            nullable=False,
         ),
         sa.Column(
             "audience",
-            sa.Enum(
-                "ALL",
-                "PARENTS",
-                "TEACHERS",
-                "NS",
-                "ADMINS",
-                name="broadcast_audience"
-            ),
-            nullable=False
+            sa.Enum("ALL", "PARENTS", "TEACHERS", "NS", "ADMINS", name="broadcast_audience"),
+            nullable=False,
         ),
         sa.Column("total_count", sa.Integer(), nullable=False),
         sa.Column("success_count", sa.Integer(), nullable=False),
@@ -49,16 +37,16 @@ def upgrade() -> None:
             "created_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
+            nullable=False,
         ),
         sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
+            nullable=False,
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("task_id")
+        sa.UniqueConstraint("task_id"),
     )
     op.create_index(op.f("ix_broadcasts_status"), "broadcasts", ["status"], unique=False)
 
@@ -71,23 +59,18 @@ def upgrade() -> None:
         sa.Column(
             "status",
             sa.Enum(
-                "SENT",
-                "FAILED",
-                "EDITED",
-                "DELETED",
-                "PENDING",
-                name="broadcast_message_status"
+                "SENT", "FAILED", "EDITED", "DELETED", "PENDING", name="broadcast_message_status"
             ),
-            nullable=False
+            nullable=False,
         ),
         sa.ForeignKeyConstraint(["broadcast_id"], ["broadcasts.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id")
+        sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
         op.f("ix_broadcast_messages_broadcast_id"),
         "broadcast_messages",
         ["broadcast_id"],
-        unique=False
+        unique=False,
     )
     op.create_index(
         op.f("ix_broadcast_messages_status"), "broadcast_messages", ["status"], unique=False
@@ -96,7 +79,7 @@ def upgrade() -> None:
         op.f("ix_broadcast_messages_user_telegram_id"),
         "broadcast_messages",
         ["user_telegram_id"],
-        unique=False
+        unique=False,
     )
 
     # schedule
@@ -104,20 +87,19 @@ def upgrade() -> None:
         "schedules",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
-            "type",
-            sa.Enum("COMMON", "TEACHER", "ROOM", name="schedule_type"),
-            nullable=False
+            "type", sa.Enum("COMMON", "TEACHER", "ROOM", name="schedule_type"), nullable=False
         ),
         sa.Column("grade", sa.String(length=50), nullable=False),
-        sa.PrimaryKeyConstraint("id")
+        sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_schedules_type"), "schedules", ["type"], unique=False)
 
-    op.create_table("schedules_extra",
-                    sa.Column("id", sa.Integer(), nullable=False),
-                    sa.Column("year_photo_id", sa.String(length=255), nullable=True),
-                    sa.PrimaryKeyConstraint("id")
-                    )
+    op.create_table(
+        "schedules_extra",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("year_photo_id", sa.String(length=255), nullable=True),
+        sa.PrimaryKeyConstraint("id"),
+    )
 
     op.create_table(
         "days",
@@ -133,24 +115,25 @@ def upgrade() -> None:
                 "FRIDAY",
                 "SATURDAY",
                 "SUNDAY",
-                name="week_day"
+                name="week_day",
             ),
-            nullable=False
+            nullable=False,
         ),
         sa.ForeignKeyConstraint(["schedule_id"], ["schedules.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id")
+        sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_days_schedule_id"), "days", ["schedule_id"], unique=False)
 
-    op.create_table("lessons",
-                    sa.Column("id", sa.Integer(), nullable=False),
-                    sa.Column("day_id", sa.Integer(), nullable=False),
-                    sa.Column("number", sa.Integer(), nullable=False),
-                    sa.Column("name", sa.String(length=255), nullable=True),
-                    sa.Column("room", sa.String(length=50), nullable=True),
-                    sa.ForeignKeyConstraint(["day_id"], ["days.id"], ondelete="CASCADE"),
-                    sa.PrimaryKeyConstraint("id")
-                    )
+    op.create_table(
+        "lessons",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("day_id", sa.Integer(), nullable=False),
+        sa.Column("number", sa.Integer(), nullable=False),
+        sa.Column("name", sa.String(length=255), nullable=True),
+        sa.Column("room", sa.String(length=50), nullable=True),
+        sa.ForeignKeyConstraint(["day_id"], ["days.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+    )
     op.create_index(op.f("ix_lessons_day_id"), "lessons", ["day_id"], unique=False)
 
     op.create_table(
@@ -163,16 +146,16 @@ def upgrade() -> None:
             "created_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
+            nullable=False,
         ),
         sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
+            nullable=False,
         ),
         sa.ForeignKeyConstraint(["lesson_id"], ["lessons.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id")
+        sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_homeworks_lesson_id"), "homeworks", ["lesson_id"], unique=False)
 
@@ -198,21 +181,18 @@ def upgrade() -> None:
             "created_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
+            nullable=False,
         ),
         sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("timezone('UTC', now())"),
-            nullable=False
+            nullable=False,
         ),
         sa.ForeignKeyConstraint(
-            ["schedule_id"],
-            ["schedules.id"],
-            onupdate="SET NULL",
-            ondelete="SET NULL"
+            ["schedule_id"], ["schedules.id"], onupdate="SET NULL", ondelete="SET NULL"
         ),
-        sa.PrimaryKeyConstraint("id")
+        sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_users_referral_code"), "users", ["referral_code"], unique=True)
     op.create_index(op.f("ix_users_role"), "users", ["role"], unique=False)

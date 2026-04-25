@@ -4,6 +4,8 @@ without-name = Без названия
 loading = Загрузка...
 no = Нет
 added = Добавлено
+start-emoji = 👨‍🏫
+simple-text = { $text }
 
 journal-link-text = ·?·
 
@@ -21,8 +23,8 @@ frg-user-info =
 
 ns-student-select =
     { $is_checked ->
-        *[0] { $name }
         [1] 🔘 { $name }
+        *[0] { $name }
     }
 
 today-tomorrow =

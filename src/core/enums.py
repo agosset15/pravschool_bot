@@ -10,10 +10,12 @@ class UpperStrEnum(StrEnum):
     def _generate_next_value_(name: str, start: int, count: int, last_values: list) -> str:
         return name
 
+
 class ScheduleType(UpperStrEnum):
     COMMON = auto()
     TEACHER = auto()
     ROOM = auto()
+
 
 class WeekDay(IntEnum):
     MONDAY = auto()
@@ -37,6 +39,7 @@ class WeekDay(IntEnum):
     @classmethod
     def names(cls) -> list[str]:
         return [day.name.lower() for day in cls]
+
 
 class Month(IntEnum):
     JANUARY = auto()
@@ -62,10 +65,12 @@ class Month(IntEnum):
     def str_list(cls, i18n: TranslatorRunner) -> list[str]:
         return [i18n.get(f"days.{day.name.lower()}") for day in cls]
 
+
 class Command(Enum):
     START = BotCommand(command="start", description="command.start")
     OVERDUE = BotCommand(command="overdue", description="command.overdue")
     HELP = BotCommand(command="help", description="command.help")
+
 
 class LogLevel(UpperStrEnum):
     CRITICAL = auto()
@@ -76,6 +81,7 @@ class LogLevel(UpperStrEnum):
     INFO = auto()
     DEBUG = auto()
     NOTSET = auto()
+
 
 class BroadcastStatus(UpperStrEnum):
     PROCESSING = auto()
@@ -112,18 +118,21 @@ class UserRole(IntEnum):
     def includes(self, other: "UserRole") -> bool:
         return self >= other
 
+
 class MessageEffectId(StrEnum):
-    THUMBS_UP = "5107584321108051014" # 👍 Thumbs Up
-    THUMBS_DOWN = "5104858069142078462" # 👎 Thumbs Down
-    HEART = "5159385139981059251" # ❤️ Heart
-    FIRE = "5104841245755180586" # 🔥 Fire
-    PARTY = "5046509860389126442" # 🎉 Party Popper
-    POOP = "5046589136895476101" # 💩 Pile of Poo
+    THUMBS_UP = "5107584321108051014"  # 👍 Thumbs Up
+    THUMBS_DOWN = "5104858069142078462"  # 👎 Thumbs Down
+    HEART = "5159385139981059251"  # ❤️ Heart
+    FIRE = "5104841245755180586"  # 🔥 Fire
+    PARTY = "5046509860389126442"  # 🎉 Party Popper
+    POOP = "5046589136895476101"  # 💩 Pile of Poo
+
 
 class MediaType(UpperStrEnum):
     PHOTO = auto()
     VIDEO = auto()
     DOCUMENT = auto()
+
 
 class SystemNotificationType(UpperStrEnum):
     ERROR = auto()
@@ -141,6 +150,7 @@ class SystemNotificationType(UpperStrEnum):
                 return topic_id_list[1]
         return None
 
+
 class UserNotificationType(UpperStrEnum):
     TOMORROW_SCHEDULE = auto()
     OVERDUE = auto()
@@ -150,8 +160,9 @@ class UserNotificationType(UpperStrEnum):
 
 
 class Locale(StrEnum):
-    EN = auto()  # English
-    RU = auto()  # Russian
+    EN = auto()
+    RU = auto()
+
 
 # https://docs.aiogram.dev/en/latest/api/types/update.html
 class MiddlewareEventType(StrEnum):
@@ -182,7 +193,8 @@ class MiddlewareEventType(StrEnum):
     REMOVED_CHAT_BOOST = auto()
     ERROR = auto()
 
+
 class InlineQueryText(StrEnum):
     ROOMS = "#room"
-    GRADES = "#rade"
+    GRADES = "#grade"
     TEACHERS = "#teacher"

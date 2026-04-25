@@ -10,6 +10,8 @@ x-common: &common
       hard: 1048576
 
   restart: unless-stopped
+  volumes:
+    - temp:/temp:rw
 
 x-logging: &logging
   logging:
@@ -35,3 +37,7 @@ services:
 
     command: taskiq worker src.infrastructure.taskiq.worker:worker
       --ack-type when_received --tasks-pattern src/infrastructure/taskiq/tasks/*.py -fsd
+
+volumes:
+  temp:
+    driver: local

@@ -9,6 +9,7 @@ START_TIME: int = int(time.time())
 def datetime_now() -> datetime:
     return datetime.now(tz=TIMEZONE)
 
+
 def date_now() -> date:
     return datetime_now().date()
 

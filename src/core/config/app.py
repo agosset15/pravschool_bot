@@ -4,7 +4,7 @@ from typing import Self
 
 from pydantic import Field, SecretStr, field_validator
 
-from src.core.constants import ASSETS_DIR, DOMAIN_REGEX
+from src.core.constants import ASSETS_DIR, DOMAIN_REGEX, TEMP_DIR
 from src.core.enums import Locale, LogLevel
 from src.core.types import LocaleList, StringList
 
@@ -26,7 +26,7 @@ class AppConfig(BaseConfig, env_prefix="APP_"):
     default_locale: Locale = Locale.RU
 
     assets_dir: Path = ASSETS_DIR
-    temp_dir: Path = assets_dir.parent / "temp"
+    temp_dir: Path = TEMP_DIR
     log_level: LogLevel = LogLevel.DEBUG
     origins: StringList = [""]
 
@@ -46,6 +46,9 @@ class AppConfig(BaseConfig, env_prefix="APP_"):
 
     def static_path(self, path: str) -> str:
         return self.static_url + path
+
+    def domain_url(self, path: str) -> str:
+        return "https://" + self.domain.get_secret_value() + path
 
     def temp_file_path(self, file_name: str) -> Path:
         return self.temp_dir / file_name

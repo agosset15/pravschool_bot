@@ -1,4 +1,4 @@
-from . import goto, inline, netschool_input, notification, schedule_input, user_updates
+from . import goto, inline, netschool_input, notification, schedule_input, time, user_updates
 
 __all__ = [
     "goto",
@@ -7,4 +7,5 @@ __all__ = [
     "notification",
     "schedule_input",
     "user_updates",
+    "time",
 ]

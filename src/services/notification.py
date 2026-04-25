@@ -15,6 +15,9 @@ from aiogram.types import (
     FSInputFile,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    InputMediaDocument,
+    InputMediaPhoto,
+    InputMediaVideo,
     Message,
     ReplyKeyboardMarkup,
 )
@@ -128,11 +131,7 @@ class NotificationService(BaseService):
                 exception.__traceback__,
             )
         )
-        payload.i18n_kwargs.update(
-            {
-                "error": f"{error_type}: {error_message.as_html()}"
-            }
-        )
+        payload.i18n_kwargs.update({"error": f"{error_type}: {error_message.as_html()}"})
         payload.media = MediaDescriptorDto(
             kind="bytes",
             value=base64.b64encode(traceback_str.encode("utf-8")).decode(),
@@ -140,6 +139,98 @@ class NotificationService(BaseService):
         )
         payload.media_type = MediaType.DOCUMENT
         await self.notify_super_dev(payload=payload)
+
+    async def edit_user_notification(
+        self,
+        message: Message,
+        payload: MessagePayloadDto,
+    ) -> None:
+        if not message:
+            logger.warning("Skipping message edit: message object is empty")
+            return None
+
+        logger.debug(
+            f"Attempting to edit user notification '{payload.i18n_key}' "
+            f"in message '{message.message_id}' from chat '{message.chat.id}'"
+        )
+
+        render_kwargs = payload.i18n_kwargs.copy()
+
+        if payload.i18n_key == "ntf-broadcast.message":
+            render_kwargs = {**render_kwargs}
+
+        reply_markup = self._prepare_reply_markup(
+            payload.reply_markup,
+            payload.disable_default_markup,
+            payload.delete_after,
+            self.config.default_locale,
+            message.chat.id,
+        )
+
+        text = self._get_translated_text(
+            locale=self.config.default_locale,
+            i18n_key=payload.i18n_key,
+            i18n_kwargs=render_kwargs,
+        )
+
+        try:
+            if payload.is_text:
+                edited_message = await self.bot.edit_message_text(
+                    text=text,
+                    chat_id=message.chat.id,
+                    message_id=message.message_id,
+                    disable_web_page_preview=True,
+                    reply_markup=reply_markup,
+                )
+            elif payload.media:
+                method = self._get_media_method(payload)
+                media = self._build_media(payload.media)
+
+                if not method:
+                    logger.warning(f"Unknown media type for payload '{payload}'")
+                    return None
+
+                media_input = self._prepare_media_input(payload, media)
+
+                edited_message = await self.bot.edit_message_media(
+                    media=media_input,
+                    chat_id=message.chat.id,
+                    message_id=message.message_id,
+                    reply_markup=reply_markup,
+                )
+            else:
+                if reply_markup:
+                    edited_message = await self.bot.edit_message_reply_markup(
+                        chat_id=message.chat.id,
+                        message_id=message.message_id,
+                        reply_markup=reply_markup,
+                    )
+                else:
+                    logger.warning(
+                        f"Payload must contain text or media for editing"
+                        f" message '{message.message_id}'"
+                    )
+                    return None
+
+            if edited_message and payload.delete_after:
+                asyncio.create_task(
+                    self._schedule_message_deletion(
+                        chat_id=message.chat.id,
+                        message_id=(
+                            edited_message.message_id
+                            if isinstance(edited_message, Message)
+                            else message.message_id
+                        ),
+                        delay=payload.delete_after,
+                    )
+                )
+
+        except TelegramForbiddenError:
+            logger.warning(f"Bot was blocked by user '{message.chat.id}'")
+            return None
+        except Exception as e:
+            logger.exception(f"Failed to edit notification in message '{message.message_id}': {e}")
+            raise
 
     #
 
@@ -248,7 +339,6 @@ class NotificationService(BaseService):
 
         if isinstance(reply_markup, InlineKeyboardMarkup):
             translated_markup = self._translate_keyboard_texts(reply_markup, locale)
-            translated_markup = cast(InlineKeyboardMarkup, translated_markup)
             builder = InlineKeyboardBuilder.from_markup(translated_markup)
             builder.row(close_button)
             return builder.as_markup()
@@ -338,11 +428,43 @@ class NotificationService(BaseService):
                     new_row.append(button)
                 new_keyboard.append(new_row)
 
+            try:
+                placeholder = self._get_translated_text(locale, keyboard.input_field_placeholder)
+            except Exception:
+                placeholder = keyboard.input_field_placeholder
+
             return ReplyKeyboardMarkup(
-                keyboard=new_keyboard, **keyboard.model_dump(exclude={"keyboard"})
+                keyboard=new_keyboard,
+                input_field_placeholder=placeholder,
+                **keyboard.model_dump(exclude={"keyboard", "input_field_placeholder"}),
             )
 
         return keyboard
+
+    def _prepare_media_input(
+        self,
+        payload: MessagePayloadDto,
+        media: Union[str, BufferedInputFile, FSInputFile],
+    ) -> Any:
+        """Prepare media input for edit_message_media based on media type."""
+
+        if payload.is_photo:
+            return InputMediaPhoto(
+                media=media,
+                caption=payload.i18n_kwargs.get("caption", ""),
+            )
+        elif payload.is_video:
+            return InputMediaVideo(
+                media=media,
+                caption=payload.i18n_kwargs.get("caption", ""),
+            )
+        elif payload.is_document:
+            return InputMediaDocument(
+                media=media,
+                caption=payload.i18n_kwargs.get("caption", ""),
+            )
+
+        raise ValueError(f"Unsupported media type for edit: {payload.media_type}")
 
     def _get_temp_owner(self) -> UserDto:
         temp_dev = UserDto(

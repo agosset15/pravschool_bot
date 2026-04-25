@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, cast
 
 from adaptix import Retort
@@ -9,6 +8,7 @@ from aiogram.types import User as AiogramUser
 from loguru import logger
 from redis.asyncio import Redis
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import AppConfig
 from src.core.constants import TTL_5M, TTL_10M
@@ -48,10 +48,9 @@ class UserService(BaseService):
 
     @invalidate_cache(key_builder=[USER_COUNT_PREFIX, USER_LIST_PREFIX])
     @invalidate_cache(key_builder=UserCacheKey)
-    async def create(self,
-                     aiogram_user: AiogramUser,
-                     referral_code: Optional[str] = None
-                     ) -> UserDto:
+    async def create(
+        self, aiogram_user: AiogramUser, referral_code: Optional[str] = None
+    ) -> UserDto:
         user = UserDto(
             telegram_id=aiogram_user.id,
             username=aiogram_user.username,
@@ -127,7 +126,7 @@ class UserService(BaseService):
         async with self.uow:
             schedule = await self.uow.schedules.get_with_days(user.schedule_id)
         schedule_converter = self.conversion_retort.get_converter(Schedule, ScheduleDto)
-        return schedule_converter(schedule)  # ty:ignore[invalid-argument-type]
+        return schedule_converter(schedule)
 
     @provide_cache(prefix=USER_COUNT_PREFIX, ttl=TTL_10M)
     async def count(self) -> int:
@@ -184,8 +183,7 @@ class UserService(BaseService):
         logger.info(f"Set is_admin={is_admin} for user '{user.telegram_id}'")
 
     @invalidate_cache(key_builder=UserCacheKey)
-    async def set_ns(self, user: UserDto,
-                     is_ns: bool) -> None:
+    async def set_ns(self, user: UserDto, is_ns: bool) -> None:
         user.is_ns = is_ns
 
         async with self.uow:
@@ -197,9 +195,9 @@ class UserService(BaseService):
         logger.info(f"Set is_ns={is_ns} for user '{user.telegram_id}'")
 
     @invalidate_cache(key_builder=UserCacheKey)
-    async def set_ns_credentials(self, user: UserDto,
-                               login: Optional[str] = None,
-                               password: Optional[bytes] = None) -> None:
+    async def set_ns_credentials(
+        self, user: UserDto, login: Optional[str] = None, password: Optional[bytes] = None
+    ) -> None:
         user.login = login
         user.password = password
 
@@ -212,14 +210,13 @@ class UserService(BaseService):
         logger.info(f"Set login={login} and password for user '{user.telegram_id}'")
 
     @invalidate_cache(key_builder=UserCacheKey)
-    async def set_schedule(self, user: UserDto, schedule_id: int) -> None:
+    async def set_schedule(self, user: UserDto, schedule: ScheduleDto) -> None:
         async with self.uow:
             await self.uow.users.update(
-                telegram_id=user.telegram_id,
-                schedule_id=schedule_id,
+                telegram_id=user.telegram_id, schedule_id=schedule.id, grade=schedule.grade
             )
 
-        logger.info(f"Set schedule='{schedule_id}' for user '{user.telegram_id}'")
+        logger.info(f"Set schedule='{schedule.id}' for user '{user.telegram_id}'")
 
     @invalidate_cache(key_builder=UserCacheKey)
     async def delete_schedule(self, user: UserDto) -> None:

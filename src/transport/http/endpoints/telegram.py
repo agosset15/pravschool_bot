@@ -37,7 +37,9 @@ class TelegramWebhookEndpoint:
         )
 
     def register(self, app: FastAPI, path: str) -> None:
-        app.add_api_route(path, endpoint=self._handle_request, methods=["POST"])
+        app.add_api_route(
+            path, endpoint=self._handle_request, methods=["POST"], include_in_schema=False
+        )
 
     def _verify_secret(self, telegram_secret_token: str) -> bool:
         return secrets.compare_digest(telegram_secret_token, self.secret_token)

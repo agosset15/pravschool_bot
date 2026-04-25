@@ -22,16 +22,22 @@ class Schedule(BaseSql):
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[ScheduleType] = mapped_column(index=True)
     grade: Mapped[str] = mapped_column(String(length=50))
-    days: Mapped[list["Day"]] = relationship(lazy="selectin", order_by="Day.id")
+    days: Mapped[list["Day"]] = relationship(
+        lazy="selectin", order_by="Day.id", cascade="delete, delete-orphan", viewonly=True
+    )
 
 
 class Day(BaseSql):
     __tablename__ = "days"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    schedule_id: Mapped[int] = mapped_column(ForeignKey("schedules.id", ondelete="CASCADE"), index=True)
+    schedule_id: Mapped[int] = mapped_column(
+        ForeignKey("schedules.id", ondelete="CASCADE"), index=True
+    )
     name: Mapped[WeekDay]
-    lessons: Mapped[list["Lesson"]] = relationship(lazy="joined", order_by="Lesson.number")
+    lessons: Mapped[list["Lesson"]] = relationship(
+        lazy="joined", order_by="Lesson.number", cascade="delete, delete-orphan", viewonly=True
+    )
 
 
 class Lesson(BaseSql):
@@ -42,7 +48,9 @@ class Lesson(BaseSql):
     number: Mapped[int]
     name: Mapped[Optional[str]] = mapped_column(String(length=255))
     room: Mapped[Optional[str]] = mapped_column(String(length=50))
-    homework: Mapped["Homework"] = relationship(lazy="selectin")
+    homework: Mapped[Optional["Homework"]] = relationship(
+        lazy="selectin", cascade="delete, delete-orphan", viewonly=True
+    )
 
 
 class Homework(BaseSql, TimestampMixin):
@@ -51,4 +59,5 @@ class Homework(BaseSql, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id", ondelete="CASCADE"), index=True)
     text: Mapped[str] = mapped_column(String(length=255))
-    image: Mapped[str] = mapped_column(String(length=255)) # TODO: save images to media location and serve to web
+    # TODO: save images to media location and serve to web
+    image: Mapped[str] = mapped_column(String(length=255))

@@ -23,3 +23,19 @@ class UserResponse(BaseModel):
     login: Optional[str]
 
     schedule_id: Optional[int]
+
+
+class UserUpdateRequest(BaseModel):
+    grade: Optional[str]
+    login: Optional[str]
+    password: Optional[str]
+    default_child: Optional[int]
+
+
+class UserCreateRequest(BaseModel):
+    referral_code: Optional[str]
+    is_teacher: bool
+    schedule_id: int
+
+    login: Optional[str]
+    password: Optional[str]

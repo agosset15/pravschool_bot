@@ -21,17 +21,16 @@ from src.transport.telegram.window import Window
 
 @inject
 async def on_schedule_input(
-        message: Message,
-        widget: MessageInput,
-        dialog_manager: DialogManager,
-        user_service: FromDishka[UserService],
-        schedule_service: FromDishka[ScheduleService],
-        notification_service: FromDishka[NotificationService],
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    user_service: FromDishka[UserService],
+    schedule_service: FromDishka[ScheduleService],
+    notification_service: FromDishka[NotificationService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
 
     text = cast(str, message.text)
-    schedule_id = None
 
     not_found_payload = MessagePayloadDto(
         i18n_key="ntf-schedule.not-found",
@@ -57,35 +56,33 @@ async def on_schedule_input(
         await notification_service.notify_user(user, not_found_payload)
         return
 
-    await user_service.set_schedule(user, schedule.id)
+    await user_service.set_schedule(user, schedule)
     await dialog_manager.start(
         state=MainMenu.MAIN,
         mode=StartMode.RESET_STACK,
         show_mode=ShowMode.DELETE_AND_SEND,
+        data={"grade": schedule.grade},
     )
+
 
 register_grade = Window(
     I18nFormat("msg-register-grade"),
     SwitchInlineQueryCurrentChat(
-        I18nFormat("btn-register-grade.grades"),
-        Const(InlineQueryText.GRADES),
-        id="grades"
+        I18nFormat("btn-register-grade.grades"), Const(InlineQueryText.GRADES), id="grades"
     ),
     SwitchInlineQueryCurrentChat(
-        I18nFormat("btn-register-grade.teachers"),
-        Const(InlineQueryText.TEACHERS),
-        id="teachers"
+        I18nFormat("btn-register-grade.teachers"), Const(InlineQueryText.TEACHERS), id="teachers"
     ),
     Start(
         I18nFormat("btn-back.common"),
         "back",
         state=MainMenu.MAIN,
         show_mode=ShowMode.EDIT,
-        mode=StartMode.RESET_STACK
+        mode=StartMode.RESET_STACK,
     ),
     MessageInput(func=on_schedule_input, filter=F.text.startswith(InlineQueryText.GRADES)),
     MessageInput(func=on_schedule_input, filter=F.text.startswith(InlineQueryText.TEACHERS)),
-    state=Register.GRADE
+    state=Register.GRADE,
 )
 
 router = Dialog(register_grade)

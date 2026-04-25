@@ -8,6 +8,7 @@ class MainMenu(StatesGroup):
     ROOMS = State()
     ROOMS_FREE = State()
     SETTINGS = State()
+    SET_STUDENT = State()
 
 
 class Notification(StatesGroup):
@@ -34,12 +35,14 @@ class AdminDashboard(StatesGroup):
     SCHEDULE = State()
     ADD_YEAR_PHOTO = State()
 
+
 class DashboardUser(StatesGroup):
     MAIN = State()
 
 
 class Homework(StatesGroup):
     MAIN = State()
+
 
 ##############
 class Advert(StatesGroup):

@@ -25,7 +25,9 @@ StringList: TypeAlias = Annotated[
 LocaleList: TypeAlias = Annotated[
     ListLocale,
     PlainValidator(
-        func=lambda x: [Locale(loc.strip()) for loc in (x if isinstance(x, list) else x.split(COMMA))]
+        func=lambda x: [
+            Locale(loc.strip()) for loc in (x if isinstance(x, list) else x.split(COMMA))
+        ]  # noqa: E501
     ),
 ]
 

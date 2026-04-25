@@ -1,5 +1,5 @@
 import re
-from datetime import timezone
+from datetime import timedelta, timezone
 from pathlib import Path
 from re import Pattern
 from typing import Final
@@ -7,6 +7,7 @@ from typing import Final
 BASE_DIR: Final[Path] = Path(__file__).resolve().parents[2]
 ASSETS_DIR: Final[Path] = BASE_DIR / "assets"
 LOG_DIR: Final[Path] = BASE_DIR / "logs"
+TEMP_DIR: Final[Path] = Path("/temp")
 
 DOMAIN_REGEX: Pattern[str] = re.compile(r"^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$")
 TAG_REGEX: Pattern[str] = re.compile(r"^[A-Z0-9_]{1,16}$")
@@ -39,10 +40,10 @@ LESSON_TIMES: Final[list[str]] = [
     "14:25 - 15:10",
     "15:20 - 16:05",
     "16:15 - 17:00",
-    "17:00 - (?)"
+    "17:00 - (?)",
 ]
 
-TIMEZONE: Final[timezone] = timezone.utc
+TIMEZONE: Final[timezone] = timezone(timedelta(hours=3))
 DATETIME_FORMAT: Final[str] = "%d.%m.%Y %H:%M:%S"
 
 TIME_1M: Final[int] = 60

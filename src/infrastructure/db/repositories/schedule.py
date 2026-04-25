@@ -26,7 +26,7 @@ class ScheduleRepository(BaseRepository):
         return await self._get_one(Day, Day.id == day_id, joined=Lesson.homework)
 
     async def get_by_type_grade(
-            self, schedule_type: ScheduleType, grade: str
+        self, schedule_type: ScheduleType, grade: str
     ) -> Optional[Schedule]:
         return await self._get_one(
             Schedule, Schedule.type == schedule_type, Schedule.grade == grade
@@ -35,7 +35,13 @@ class ScheduleRepository(BaseRepository):
     async def get_all(self) -> list[Schedule]:
         return await self._get_many(Schedule)
 
-    async def get_all_by_type(self, schedule_type: ScheduleType) -> list[Schedule]:
+    async def get_all_by_type(
+        self, schedule_type: ScheduleType, joined: bool = False
+    ) -> list[Schedule]:
+        if joined:
+            return await self._get_many(
+                Schedule, Schedule.type == schedule_type, joined=Schedule.days
+            )
         return await self._get_many(Schedule, Schedule.type == schedule_type)
 
     async def get_by_partial_grade(self, query: str, schedule_type: ScheduleType) -> list[Schedule]:

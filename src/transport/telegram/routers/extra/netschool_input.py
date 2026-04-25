@@ -18,14 +18,13 @@ from src.transport.telegram.window import Window
 
 @inject
 async def on_login_input(
-        message: Message,
-        widget: MessageInput,
-        dialog_manager: DialogManager,
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
 ) -> None:
     text = cast(str, message.text)
     dialog_manager.dialog_data["login"] = text
 
-    await message.delete()
     await dialog_manager.switch_to(
         state=NSCredentials.PASSWORD,
         show_mode=ShowMode.EDIT,
@@ -34,36 +33,34 @@ async def on_login_input(
 
 @inject
 async def on_password_input(
-        message: Message,
-        widget: MessageInput,
-        dialog_manager: DialogManager,
-        netschool_service: FromDishka[NetSchoolService],
-        notification_service: FromDishka[NotificationService]
+    message: Message,
+    widget: MessageInput,
+    dialog_manager: DialogManager,
+    netschool_service: FromDishka[NetSchoolService],
+    notification_service: FromDishka[NotificationService],
 ) -> None:
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     raw_password = cast(str, message.text)
     login = dialog_manager.dialog_data["login"]
-    await message.delete()
 
     user.login = login
     success = await netschool_service.register(user, raw_password)
 
     if not success:
-        await notification_service.notify_user(user, MessagePayloadDto(
-            i18n_key="ntf-error.incorrect-credentials",
-            disable_default_markup=False,
-        ))
+        await notification_service.notify_user(
+            user,
+            MessagePayloadDto(
+                i18n_key="ntf-error.incorrect-credentials",
+                disable_default_markup=False,
+            ),
+        )
         await dialog_manager.start(
-            state=NSCredentials.LOGIN,
-            show_mode=ShowMode.EDIT,
-            mode=StartMode.RESET_STACK
+            state=NSCredentials.LOGIN, show_mode=ShowMode.EDIT, mode=StartMode.RESET_STACK
         )
         return
 
     await dialog_manager.start(
-        state=MainMenu.MAIN,
-        show_mode=ShowMode.EDIT,
-        mode=StartMode.RESET_STACK
+        state=MainMenu.MAIN, show_mode=ShowMode.EDIT, mode=StartMode.RESET_STACK
     )
 
 
@@ -74,10 +71,10 @@ register_netschool_login = Window(
         "back",
         state=MainMenu.MAIN,
         show_mode=ShowMode.EDIT,
-        mode=StartMode.RESET_STACK
+        mode=StartMode.RESET_STACK,
     ),
     MessageInput(func=on_login_input, filter=F.text),
-    state=NSCredentials.LOGIN
+    state=NSCredentials.LOGIN,
 )
 
 register_netschool_password = Window(
@@ -87,8 +84,8 @@ register_netschool_password = Window(
         "back",
         show_mode=ShowMode.EDIT,
     ),
-    MessageInput(func=on_login_input, filter=F.text),
-    state=NSCredentials.LOGIN
+    MessageInput(func=on_password_input, filter=F.text),
+    state=NSCredentials.PASSWORD,
 )
 
-router = Dialog(register_netschool_login)
+router = Dialog(register_netschool_login, register_netschool_password)

@@ -7,7 +7,7 @@ from loguru import logger
 
 from src.core.constants import CONTAINER_KEY, GRADES_KEY, USER_KEY
 from src.core.dto import MessagePayloadDto, UserDto
-from src.core.enums import MiddlewareEventType, SystemNotificationType, ScheduleType
+from src.core.enums import MiddlewareEventType, ScheduleType, SystemNotificationType
 from src.core.utils.converters import parse_referral_code
 from src.services.notification import NotificationService
 from src.services.schedule import ScheduleService
@@ -50,15 +50,18 @@ class UserMiddleware(EventTypedMiddleware):
             if isinstance(event, Message) and event.text:
                 code = parse_referral_code(event.text)
             user = await user_service.create(aiogram_user, code)
-            await notification_service.system_notify(MessagePayloadDto(
-                i18n_key="event-user.registered",
-                i18n_kwargs={
-                    "telegram_id": user.telegram_id,
-                    "username": user.username or False,
-                    "name": user.name
-                },
-                reply_markup=get_user_keyboard(user.telegram_id),
-            ), SystemNotificationType.USER_REGISTERED)
+            await notification_service.system_notify(
+                MessagePayloadDto(
+                    i18n_key="event-user.registered",
+                    i18n_kwargs={
+                        "telegram_id": user.telegram_id,
+                        "username": user.username or False,
+                        "name": user.name,
+                    },
+                    reply_markup=get_user_keyboard(user.telegram_id),
+                ),
+                SystemNotificationType.USER_REGISTERED,
+            )
 
         data[USER_KEY] = user
 

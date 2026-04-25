@@ -1,17 +1,9 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
-from adaptix import (
-    ExtraSkip,
-    Retort,
-    as_is_dumper,
-    as_is_loader,
-    dumper,
-    loader,
-    name_mapping,
-)
+from adaptix import ExtraSkip, Retort, as_is_dumper, as_is_loader, dumper, loader, name_mapping
 from adaptix._internal.provider.loc_stack_filtering import OriginSubclassLSC
-from adaptix.conversion import ConversionRetort
+from adaptix.conversion import ConversionRetort, coercer
 from dishka import Provider, Scope, provide
 from pydantic import SecretStr
 
@@ -49,6 +41,8 @@ class RetortProvider(Provider):
         conversion_retort = ConversionRetort(
             recipe=[
                 dumper(SecretStr, lambda v: v.get_secret_value()),
+                coercer(Optional[str], str, func=lambda v: v or ""),
+                coercer(Optional[int], int, func=lambda v: v or 0),
             ]
         )
         return conversion_retort

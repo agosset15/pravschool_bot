@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import SecretStr
 
 from src.core.constants import BOT_WEBHOOK_ENDPOINT
@@ -11,6 +13,7 @@ class BotConfig(BaseConfig, env_prefix="BOT_"):
     owner_id: int
     support_username: SecretStr
     mini_app_path: str = "/app"
+    proxy_url: Optional[SecretStr] = None
 
     topic_logs_enabled: bool = False
     topic_logs_chat_id: int = 0
@@ -32,7 +35,4 @@ class BotConfig(BaseConfig, env_prefix="BOT_"):
 
     @property
     def list_topic_logs_threads(self) -> list[int]:
-        return [
-            self.topic_logs_thread_bot,
-            self.topic_logs_thread_user
-        ]
+        return [self.topic_logs_thread_bot, self.topic_logs_thread_user]
